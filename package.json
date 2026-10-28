@@ -1,0 +1,13 @@
+{
+  "name": "docuflow-ai",
+  "private": true,
+  "packageManager": "pnpm@10.33.4",
+  "scripts": {
+    "dev": "pnpm --filter web dev -- --port 43123",
+    "build": "pnpm --filter web build",
+    "lint": "pnpm --filter web lint",
+    "typecheck": "pnpm --filter web typecheck",
+    "test": "pnpm --filter web test",
+    "format": "pnpm --filter web format"
+  }
+}

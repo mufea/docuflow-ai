@@ -1,0 +1,33 @@
+# Optional local dependencies. Docker is not required for the default inline/SQLite path.
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: docuflow
+      POSTGRES_PASSWORD: docuflow_dev
+      POSTGRES_DB: docuflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - docuflow_pg:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: docuflow
+      MINIO_ROOT_PASSWORD: docuflow_devpass
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - docuflow_minio:/data
+
+volumes:
+  docuflow_pg:
+  docuflow_minio:

@@ -1,0 +1,150 @@
+# Render Blueprint for DocuFlow AI
+# This file describes services. It is not proof of a successful deployment.
+
+previewsEnabled: false
+
+databases:
+  - name: docuflow-db
+    plan: basic-256mb
+    postgresMajorVersion: 16
+    ipAllowList: []
+
+services:
+  - type: redis
+    name: docuflow-redis
+    plan: starter
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
+
+  - type: web
+    name: docuflow-api
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    preDeployCommand: alembic upgrade head
+    startCommand: uvicorn docuflow.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DOCUFLOW_ENV
+        value: production
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: docuflow-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: docuflow-redis
+          type: redis
+          property: connectionString
+      - key: JOB_BROKER
+        value: rq
+      - key: STORAGE_BACKEND
+        value: s3
+      - key: LOG_JSON
+        value: "true"
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: DOCUFLOW_SECRET_KEY
+        generateValue: true
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_ENDPOINT_URL
+        sync: false
+      - key: S3_REGION
+        value: auto
+      - key: DOCUFLOW_PUBLIC_WEB_URL
+        sync: false
+      - key: DOCUFLOW_PUBLIC_API_URL
+        sync: false
+      - key: DOCUFLOW_CORS_ORIGINS
+        sync: false
+      - key: DOCUFLOW_TRUSTED_HOSTS
+        sync: false
+      - key: AI_PROVIDER
+        value: mock
+      - key: EMAIL_BACKEND
+        value: console
+
+  - type: worker
+    name: docuflow-worker
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m docuflow.worker
+    envVars:
+      - key: DOCUFLOW_ENV
+        value: production
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: docuflow-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: docuflow-redis
+          type: redis
+          property: connectionString
+      - key: JOB_BROKER
+        value: rq
+      - key: STORAGE_BACKEND
+        value: s3
+      - key: LOG_JSON
+        value: "true"
+      - key: DOCUFLOW_SECRET_KEY
+        fromService:
+          name: docuflow-api
+          type: web
+          envVarKey: DOCUFLOW_SECRET_KEY
+      - key: S3_BUCKET
+        fromService:
+          name: docuflow-api
+          type: web
+          envVarKey: S3_BUCKET
+      - key: S3_ACCESS_KEY_ID
+        fromService:
+          name: docuflow-api
+          type: web
+          envVarKey: S3_ACCESS_KEY_ID
+      - key: S3_SECRET_ACCESS_KEY
+        fromService:
+          name: docuflow-api
+          type: web
+          envVarKey: S3_SECRET_ACCESS_KEY
+      - key: S3_ENDPOINT_URL
+        fromService:
+          name: docuflow-api
+          type: web
+          envVarKey: S3_ENDPOINT_URL
+      - key: S3_REGION
+        value: auto
+      - key: AI_PROVIDER
+        value: mock
+      - key: WORKER_CONCURRENCY
+        value: "2"
+      - key: WORKER_TIMEOUT_SECONDS
+        value: "300"
+
+  - type: web
+    name: docuflow-web
+    runtime: node
+    plan: starter
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter web build
+    startCommand: pnpm --filter web start -p $PORT
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: API_INTERNAL_URL
+        fromService:
+          name: docuflow-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: NEXT_PUBLIC_API_BASE
+        value: /v1
