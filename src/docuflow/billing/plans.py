@@ -21,7 +21,7 @@ DEFAULT_PLANS = [
         "max_pages": 200,
         "max_ai_requests_per_day": 80,
         "features": {"ai": True, "ocr": True, "conversion": True, "priority": True},
-        "is_public": True,
+        "is_public": False,
     },
     {
         "slug": "business",
@@ -31,7 +31,7 @@ DEFAULT_PLANS = [
         "max_pages": 500,
         "max_ai_requests_per_day": 400,
         "features": {"ai": True, "ocr": True, "conversion": True, "priority": True, "admin_sso": False},
-        "is_public": True,
+        "is_public": False,
     },
 ]
 

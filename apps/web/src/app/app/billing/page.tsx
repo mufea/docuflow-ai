@@ -15,9 +15,9 @@ export default function BillingPage() {
     <div className="space-y-4">
       <h1 className="font-heading text-3xl">Subscription</h1>
       <Alert>
-        <AlertTitle>Live billing is not activated</AlertTitle>
+        <AlertTitle>Free plan only</AlertTitle>
         <AlertDescription>
-          Stripe and Midtrans webhook adapters are implemented with signature verification. Checkout will not take payment until an operator configures secrets and explicitly authorizes charges.
+          All accounts use the Free plan. Paid Pro and Business checkout is disabled.
         </AlertDescription>
       </Alert>
       <ul className="grid gap-3 md:grid-cols-3">

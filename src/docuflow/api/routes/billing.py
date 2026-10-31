@@ -69,10 +69,10 @@ def ledger(user: User = Depends(require_user), db: Session = Depends(get_db)) ->
 
 @router.post("/checkout")
 def checkout(request: Request, user: User = Depends(require_user)) -> dict:
-    plan = request.query_params.get("plan") or "pro"
+    plan = request.query_params.get("plan") or "free"
     return {
         "status": "not_activated",
-        "message": "Live billing is disabled until payment credentials are authorized.",
+        "message": "All accounts use the Free plan. Paid checkout is disabled.",
         "plan": plan,
         "providers": ["stripe", "midtrans"],
         "next_step": "Configure STRIPE_* or MIDTRANS_* secrets, then enable sandbox webhooks.",

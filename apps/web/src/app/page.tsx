@@ -17,7 +17,7 @@ export default function HomePage() {
               Merge, repair, convert, and question PDFs without pretending the hard parts are done.
             </h1>
             <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-              DocuFlow AI runs actual server-side PDF operations, stores files off the web process, and keeps AI optional. Free accounts include monthly credits. Paid plans are defined in configuration, not hardcoded UI.
+              DocuFlow AI runs actual server-side PDF operations, stores files off the web process, and keeps AI optional. Every account is on the Free plan with monthly credits.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link className={buttonVariants({ size: "lg" })} href="/register">
