@@ -36,7 +36,9 @@ See `.env.example`. At minimum:
 
 - `DOCUFLOW_ENV=production`
 - `DOCUFLOW_SECRET_KEY` (long random)
-- `DATABASE_URL` (Render Postgres)
+- `DATABASE_URL` (Render Postgres). Leave the injected `postgres://` value as-is.
+  The API and Alembic rewrite it to `postgresql+psycopg://` so SQLAlchemy uses
+  psycopg3. Do not install `psycopg2`.
 - `REDIS_URL`
 - `JOB_BROKER=rq`
 - `STORAGE_BACKEND=s3` plus bucket credentials

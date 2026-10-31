@@ -6,6 +6,8 @@ from typing import Literal
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from docuflow.dsn import normalize_database_url
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -100,6 +102,11 @@ class Settings(BaseSettings):
         if len(value.get_secret_value()) < 16:
             raise ValueError("DOCUFLOW_SECRET_KEY must be at least 16 characters.")
         return value
+
+    @field_validator("database_url")
+    @classmethod
+    def _normalize_database_url(cls, value: str) -> str:
+        return normalize_database_url(value)
 
     @property
     def cors_origin_list(self) -> list[str]:

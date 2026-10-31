@@ -7,6 +7,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from docuflow.config import Settings
+from docuflow.dsn import normalize_database_url
 
 
 class Base(DeclarativeBase):
@@ -18,7 +19,7 @@ def _is_sqlite(url: str) -> bool:
 
 
 def create_engine_from_settings(settings: Settings) -> Engine:
-    url = settings.database_url
+    url = normalize_database_url(settings.database_url)
     kwargs: dict[str, object] = {"future": True, "pool_pre_ping": True}
     if _is_sqlite(url):
         kwargs["connect_args"] = {"check_same_thread": False}
