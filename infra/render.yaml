@@ -27,8 +27,8 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    preDeployCommand: alembic upgrade head
-    startCommand: uvicorn docuflow.main:app --host 0.0.0.0 --port $PORT
+    # Free web services reject preDeployCommand. Run migrations on boot instead.
+    startCommand: alembic upgrade head && uvicorn docuflow.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
       - key: DOCUFLOW_ENV

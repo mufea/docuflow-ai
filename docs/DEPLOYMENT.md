@@ -112,7 +112,11 @@ Do not treat the Blueprint as a completed production deploy.
 - Web: `pnpm install --frozen-lockfile && pnpm --filter web build` then `pnpm --filter web start -p $PORT`
 - API: `pip install .` then `uvicorn docuflow.main:app --host 0.0.0.0 --port $PORT`
 - Worker: `python -m docuflow.worker`
-- Migrations: API `preDeployCommand` runs `alembic upgrade head` **once per deploy**, not in the worker or extra API replicas. If you scale the API, keep migrations on pre-deploy / a one-off job.
+- Migrations: Render Free rejects `preDeployCommand`, so the API
+  `startCommand` runs `alembic upgrade head` and then uvicorn. That is
+  idempotent and safe on a single Free instance (including after spin-up).
+  If you later scale the API on a paid plan, move migrations back to
+  pre-deploy or a one-off job so replicas do not race.
 
 ## Required production environment
 
