@@ -109,7 +109,9 @@ Do not treat the Blueprint as a completed production deploy.
 
 ## Build and start
 
-- Web: `pnpm install --frozen-lockfile && pnpm --filter web build` then `pnpm --filter web start -p $PORT`
+- Web: `corepack pnpm install --frozen-lockfile && corepack pnpm --filter web build`
+  then `corepack pnpm --filter web start -p $PORT`. Do not run `corepack enable`
+  on Render — it tries to write `/usr/bin/pnpm` and fails with EROFS.
 - API: `pip install .` then `uvicorn docuflow.main:app --host 0.0.0.0 --port $PORT`
 - Worker: `python -m docuflow.worker`
 - Migrations: Render Free rejects `preDeployCommand`, so the API

@@ -142,12 +142,15 @@ services:
     name: docuflow-web
     runtime: node
     plan: free
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter web build
-    startCommand: pnpm --filter web start -p $PORT
+    # Do not run `corepack enable`: it unlinks /usr/bin/pnpm on Render's read-only FS.
+    buildCommand: corepack pnpm install --frozen-lockfile && corepack pnpm --filter web build
+    startCommand: corepack pnpm --filter web start -p $PORT
     healthCheckPath: /
     envVars:
       - key: NODE_ENV
         value: production
+      - key: COREPACK_ENABLE_DOWNLOAD_PROMPT
+        value: "0"
       - key: API_INTERNAL_URL
         fromService:
           name: docuflow-api
