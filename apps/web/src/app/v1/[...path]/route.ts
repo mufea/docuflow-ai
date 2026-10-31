@@ -68,6 +68,7 @@ async function proxy(request: NextRequest, path: string[]) {
   const csrf = request.headers.get("x-csrf-token");
   const originHeader = request.headers.get("origin");
   headers.set("accept", "application/json");
+  headers.set("accept-encoding", "identity");
   if (contentType) headers.set("content-type", contentType);
   if (cookie) headers.set("cookie", cookie);
   if (csrf) headers.set("x-csrf-token", csrf);
@@ -93,13 +94,22 @@ async function proxy(request: NextRequest, path: string[]) {
     );
   }
 
+  const payload = await response.arrayBuffer();
   const outbound = new Headers();
+  const skip = new Set([
+    "content-encoding",
+    "transfer-encoding",
+    "content-length",
+    "connection",
+    "keep-alive",
+    "set-cookie",
+  ]);
   response.headers.forEach((value, key) => {
-    if (["content-encoding", "transfer-encoding"].includes(key.toLowerCase())) return;
-    if (key.toLowerCase() === "set-cookie") return;
+    if (skip.has(key.toLowerCase())) return;
     outbound.set(key, value);
   });
-  const nextResponse = new Response(response.body, { status: response.status, headers: outbound });
+  outbound.set("content-length", String(payload.byteLength));
+  const nextResponse = new Response(payload, { status: response.status, headers: outbound });
   const cookies = response.headers.getSetCookie?.() ?? [];
   for (const cookieValue of cookies) {
     nextResponse.headers.append("set-cookie", cookieValue);

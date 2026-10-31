@@ -14,10 +14,28 @@ export function readApiPayload(text: string, contentType: string, status: number
   if (trimmed && !contentType.includes("json") && trimmed.startsWith("<")) {
     throw new Error("The API returned a web page instead of JSON.");
   }
-  const data = trimmed ? (JSON.parse(text) as Record<string, unknown>) : {};
+  let data: Record<string, unknown> = {};
+  if (trimmed) {
+    try {
+      data = JSON.parse(text) as Record<string, unknown>;
+    } catch {
+      throw new Error(
+        "The API returned an incomplete response. Wait about a minute for the Free API to wake up, then try again.",
+      );
+    }
+  }
   if (status < 200 || status >= 300) {
-    const message = data.message || data.detail || `Request failed (${status})`;
-    throw new Error(typeof message === "string" ? message : "Request failed");
+    throw new Error(errorMessage(data, status));
   }
   return data;
+}
+
+function errorMessage(data: Record<string, unknown>, status: number): string {
+  if (typeof data.message === "string") return data.message;
+  if (typeof data.detail === "string") return data.detail;
+  if (Array.isArray(data.detail) && data.detail[0] && typeof data.detail[0] === "object") {
+    const first = data.detail[0] as Record<string, unknown>;
+    if (typeof first.msg === "string") return first.msg;
+  }
+  return `Request failed (${status})`;
 }

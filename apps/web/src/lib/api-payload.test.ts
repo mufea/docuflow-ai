@@ -15,4 +15,18 @@ describe("readApiPayload", () => {
   it("explains a 503 HTML wake-up page", () => {
     expect(() => readApiPayload("<!DOCTYPE html>", "text/html", 503)).toThrow(/API is starting/i);
   });
+
+  it("explains truncated JSON instead of a SyntaxError", () => {
+    expect(() => readApiPayload('{"id":"cut-off', "application/json", 200)).toThrow(/incomplete response/i);
+  });
+
+  it("reads FastAPI validation detail arrays", () => {
+    expect(() =>
+      readApiPayload(
+        JSON.stringify({ detail: [{ loc: ["body", "email"], msg: "value is not a valid email address" }] }),
+        "application/json",
+        422,
+      ),
+    ).toThrow(/valid email address/i);
+  });
 });
