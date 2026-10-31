@@ -60,3 +60,12 @@ def expand_ranges(ranges: list[tuple[int, int]]) -> list[int]:
     for start, end in ranges:
         pages.extend(range(start, end + 1))
     return pages
+
+
+def validate_range_tuple(item: object, page_count: int) -> tuple[int, int]:
+    if not isinstance(item, tuple) or len(item) != 2:
+        raise PageRangeError("Page range must be a (start, end) tuple.")
+    start, end = item
+    if not isinstance(start, int) or isinstance(start, bool) or not isinstance(end, int) or isinstance(end, bool):
+        raise PageRangeError("Page range bounds must be integers.")
+    return _normalize_range(start, end, page_count)

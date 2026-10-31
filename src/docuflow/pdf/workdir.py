@@ -24,6 +24,11 @@ def work_directory(prefix: str = "docuflow-", parent: str | Path | None = None) 
         shutil.rmtree(path, ignore_errors=True)
 
 
+def paths_collide(left: Path | str, right: Path | str) -> bool:
+    """True when two paths name the same file after expand, resolve, and symlink follow."""
+    return Path(left).expanduser().resolve() == Path(right).expanduser().resolve()
+
+
 def safe_output_path(work_dir: Path, name: str) -> Path:
     candidate = Path(name)
     if candidate.is_absolute() or ".." in candidate.parts:

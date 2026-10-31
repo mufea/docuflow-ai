@@ -23,9 +23,9 @@ from docuflow.exceptions import (
     TooManyPagesError,
     UnsupportedOperationError,
 )
-from docuflow.pdf.ranges import expand_ranges, parse_page_ranges, validate_pages
+from docuflow.pdf.ranges import expand_ranges, parse_page_ranges, validate_pages, validate_range_tuple
 from docuflow.pdf.sniff import require_image, require_pdf, sniff_file
-from docuflow.pdf.workdir import safe_output_path
+from docuflow.pdf.workdir import paths_collide, safe_output_path
 
 logger = logging.getLogger("docuflow.pdf")
 
@@ -73,8 +73,10 @@ class PdfEngine:
                 if value is None:
                     continue
                 metadata[str(key).lstrip("/")] = str(value)[:500]
+        page_count = len(reader.pages)
+        self._check_pages(page_count)
         return PdfInfo(
-            page_count=len(reader.pages),
+            page_count=page_count,
             encrypted=bool(reader.is_encrypted),
             pdf_version=getattr(reader, "pdf_header", None),
             metadata=metadata,
@@ -87,6 +89,7 @@ class PdfEngine:
         writer = PdfWriter()
         total_pages = 0
         sources: list[str] = []
+        source_paths: list[Path] = []
         for item in inputs:
             path = self._require_size(Path(item))
             require_pdf(path)
@@ -96,7 +99,8 @@ class PdfEngine:
             self._check_pages(total_pages)
             writer.append(reader)
             sources.append(path.name)
-        dest = Path(output)
+            source_paths.append(path)
+        dest = self._guard_output(output, *source_paths)
         self._write_writer(writer, dest)
         return ProcessResult(outputs=[dest], metadata={"page_count": total_pages, "sources": sources})
 
@@ -112,6 +116,7 @@ class PdfEngine:
         require_pdf(path)
         reader = self._open_reader(path, password)
         page_count = len(reader.pages)
+        self._check_pages(page_count)
         parsed = parse_page_ranges(ranges, page_count) if isinstance(ranges, str) else ranges
         if isinstance(ranges, list):
             parsed = [self._check_tuple(r, page_count) for r in ranges]
@@ -122,7 +127,7 @@ class PdfEngine:
             writer = PdfWriter()
             for page_no in range(start, end + 1):
                 writer.add_page(reader.pages[page_no - 1])
-            dest = dest_dir / f"split-{index:03d}-p{start}-{end}.pdf"
+            dest = self._guard_output(dest_dir / f"split-{index:03d}-p{start}-{end}.pdf", path)
             self._write_writer(writer, dest)
             outputs.append(dest)
         return ProcessResult(
@@ -143,7 +148,7 @@ class PdfEngine:
         writer = PdfWriter()
         for page_no in selected:
             writer.add_page(reader.pages[page_no - 1])
-        dest = Path(output)
+        dest = self._guard_output(output, path)
         self._write_writer(writer, dest)
         return ProcessResult(outputs=[dest], metadata={"pages": selected, "source": path.name})
 
@@ -165,7 +170,7 @@ class PdfEngine:
         writer = PdfWriter()
         for page_no in validated:
             writer.add_page(reader.pages[page_no - 1])
-        dest = Path(output)
+        dest = self._guard_output(output, path)
         self._write_writer(writer, dest)
         return ProcessResult(outputs=[dest], metadata={"order": validated, "source": path.name})
 
@@ -195,7 +200,7 @@ class PdfEngine:
         unknown = set(rotations) - set(range(1, page_count + 1))
         if unknown:
             raise PageRangeError(f"Cannot rotate pages that do not exist: {sorted(unknown)}.")
-        dest = Path(output)
+        dest = self._guard_output(output, path)
         self._write_writer(writer, dest)
         return ProcessResult(outputs=[dest], metadata={"rotations": applied, "source": path.name})
 
@@ -215,7 +220,7 @@ class PdfEngine:
         writer = PdfWriter()
         for page_no in remaining:
             writer.add_page(reader.pages[page_no - 1])
-        dest = Path(output)
+        dest = self._guard_output(output, path)
         self._write_writer(writer, dest)
         return ProcessResult(
             outputs=[dest],
@@ -234,9 +239,10 @@ class PdfEngine:
         require_pdf(path)
         if level not in {"low", "medium", "high"}:
             raise UnsupportedOperationError("Compression level must be low, medium, or high.")
-        dest = Path(output)
+        dest = self._guard_output(output, path)
         warnings: list[str] = []
         doc = self._open_fitz(path, password)
+        tmp = self._partial_path(dest)
         try:
             self._check_pages(doc.page_count)
             if level in {"medium", "high"}:
@@ -245,14 +251,19 @@ class PdfEngine:
                 self._recompress_images(doc, max_dim=max_dim, quality=quality)
             dest.parent.mkdir(parents=True, exist_ok=True)
             doc.save(
-                dest.as_posix(),
+                tmp.as_posix(),
                 garbage=4,
                 deflate=True,
                 clean=True,
                 use_objstms=1,
             )
+            tmp.replace(dest)
+        except BaseException:
+            tmp.unlink(missing_ok=True)
+            raise
         finally:
             doc.close()
+            tmp.unlink(missing_ok=True)
         original = path.stat().st_size
         result_size = dest.stat().st_size
         if result_size >= original:
@@ -275,19 +286,32 @@ class PdfEngine:
             raise UnsupportedOperationError("At least one image is required.")
         if len(images) > self.max_images:
             raise UnsupportedOperationError(f"A maximum of {self.max_images} images can be converted at once.")
-        dest = Path(output)
+        source_paths: list[Path] = []
+        planned_pages = 0
+        for item in images:
+            path = self._require_size(Path(item))
+            require_image(path)
+            planned_pages += self._count_image_pages(path)
+            self._check_pages(planned_pages)
+            source_paths.append(path)
+        dest = self._guard_output(output, *source_paths)
         dest.parent.mkdir(parents=True, exist_ok=True)
+        tmp = self._partial_path(dest)
         doc = fitz.open()
         used: list[str] = []
         try:
-            for item in images:
-                path = self._require_size(Path(item))
-                require_image(path)
-                self._insert_image_pages(doc, path)
+            produced = 0
+            for path in source_paths:
+                produced += self._insert_image_pages(doc, path, pages_so_far=produced)
                 used.append(path.name)
-            doc.save(dest.as_posix(), deflate=True, garbage=3)
+            doc.save(tmp.as_posix(), deflate=True, garbage=3)
+            tmp.replace(dest)
+        except BaseException:
+            tmp.unlink(missing_ok=True)
+            raise
         finally:
             doc.close()
+            tmp.unlink(missing_ok=True)
         return ProcessResult(outputs=[dest], metadata={"images": used, "page_count": self._count_pages(dest)})
 
     def pdf_to_images(
@@ -324,7 +348,7 @@ class PdfEngine:
                 page = doc.load_page(page_no - 1)
                 pix = page.get_pixmap(matrix=matrix, alpha=False)
                 suffix = "jpg" if fmt == "jpeg" else "png"
-                dest = dest_dir / f"page-{page_no:04d}.{suffix}"
+                dest = self._guard_output(dest_dir / f"page-{page_no:04d}.{suffix}", path)
                 pix.save(dest.as_posix())
                 outputs.append(dest)
         finally:
@@ -392,7 +416,7 @@ class PdfEngine:
                 page = doc.load_page(page_no - 1)
                 scale = max_width / max(page.rect.width, 1)
                 pix = page.get_pixmap(matrix=fitz.Matrix(scale, scale), alpha=False)
-                dest = dest_dir / f"thumb-{page_no:04d}.png"
+                dest = self._guard_output(dest_dir / f"thumb-{page_no:04d}.png", path)
                 pix.save(dest.as_posix())
                 outputs.append(dest)
         finally:
@@ -415,7 +439,7 @@ class PdfEngine:
         writer.append(reader)
         owner = owner_password or user_password
         writer.encrypt(user_password=user_password, owner_password=owner, algorithm="AES-256")
-        dest = Path(output)
+        dest = self._guard_output(output, path)
         self._write_writer(writer, dest)
         return ProcessResult(
             outputs=[dest],
@@ -438,7 +462,7 @@ class PdfEngine:
             raise UnsupportedOperationError("This PDF is not password-protected.")
         writer = PdfWriter()
         writer.append(reader)
-        dest = Path(output)
+        dest = self._guard_output(output, path)
         self._write_writer(writer, dest)
         return ProcessResult(outputs=[dest], metadata={"encrypted": False, "source": path.name})
 
@@ -489,15 +513,32 @@ class PdfEngine:
             raise EmptyDocumentError("The PDF contains no pages.")
         return doc
 
+    def _guard_output(self, dest: Path | str, *inputs: Path | str) -> Path:
+        target = Path(dest)
+        for source in inputs:
+            if paths_collide(target, source):
+                raise UnsupportedOperationError("Output path must not overwrite an input file.")
+        return target
+
+    def _partial_path(self, dest: Path) -> Path:
+        return dest.with_name(f".{dest.name}.partial")
+
     def _write_writer(self, writer: PdfWriter, dest: Path) -> None:
         dest.parent.mkdir(parents=True, exist_ok=True)
+        tmp = self._partial_path(dest)
         try:
-            with dest.open("wb") as handle:
+            with tmp.open("wb") as handle:
                 writer.write(handle)
+            if tmp.stat().st_size < 5:
+                raise InvalidPdfError("Failed to write a valid PDF output.")
+            tmp.replace(dest)
         except FileNotDecryptedError as exc:
             raise EncryptedPdfError("The PDF could not be written because it is still encrypted.") from exc
-        if dest.stat().st_size < 5:
-            raise InvalidPdfError("Failed to write a valid PDF output.")
+        except BaseException:
+            tmp.unlink(missing_ok=True)
+            raise
+        finally:
+            tmp.unlink(missing_ok=True)
 
     def _require_size(self, path: Path) -> Path:
         if not path.is_file():
@@ -525,22 +566,35 @@ class PdfEngine:
         return validate_pages(pages, page_count, allow_duplicates=allow_duplicates)
 
     def _check_tuple(self, item: tuple[int, int], page_count: int) -> tuple[int, int]:
-        start, end = item
-        return validate_pages([start, end], page_count)[0], validate_pages([start, end], page_count)[1]
+        return validate_range_tuple(item, page_count)
 
-    def _insert_image_pages(self, doc: fitz.Document, path: Path) -> None:
+    def _count_image_pages(self, path: Path) -> int:
         kind = sniff_file(path)
+        if kind.mime != "image/gif":
+            return 1
+        with Image.open(path) as image:
+            frames = int(getattr(image, "n_frames", 1) or 1)
+        return max(1, frames)
+
+    def _insert_image_pages(self, doc: fitz.Document, path: Path, *, pages_so_far: int) -> int:
+        kind = sniff_file(path)
+        added = 0
         if kind.mime == "image/gif":
             with Image.open(path) as image:
                 self._guard_pixels(image)
                 for frame in ImageSequence.Iterator(image):
+                    self._check_pages(pages_so_far + added + 1)
                     rgb = frame.convert("RGB")
                     self._insert_pil_page(doc, rgb)
-            return
+                    added += 1
+                    rgb.close()
+            return max(added, 1)
         with Image.open(path) as image:
             self._guard_pixels(image)
             rgb = image.convert("RGB")
+            self._check_pages(pages_so_far + 1)
             self._insert_pil_page(doc, rgb)
+        return 1
 
     def _guard_pixels(self, image: Image.Image) -> None:
         width, height = image.size

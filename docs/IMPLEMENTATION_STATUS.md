@@ -16,9 +16,46 @@ Phases are marked complete only when commands below were executed and passed.
 
 Implemented: monorepo layout, uv Python package, pnpm workspace, `.env.example`, docs, Render Blueprint, docker-compose for optional deps.
 
-## Phase 1 — Core PDF engine — verified
+## Phase 1 — Core PDF engine hardening — verified on `feat/phase-1-pdf-engine-hardening`
 
-`uv run pytest tests/pdf -q` is included in the full suite below.
+Base: `main` @ `da4ee00`. `main` was not modified.
+
+Fixes in `PdfEngine`:
+
+- `max_pages` is enforced by `inspect()`, `split()`, and the existing `_check_pages` path used by extract/reorder/rotate/delete/compress/images/text/thumbnails/merge.
+- `_check_tuple()` now uses `validate_range_tuple()` so reversed, zero, oversize, and malformed tuples raise `PageRangeError`.
+- `_guard_output()` blocks writing to a path that resolves to an input (relative, absolute, or symlink).
+- Writes go through a `.partial` file then `replace`, so a failed conversion does not leave a half-written PDF.
+- `images_to_pdf()` counts GIF frames toward `max_pages` before emitting pages. `max_images` still limits input files.
+
+Engine limits that remain: encryption still needs a password; compression may not shrink every file; LibreOffice is not required.
+
+Verification for this hardening branch:
+
+```
+uv run pytest tests/pdf -q
+# 38 passed
+
+uv run pytest -q
+# 66 passed
+
+uv run ruff check src tests
+# All checks passed
+
+uv run ruff format --check src/docuflow/pdf tests/pdf
+# 9 files already formatted
+
+uv run mypy src/docuflow/pdf
+# Success: no issues found in 5 source files
+
+git diff --check
+# clean
+```
+
+Full-repo `uv run ruff format --check src tests` still wants to reformat
+`tests/test_database_url.py` (pre-existing on main; not changed here).
+Full-repo `uv run mypy src/docuflow` still fails in `services/seed.py` on
+`DEFAULT_PLANS` dict types (pre-existing on main; not changed here).
 
 ## Phase 2–7 — Persistence, web, conversion, AI, billing, admin — implemented and covered by suite
 
