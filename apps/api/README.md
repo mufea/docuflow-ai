@@ -8,14 +8,8 @@ Local:
 uv run uvicorn docuflow.main:app --host 127.0.0.1 --port 43124
 ```
 
-Render start command:
+Render start command (Free web cannot use `preDeployCommand`):
 
 ```
-uvicorn docuflow.main:app --host 0.0.0.0 --port $PORT
-```
-
-Pre-deploy (once per release):
-
-```
-alembic upgrade head
+alembic upgrade head && uvicorn docuflow.main:app --host 0.0.0.0 --port $PORT
 ```
