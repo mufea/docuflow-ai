@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import re
 from datetime import UTC, datetime, timedelta
 
@@ -15,6 +16,7 @@ from docuflow.security.passwords import hash_password, verify_password
 from docuflow.security.tokens import digest_equals, hash_token, random_token
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+logger = logging.getLogger("docuflow.auth")
 
 
 class AuthService:
@@ -135,18 +137,16 @@ class AuthService:
         self.session.commit()
         if purpose == "verify":
             link = f"{self.settings.public_web_url}/verify-email?token={raw}"
-            self.email.send(
-                to=user.email,
-                subject="Verify your DocuFlow AI email",
-                body=f"Confirm your email address:\n{link}\nThis link expires in one hour.",
-            )
+            subject = "Verify your DocuFlow AI email"
+            body = f"Confirm your email address:\n{link}\nThis link expires in one hour."
         else:
             link = f"{self.settings.public_web_url}/reset-password?token={raw}"
-            self.email.send(
-                to=user.email,
-                subject="Reset your DocuFlow AI password",
-                body=f"Reset your password:\n{link}\nIf you did not request this, ignore the message.",
-            )
+            subject = "Reset your DocuFlow AI password"
+            body = f"Reset your password:\n{link}\nIf you did not request this, ignore the message."
+        try:
+            self.email.send(to=user.email, subject=subject, body=body)
+        except Exception:
+            logger.exception("email_send_failed purpose=%s user_id=%s", purpose, user.id)
 
     def _consume_token(self, token: str, purpose: str) -> EmailToken:
         record = self.session.scalar(select(EmailToken).where(EmailToken.token_hash == hash_token(token)))

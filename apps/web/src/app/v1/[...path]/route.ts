@@ -1,16 +1,24 @@
 import { type NextRequest } from "next/server";
 
+import {
+  API_UNREACHABLE_MESSAGE,
+  apiOriginFromEnv,
+  isBinaryContentType,
+  isLocalPlaceholder,
+  isSelfProxy,
+  isValidJson,
+  looksHtml,
+  looksInvalidHost,
+  looksJsonObjectOrArray,
+  messageForNonJsonBody,
+  MISSING_API_URL_MESSAGE,
+  PRIVATE_NETWORK_MESSAGE,
+  SELF_PROXY_MESSAGE,
+  shouldRetryUpstream,
+} from "@/lib/api-proxy";
+
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
-function apiOrigin(): string {
-  const raw = (process.env.API_INTERNAL_URL || process.env.DOCUFLOW_PUBLIC_API_URL || "").trim();
-  return raw.replace(/\/$/, "");
-}
-
-function isLocalPlaceholder(url: string): boolean {
-  return !url || /localhost|127\.0\.0\.1/.test(url);
-}
 
 function jsonError(status: number, message: string) {
   return Response.json({ message }, { status });
@@ -20,7 +28,30 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fetchApi(target: string, init: RequestInit, attempts = 4): Promise<Response> {
+function decodeText(payload: ArrayBuffer): string {
+  return new TextDecoder("utf-8").decode(payload);
+}
+
+function shouldRewriteAsJson(text: string, contentType: string): boolean {
+  if (isBinaryContentType(contentType)) return false;
+  const trimmed = text.trim();
+  if (!trimmed) return false;
+  if (isValidJson(trimmed)) return false;
+  return (
+    looksInvalidHost(trimmed) ||
+    looksHtml(trimmed, contentType) ||
+    looksJsonObjectOrArray(trimmed) ||
+    contentType.includes("json") ||
+    contentType.includes("text/") ||
+    !contentType
+  );
+}
+
+async function fetchApi(
+  target: string,
+  init: RequestInit,
+  attempts = 4,
+): Promise<{ response: Response; payload: ArrayBuffer }> {
   let lastError: unknown;
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     if (attempt > 0) {
@@ -28,12 +59,17 @@ async function fetchApi(target: string, init: RequestInit, attempts = 4): Promis
     }
     try {
       const response = await fetch(target, init);
+      const payload = await response.arrayBuffer();
       const contentType = response.headers.get("content-type") || "";
-      if (contentType.includes("text/html") || response.status === 502 || response.status === 503) {
+      if (isBinaryContentType(contentType)) {
+        return { response, payload };
+      }
+      const text = decodeText(payload);
+      if (shouldRetryUpstream(response.status, text, contentType)) {
         lastError = new Error("html-or-unavailable");
         continue;
       }
-      return response;
+      return { response, payload };
     } catch (error) {
       lastError = error;
     }
@@ -42,22 +78,23 @@ async function fetchApi(target: string, init: RequestInit, attempts = 4): Promis
 }
 
 async function proxy(request: NextRequest, path: string[]) {
-  const origin = apiOrigin();
+  const origin = apiOriginFromEnv({
+    API_INTERNAL_URL: process.env.API_INTERNAL_URL,
+    DOCUFLOW_PUBLIC_API_URL: process.env.DOCUFLOW_PUBLIC_API_URL,
+  });
+  const incomingHost = request.headers.get("host") || request.nextUrl.host;
   if (process.env.NODE_ENV === "production" && isLocalPlaceholder(origin)) {
-    return jsonError(
-      503,
-      "The web service is missing API_INTERNAL_URL. Set it to your API’s public https://…onrender.com URL (not localhost).",
-    );
+    return jsonError(503, MISSING_API_URL_MESSAGE);
   }
   if (
     process.env.NODE_ENV === "production" &&
     origin.startsWith("http://") &&
     !origin.includes("onrender.com")
   ) {
-    return jsonError(
-      503,
-      "API_INTERNAL_URL must be the public https://…onrender.com URL. Free web services cannot call each other over Render’s private network.",
-    );
+    return jsonError(503, PRIVATE_NETWORK_MESSAGE);
+  }
+  if (origin && isSelfProxy(origin, incomingHost)) {
+    return jsonError(503, SELF_PROXY_MESSAGE);
   }
 
   const base = origin || "http://127.0.0.1:43124";
@@ -79,22 +116,28 @@ async function proxy(request: NextRequest, path: string[]) {
   const body = hasBody ? await request.arrayBuffer() : undefined;
 
   let response: Response;
+  let payload: ArrayBuffer;
   try {
-    response = await fetchApi(target, {
+    ({ response, payload } = await fetchApi(target, {
       method,
       headers,
       body,
       redirect: "manual",
       cache: "no-store",
-    });
+    }));
   } catch {
-    return jsonError(
-      503,
-      "The API is starting or is unreachable. Wait about a minute and try again. Confirm API_INTERNAL_URL on the web service.",
-    );
+    return jsonError(503, API_UNREACHABLE_MESSAGE);
   }
 
-  const payload = await response.arrayBuffer();
+  const upstreamType = response.headers.get("content-type") || "";
+  if (!isBinaryContentType(upstreamType)) {
+    const text = decodeText(payload);
+    if (shouldRewriteAsJson(text, upstreamType)) {
+      const status = response.status >= 400 ? response.status : 502;
+      return jsonError(status, messageForNonJsonBody(text, response.status, upstreamType));
+    }
+  }
+
   const outbound = new Headers();
   const skip = new Set([
     "content-encoding",

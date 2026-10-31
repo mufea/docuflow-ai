@@ -6,7 +6,6 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, ORJSONResponse
-from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from docuflow.ai.providers import build_ai_provider
 from docuflow.api.deps import AppContext
@@ -18,6 +17,7 @@ from docuflow.exceptions import DocuflowError
 from docuflow.jobs.broker import build_broker
 from docuflow.jobs.runner import JobRunner
 from docuflow.logging import configure_logging
+from docuflow.security.hosts import host_is_allowed
 from docuflow.security.rate_limit import MemoryRateLimiter
 from docuflow.services.seed import seed_reference_data
 from docuflow.storage.factory import build_storage
@@ -70,8 +70,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Authorization", "Content-Type", "X-CSRF-Token"],
     )
-    if settings.is_production:
-        app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.trusted_host_list)
+
+    @app.middleware("http")
+    async def enforce_trusted_host(request: Request, call_next):  # type: ignore[no-untyped-def]
+        if settings.is_production and not host_is_allowed(request.headers.get("host", ""), settings.trusted_host_list):
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "message": (
+                        "The API rejected this Host header. Set DOCUFLOW_TRUSTED_HOSTS "
+                        "on the API to .onrender.com and your custom domain, then redeploy."
+                    )
+                },
+            )
+        return await call_next(request)
 
     @app.middleware("http")
     async def security_headers(request: Request, call_next):  # type: ignore[no-untyped-def]

@@ -1,27 +1,16 @@
+import { looksHtml, messageForNonJsonBody } from "./api-proxy";
+
 export function readApiPayload(text: string, contentType: string, status: number): Record<string, unknown> {
   const trimmed = text.trim();
-  const looksHtml =
-    contentType.includes("text/html") ||
-    trimmed.startsWith("<!") ||
-    trimmed.toLowerCase().startsWith("<html");
-  if (looksHtml) {
-    throw new Error(
-      status === 502 || status === 503 || status === 504
-        ? "The API is starting. Wait about a minute and try again."
-        : "The API returned a web page instead of JSON. On Render, set the web service API_INTERNAL_URL to the API’s public https://…onrender.com URL, then wait for a Free API to wake up.",
-    );
-  }
-  if (trimmed && !contentType.includes("json") && trimmed.startsWith("<")) {
-    throw new Error("The API returned a web page instead of JSON.");
+  if (looksHtml(trimmed, contentType) || (trimmed && !contentType.includes("json") && trimmed.startsWith("<"))) {
+    throw new Error(messageForNonJsonBody(text, status, contentType));
   }
   let data: Record<string, unknown> = {};
   if (trimmed) {
     try {
       data = JSON.parse(text) as Record<string, unknown>;
     } catch {
-      throw new Error(
-        "The API returned an incomplete response. Wait about a minute for the Free API to wake up, then try again.",
-      );
+      throw new Error(messageForNonJsonBody(text, status, contentType));
     }
   }
   if (status < 200 || status >= 300) {

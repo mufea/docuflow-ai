@@ -75,6 +75,7 @@ services:
           type: web
           envVarKey: RENDER_EXTERNAL_URL
       - key: DOCUFLOW_TRUSTED_HOSTS
+        # Add your custom domain here too, comma-separated, e.g. ".onrender.com,pdf.example.com"
         value: .onrender.com
       - key: AI_PROVIDER
         value: mock

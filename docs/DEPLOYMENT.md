@@ -62,9 +62,9 @@ Do this from a GitHub (or GitLab) repo that already has this code, including
 9. Open the **web** URL, not the API URL. Health checks:
    `https://<api-host>/health` and `https://<api-host>/ready`.
 
-### Login returns `Unexpected token '<', "<!DOCTYPE"…`
+### Login or signup returns HTML, truncated JSON, or “incomplete response”
 
-The browser asked for JSON and got an HTML page. Typical Render causes:
+The browser asked for JSON and got something else. Typical Render causes:
 
 1. **`API_INTERNAL_URL` is missing on the web service**, so `/v1` is proxied to
    `localhost` and Next.js returns its HTML error page. Set
@@ -72,10 +72,17 @@ The browser asked for JSON and got an HTML page. Typical Render causes:
    public URL, for example `https://docuflow-api.onrender.com`. Use `https://`,
    not Render’s private `http://<service>:10000` host — Free web services
    cannot receive private-network traffic.
-2. **The API is asleep.** Free web services spin down after 15 minutes. Open
+2. **`API_INTERNAL_URL` points at the web service or custom domain.** The web
+   proxy then calls itself. It must be the **API** public `https://…onrender.com`
+   URL, not the marketing site.
+3. **The API is asleep.** Free web services spin down after 15 minutes. Open
    `https://<api-host>/health` once, wait about a minute, then sign in again.
-3. **`DOCUFLOW_TRUSTED_HOSTS` is still localhost.** Set it to `.onrender.com`
-   on the API (or rely on the Blueprint default) and redeploy the API.
+4. **`DOCUFLOW_TRUSTED_HOSTS` is still localhost or omits your custom domain.**
+   Starlette used to answer `Invalid host header` as plain text, which the
+   signup form showed as an “incomplete response.” Set
+   `DOCUFLOW_TRUSTED_HOSTS` to `.onrender.com` plus the custom hostname, set
+   `DOCUFLOW_PUBLIC_WEB_URL` / `DOCUFLOW_CORS_ORIGINS` to the real site URL,
+   and redeploy the API.
 
 ### Fully Free (no worker bill)
 

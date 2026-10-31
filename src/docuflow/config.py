@@ -134,14 +134,21 @@ class Settings(BaseSettings):
             value = item.strip()
             if value:
                 hosts.append(value)
-        for raw in (self.public_api_url, self.public_web_url, os.environ.get("RENDER_EXTERNAL_URL", "")):
+        candidates = [
+            self.public_api_url,
+            self.public_web_url,
+            os.environ.get("RENDER_EXTERNAL_URL", ""),
+            *self.cors_origin_list,
+        ]
+        for raw in candidates:
             host = urlparse(raw).hostname if raw else None
             if host:
                 hosts.append(host)
         render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "").strip()
         if render_host:
             hosts.append(render_host)
-        if os.environ.get("RENDER") or any(host.endswith(".onrender.com") for host in hosts):
+        on_render = bool(os.environ.get("RENDER")) or any(host.endswith(".onrender.com") for host in hosts)
+        if self.env == "production" or on_render:
             hosts.append(".onrender.com")
         unique: list[str] = []
         seen: set[str] = set()

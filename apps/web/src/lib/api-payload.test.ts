@@ -29,4 +29,12 @@ describe("readApiPayload", () => {
       ),
     ).toThrow(/valid email address/i);
   });
+
+  it("explains Starlette Invalid host header instead of incomplete JSON", () => {
+    expect(() => readApiPayload("Invalid host header", "text/plain", 400)).toThrow(/TRUSTED_HOSTS/i);
+  });
+
+  it("surfaces a sanitized preview for other plain-text errors", () => {
+    expect(() => readApiPayload("upstream exploded", "text/plain", 500)).toThrow(/upstream exploded/);
+  });
 });

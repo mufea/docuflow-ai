@@ -61,6 +61,21 @@ Full-repo `uv run mypy src/docuflow` still fails in `services/seed.py` on
 
 Not every operational path (live Stripe, live OpenAI, LibreOffice) is exercised; those are mocked or marked unavailable.
 
+## Render signup JSON proxy — verified on `feat/phase-1-pdf-engine-hardening`
+
+Signup/login through `/v1` now retries HTML, 502/503, and truncated JSON; maps
+Starlette `Invalid host header` to JSON; rejects a self-proxy
+`API_INTERNAL_URL`; and production host checks return JSON. Register no longer
+fails after the user row is committed if verify-email sending throws.
+
+```
+uv run pytest -q
+# 71 passed
+
+pnpm --filter web test
+# 15 passed
+```
+
 ## Phase 8 — Render readiness — configuration present, not deployed
 
 `infra/render.yaml` exists with Free compute for web, API, Postgres, and Redis.
