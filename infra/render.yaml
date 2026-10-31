@@ -1,25 +1,31 @@
 # Render Blueprint for DocuFlow AI
 # This file describes services. It is not proof of a successful deployment.
+#
+# Compute plans: web, Postgres, and Key Value use Render's Free tier.
+# Background workers have no Free plan (see Render docs). The worker stays on
+# the cheapest paid plan, 0.5c-512mb. Syncing this Blueprint does not always
+# downgrade an existing paid service — change those in the Render dashboard
+# if the plan stays on Starter / Basic after a sync.
 
 previewsEnabled: false
 
 databases:
   - name: docuflow-db
-    plan: basic-256mb
+    plan: free
     postgresMajorVersion: 16
     ipAllowList: []
 
 services:
   - type: redis
     name: docuflow-redis
-    plan: starter
+    plan: free
     maxmemoryPolicy: noeviction
     ipAllowList: []
 
   - type: web
     name: docuflow-api
     runtime: python
-    plan: starter
+    plan: free
     buildCommand: pip install -r requirements.txt
     preDeployCommand: alembic upgrade head
     startCommand: uvicorn docuflow.main:app --host 0.0.0.0 --port $PORT
@@ -74,7 +80,8 @@ services:
   - type: worker
     name: docuflow-worker
     runtime: python
-    plan: starter
+    # Render does not offer Free for background workers.
+    plan: 0.5c-512mb
     buildCommand: pip install -r requirements.txt
     startCommand: python -m docuflow.worker
     envVars:
@@ -134,7 +141,7 @@ services:
   - type: web
     name: docuflow-web
     runtime: node
-    plan: starter
+    plan: free
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter web build
     startCommand: pnpm --filter web start -p $PORT
     healthCheckPath: /

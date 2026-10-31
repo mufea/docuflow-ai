@@ -9,7 +9,33 @@ This application is designed for Render, not a single serverless function. It ne
 5. Redis
 6. External S3-compatible bucket (Cloudflare R2, AWS S3, or MinIO)
 
-The Blueprint is `infra/render.yaml`.
+The Blueprint is `infra/render.yaml`. Web, API, Postgres, and Redis/Key Value
+are set to Render **Free**. Background workers have no Free compute plan, so
+`docuflow-worker` stays on `0.5c-512mb` (cheapest paid).
+
+Free limits that matter here: web services spin down after 15 minutes idle and
+wake in about a minute; Free Postgres is 1 GB, one per workspace, and expires
+after 30 days; Free Key Value is in-memory only and loses data on restart.
+
+## Changing existing Render services to Free
+
+Editing this repo does not move live services by itself. After you pull and
+push to the repo Render deploys from:
+
+1. In the Render dashboard, open the Blueprint (or **New → Blueprint** and
+   point it at `infra/render.yaml`), then sync / apply.
+2. If a service is still on Starter or Basic after the sync, open it →
+   **Settings** (or **Info** for datastores) → **Instance type** / **Plan** →
+   **Free** → save.
+3. Do this for `docuflow-web`, `docuflow-api`, `docuflow-db`, and
+   `docuflow-redis`. Leave `docuflow-worker` on the smallest paid plan — Render
+   will reject Free for a worker.
+4. Confirm Billing shows $0 for those four resources. A Free workspace still
+   needs a payment method if you keep the worker.
+
+Render keeps the current plan when a Blueprint omits `plan`. This file now
+sets `plan` explicitly. A Blueprint apply still will not recreate a datastore
+just to change its plan; use the dashboard if Postgres or Redis stay paid.
 
 ## Status
 
