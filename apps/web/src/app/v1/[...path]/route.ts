@@ -1,30 +1,97 @@
 import { type NextRequest } from "next/server";
 
-const API = process.env.API_INTERNAL_URL || "http://127.0.0.1:43124";
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
+function apiOrigin(): string {
+  const raw = (process.env.API_INTERNAL_URL || process.env.DOCUFLOW_PUBLIC_API_URL || "").trim();
+  return raw.replace(/\/$/, "");
+}
+
+function isLocalPlaceholder(url: string): boolean {
+  return !url || /localhost|127\.0\.0\.1/.test(url);
+}
+
+function jsonError(status: number, message: string) {
+  return Response.json({ message }, { status });
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchApi(target: string, init: RequestInit, attempts = 4): Promise<Response> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    if (attempt > 0) {
+      await sleep(3000 * attempt);
+    }
+    try {
+      const response = await fetch(target, init);
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("text/html") || response.status === 502 || response.status === 503) {
+        lastError = new Error("html-or-unavailable");
+        continue;
+      }
+      return response;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("API unreachable");
+}
 
 async function proxy(request: NextRequest, path: string[]) {
-  const target = `${API}/v1/${path.join("/")}${request.nextUrl.search}`;
+  const origin = apiOrigin();
+  if (process.env.NODE_ENV === "production" && isLocalPlaceholder(origin)) {
+    return jsonError(
+      503,
+      "The web service is missing API_INTERNAL_URL. Set it to your API’s public https://…onrender.com URL (not localhost).",
+    );
+  }
+  if (
+    process.env.NODE_ENV === "production" &&
+    origin.startsWith("http://") &&
+    !origin.includes("onrender.com")
+  ) {
+    return jsonError(
+      503,
+      "API_INTERNAL_URL must be the public https://…onrender.com URL. Free web services cannot call each other over Render’s private network.",
+    );
+  }
+
+  const base = origin || "http://127.0.0.1:43124";
+  const target = `${base}/v1/${path.join("/")}${request.nextUrl.search}`;
   const headers = new Headers();
-  const accept = request.headers.get("accept");
   const contentType = request.headers.get("content-type");
   const cookie = request.headers.get("cookie");
   const csrf = request.headers.get("x-csrf-token");
-  const origin = request.headers.get("origin");
-  if (accept) headers.set("accept", accept);
+  const originHeader = request.headers.get("origin");
+  headers.set("accept", "application/json");
   if (contentType) headers.set("content-type", contentType);
   if (cookie) headers.set("cookie", cookie);
   if (csrf) headers.set("x-csrf-token", csrf);
-  if (origin) headers.set("origin", origin);
+  if (originHeader) headers.set("origin", originHeader);
 
   const method = request.method;
   const hasBody = !["GET", "HEAD"].includes(method);
   const body = hasBody ? await request.arrayBuffer() : undefined;
-  const response = await fetch(target, {
-    method,
-    headers,
-    body,
-    redirect: "manual",
-  });
+
+  let response: Response;
+  try {
+    response = await fetchApi(target, {
+      method,
+      headers,
+      body,
+      redirect: "manual",
+      cache: "no-store",
+    });
+  } catch {
+    return jsonError(
+      503,
+      "The API is starting or is unreachable. Wait about a minute and try again. Confirm API_INTERNAL_URL on the web service.",
+    );
+  }
 
   const outbound = new Headers();
   response.headers.forEach((value, key) => {

@@ -65,13 +65,17 @@ services:
       - key: S3_REGION
         value: auto
       - key: DOCUFLOW_PUBLIC_WEB_URL
-        sync: false
-      - key: DOCUFLOW_PUBLIC_API_URL
-        sync: false
+        fromService:
+          name: docuflow-web
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
       - key: DOCUFLOW_CORS_ORIGINS
-        sync: false
+        fromService:
+          name: docuflow-web
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
       - key: DOCUFLOW_TRUSTED_HOSTS
-        sync: false
+        value: .onrender.com
       - key: AI_PROVIDER
         value: mock
       - key: EMAIL_BACKEND
@@ -152,6 +156,11 @@ services:
       - key: COREPACK_ENABLE_DOWNLOAD_PROMPT
         value: "0"
       - key: API_INTERNAL_URL
+        fromService:
+          name: docuflow-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: DOCUFLOW_PUBLIC_API_URL
         fromService:
           name: docuflow-api
           type: web

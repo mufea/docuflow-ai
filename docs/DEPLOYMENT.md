@@ -62,6 +62,21 @@ Do this from a GitHub (or GitLab) repo that already has this code, including
 9. Open the **web** URL, not the API URL. Health checks:
    `https://<api-host>/health` and `https://<api-host>/ready`.
 
+### Login returns `Unexpected token '<', "<!DOCTYPE"…`
+
+The browser asked for JSON and got an HTML page. Typical Render causes:
+
+1. **`API_INTERNAL_URL` is missing on the web service**, so `/v1` is proxied to
+   `localhost` and Next.js returns its HTML error page. Set
+   `API_INTERNAL_URL` (and optionally `DOCUFLOW_PUBLIC_API_URL`) to the API’s
+   public URL, for example `https://docuflow-api.onrender.com`. Use `https://`,
+   not Render’s private `http://<service>:10000` host — Free web services
+   cannot receive private-network traffic.
+2. **The API is asleep.** Free web services spin down after 15 minutes. Open
+   `https://<api-host>/health` once, wait about a minute, then sign in again.
+3. **`DOCUFLOW_TRUSTED_HOSTS` is still localhost.** Set it to `.onrender.com`
+   on the API (or rely on the Blueprint default) and redeploy the API.
+
 ### Fully Free (no worker bill)
 
 If you do not want to add a card: in the Blueprint review, skip creating

@@ -1,3 +1,5 @@
+import { readApiPayload } from "./api-payload";
+
 export type User = {
   id: string;
   email: string;
@@ -46,12 +48,7 @@ function csrfToken() {
 
 async function parse(response: Response) {
   const text = await response.text();
-  const data = text ? JSON.parse(text) : {};
-  if (!response.ok) {
-    const message = data.message || data.detail || response.statusText;
-    throw new Error(typeof message === "string" ? message : "Request failed");
-  }
-  return data;
+  return readApiPayload(text, response.headers.get("content-type") || "", response.status);
 }
 
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {

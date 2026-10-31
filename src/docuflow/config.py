@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from typing import Literal
+from urllib.parse import urlparse
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from docuflow.dsn import normalize_database_url
@@ -108,13 +110,46 @@ class Settings(BaseSettings):
     def _normalize_database_url(cls, value: str) -> str:
         return normalize_database_url(value)
 
+    @model_validator(mode="after")
+    def _fill_render_public_api_url(self) -> Settings:
+        render_url = os.environ.get("RENDER_EXTERNAL_URL", "").rstrip("/")
+        if render_url and (
+            self.public_api_url.startswith("http://127.0.0.1") or self.public_api_url.startswith("http://localhost")
+        ):
+            self.public_api_url = render_url
+        return self
+
     @property
     def cors_origin_list(self) -> list[str]:
-        return [item.strip() for item in self.cors_origins.split(",") if item.strip()]
+        origins = [item.strip() for item in self.cors_origins.split(",") if item.strip()]
+        web = self.public_web_url.rstrip("/")
+        if web and web not in origins:
+            origins.append(web)
+        return origins
 
     @property
     def trusted_host_list(self) -> list[str]:
-        return [item.strip() for item in self.trusted_hosts.split(",") if item.strip()]
+        hosts: list[str] = []
+        for item in self.trusted_hosts.split(","):
+            value = item.strip()
+            if value:
+                hosts.append(value)
+        for raw in (self.public_api_url, self.public_web_url, os.environ.get("RENDER_EXTERNAL_URL", "")):
+            host = urlparse(raw).hostname if raw else None
+            if host:
+                hosts.append(host)
+        render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "").strip()
+        if render_host:
+            hosts.append(render_host)
+        if os.environ.get("RENDER") or any(host.endswith(".onrender.com") for host in hosts):
+            hosts.append(".onrender.com")
+        unique: list[str] = []
+        seen: set[str] = set()
+        for host in hosts:
+            if host not in seen:
+                seen.add(host)
+                unique.append(host)
+        return unique
 
     @property
     def is_production(self) -> bool:
