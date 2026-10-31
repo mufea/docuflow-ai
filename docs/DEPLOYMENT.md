@@ -9,13 +9,71 @@ This application is designed for Render, not a single serverless function. It ne
 5. Redis
 6. External S3-compatible bucket (Cloudflare R2, AWS S3, or MinIO)
 
-The Blueprint is `infra/render.yaml`. Web, API, Postgres, and Redis/Key Value
-are set to Render **Free**. Background workers have no Free compute plan, so
-`docuflow-worker` stays on `0.5c-512mb` (cheapest paid).
+The Blueprint is `infra/render.yaml` (not the repo root). Web, API, Postgres,
+and Redis/Key Value are set to Render **Free**. Background workers have no Free
+compute plan, so `docuflow-worker` stays on `0.5c-512mb` (cheapest paid).
+
+A Render deploy is still supported on this setup. Four of five resources are
+Free. The worker is the only paid piece and is the reason Render may ask for a
+payment method.
 
 Free limits that matter here: web services spin down after 15 minutes idle and
 wake in about a minute; Free Postgres is 1 GB, one per workspace, and expires
 after 30 days; Free Key Value is in-memory only and loses data on restart.
+
+## First deploy on Render
+
+Do this from a GitHub (or GitLab) repo that already has this code, including
+`infra/render.yaml`. Render builds from that remote, not from your laptop.
+
+1. Push `main` to the GitHub repo you will connect.
+2. Sign in at [dashboard.render.com](https://dashboard.render.com).
+3. **New → Blueprint**. Connect the GitHub repo if prompted.
+4. Set the Blueprint file to `infra/render.yaml`. Render’s default is
+   `render.yaml` at the repo root; that path is wrong for this project.
+5. Confirm the plan column: `docuflow-web`, `docuflow-api`, `docuflow-db`,
+   and `docuflow-redis` should be **Free**. `docuflow-worker` will stay on
+   **0.5 CPU / 512 MB**.
+6. Fill the Blueprint fields marked `sync: false` on `docuflow-api` before
+   you apply:
+
+   | Key | What to put |
+   | --- | --- |
+   | `S3_BUCKET` | Bucket name |
+   | `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | Bucket credentials |
+   | `S3_ENDPOINT_URL` | e.g. `https://<account>.r2.cloudflarestorage.com` |
+   | `DOCUFLOW_PUBLIC_WEB_URL` | `https://docuflow-web.onrender.com` (update after first deploy if the hostname differs) |
+   | `DOCUFLOW_PUBLIC_API_URL` | `https://docuflow-api.onrender.com` |
+   | `DOCUFLOW_CORS_ORIGINS` | Same origin as the web URL, no trailing slash |
+   | `DOCUFLOW_TRUSTED_HOSTS` | Web and API hostnames, comma-separated, no `https://` |
+
+   Leave `DATABASE_URL` and `REDIS_URL` alone — Render injects them.
+   Leave the `postgres://` URL as-is; the API rewrites it to psycopg3.
+
+7. Apply the Blueprint. Render creates Postgres and Redis first, then builds
+   API, worker, and web. The first Free web build can take several minutes;
+   the first HTTP request after idle takes about a minute while the service
+   wakes up.
+8. After both web services have public URLs, set
+   `DOCUFLOW_PUBLIC_WEB_URL`, `DOCUFLOW_PUBLIC_API_URL`,
+   `DOCUFLOW_CORS_ORIGINS`, and `DOCUFLOW_TRUSTED_HOSTS` to the real
+   `*.onrender.com` hosts, then redeploy the API (and web if you changed
+   anything it reads).
+9. Open the **web** URL, not the API URL. Health checks:
+   `https://<api-host>/health` and `https://<api-host>/ready`.
+
+### Fully Free (no worker bill)
+
+If you do not want to add a card: in the Blueprint review, skip creating
+`docuflow-worker`, and on `docuflow-api` set `JOB_BROKER=inline`. PDF jobs
+then run inside the API process. That is slower and can time out on large
+files, but the stack stays $0.
+
+### Already created the services?
+
+Sync the existing Blueprint, or change each service’s instance type in
+**Settings**. See the next section. Do not create a second Free Postgres or
+Free Key Value in the same workspace — Render allows only one of each.
 
 ## Changing existing Render services to Free
 
