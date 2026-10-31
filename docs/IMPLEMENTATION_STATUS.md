@@ -26,7 +26,9 @@ Not every operational path (live Stripe, live OpenAI, LibreOffice) is exercised;
 
 ## Phase 8 — Render readiness — configuration present, not deployed
 
-`infra/render.yaml` exists. No Render deployment has been performed.
+`infra/render.yaml` exists with Free compute for web, API, Postgres, and Redis.
+The worker stays on `0.5c-512mb` because Render has no Free worker plan. No
+Render deployment has been performed from this environment.
 
 ## Commands executed
 
