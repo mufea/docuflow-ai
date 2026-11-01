@@ -84,6 +84,16 @@ The browser asked for JSON and got something else. Typical Render causes:
    `DOCUFLOW_PUBLIC_WEB_URL` / `DOCUFLOW_CORS_ORIGINS` to the real site URL,
    and redeploy the API.
 
+### Tools return `Invalid request origin`
+
+Upload and job POSTs check the browser `Origin` against
+`DOCUFLOW_CORS_ORIGINS`. A custom domain that is not in that list used to fail
+CSRF even when you were signed in. The web proxy now sends the site Host, and
+the API accepts that origin plus `*.onrender.com` in production. Still set
+`DOCUFLOW_PUBLIC_WEB_URL` and `DOCUFLOW_CORS_ORIGINS` to the URL you open in
+the browser (custom domain or `https://<web>.onrender.com`), then redeploy the
+API and web.
+
 ### Fully Free (no worker bill)
 
 If you do not want to add a card: in the Blueprint review, skip creating

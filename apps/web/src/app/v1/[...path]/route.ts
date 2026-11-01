@@ -110,6 +110,7 @@ async function proxy(request: NextRequest, path: string[]) {
   if (cookie) headers.set("cookie", cookie);
   if (csrf) headers.set("x-csrf-token", csrf);
   if (originHeader) headers.set("origin", originHeader);
+  if (incomingHost) headers.set("x-docuflow-web-host", incomingHost);
 
   const method = request.method;
   const hasBody = !["GET", "HEAD"].includes(method);

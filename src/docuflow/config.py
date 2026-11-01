@@ -9,6 +9,7 @@ from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from docuflow.dsn import normalize_database_url
+from docuflow.security.hosts import origin_variants
 
 
 class Settings(BaseSettings):
@@ -121,11 +122,20 @@ class Settings(BaseSettings):
 
     @property
     def cors_origin_list(self) -> list[str]:
-        origins = [item.strip() for item in self.cors_origins.split(",") if item.strip()]
-        web = self.public_web_url.rstrip("/")
-        if web and web not in origins:
-            origins.append(web)
+        origins: list[str] = []
+        seen: set[str] = set()
+        for raw in (*self.cors_origins.split(","), self.public_web_url):
+            for item in origin_variants(raw):
+                if item not in seen:
+                    seen.add(item)
+                    origins.append(item)
         return origins
+
+    @property
+    def cors_origin_regex(self) -> str | None:
+        if self.env == "production":
+            return r"https://([A-Za-z0-9-]+\.)*onrender\.com"
+        return None
 
     @property
     def trusted_host_list(self) -> list[str]:

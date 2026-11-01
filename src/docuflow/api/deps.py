@@ -12,6 +12,7 @@ from docuflow.exceptions import AuthenticationError, AuthorizationError
 from docuflow.jobs.broker import JobBroker
 from docuflow.jobs.runner import JobRunner
 from docuflow.models import SessionToken, User
+from docuflow.security.hosts import origin_is_allowed
 from docuflow.security.rate_limit import MemoryRateLimiter
 from docuflow.services.auth import AuthService, valid_csrf
 from docuflow.storage.base import ObjectStorage
@@ -77,7 +78,15 @@ def require_csrf(
     header = request.headers.get("x-csrf-token")
     if not valid_csrf(token, header):
         raise AuthorizationError("Invalid CSRF token.")
+    settings = request.app.state.ctx.settings
     origin = request.headers.get("origin")
-    if origin and origin not in request.app.state.ctx.settings.cors_origin_list:
+    web_host = request.headers.get("x-docuflow-web-host") or ""
+    if origin and not origin_is_allowed(
+        origin,
+        settings.cors_origin_list,
+        allowed_hosts=settings.trusted_host_list,
+        web_host=web_host,
+        require_https=settings.is_production,
+    ):
         raise AuthorizationError("Invalid request origin.")
     return user

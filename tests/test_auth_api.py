@@ -46,6 +46,34 @@ def test_csrf_required_for_profile_update(client: TestClient) -> None:
     assert ok.json()["name"] == "Grace"
 
 
+def test_csrf_rejects_unknown_origin(client: TestClient) -> None:
+    register_and_login(client)
+    csrf = client.cookies.get("df_csrf")
+    denied = client.patch(
+        "/v1/auth/me",
+        json={"name": "Nope"},
+        headers={"X-CSRF-Token": csrf, "Origin": "https://evil.example"},
+    )
+    assert denied.status_code == 403
+    assert "origin" in denied.json()["message"].lower()
+
+
+def test_csrf_allows_origin_matching_proxied_web_host(client: TestClient) -> None:
+    register_and_login(client)
+    csrf = client.cookies.get("df_csrf")
+    ok = client.patch(
+        "/v1/auth/me",
+        json={"name": "Custom Domain"},
+        headers={
+            "X-CSRF-Token": csrf,
+            "Origin": "https://pdf.example.com",
+            "X-DocuFlow-Web-Host": "pdf.example.com",
+        },
+    )
+    assert ok.status_code == 200
+    assert ok.json()["name"] == "Custom Domain"
+
+
 def test_register_succeeds_when_verify_email_fails(client: TestClient, app) -> None:
     class BoomEmail(EmailBackend):
         def send(self, *, to: str, subject: str, body: str) -> None:

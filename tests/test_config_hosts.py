@@ -1,5 +1,5 @@
 from docuflow.config import Settings
-from docuflow.security.hosts import host_is_allowed
+from docuflow.security.hosts import host_is_allowed, origin_is_allowed, origin_variants
 
 
 def test_host_matching_supports_onrender_suffix_and_ports() -> None:
@@ -48,6 +48,34 @@ def test_cors_includes_public_web_url() -> None:
         public_web_url="https://docuflow-web.onrender.com",
     )
     assert "https://docuflow-web.onrender.com" in settings.cors_origin_list
+    assert "https://www.docuflow-web.onrender.com" in settings.cors_origin_list
+
+
+def test_origin_is_allowed_for_custom_domain_and_proxy_host() -> None:
+    allowed = origin_variants("https://docuflow-web.onrender.com")
+    assert origin_is_allowed("https://docuflow-web.onrender.com/", allowed)
+    assert origin_is_allowed(
+        "https://pdf.example.com",
+        allowed,
+        web_host="pdf.example.com",
+    )
+    assert origin_is_allowed(
+        "https://docuflow-web.onrender.com",
+        allowed,
+        allowed_hosts=[".onrender.com"],
+    )
+    assert not origin_is_allowed("https://evil.example", allowed, allowed_hosts=[".onrender.com"])
+    assert not origin_is_allowed(
+        "https://evil.example",
+        allowed,
+        web_host="docuflow-web.onrender.com",
+    )
+    assert not origin_is_allowed(
+        "http://pdf.example.com",
+        allowed,
+        web_host="pdf.example.com",
+        require_https=True,
+    )
 
 
 def test_render_external_url_fills_localhost_public_api(monkeypatch) -> None:
