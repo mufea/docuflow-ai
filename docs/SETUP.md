@@ -7,7 +7,7 @@
 - uv 0.13
 - PostgreSQL 16 and Redis 7 (optional; installed for realism)
 - Tesseract OCR (optional)
-- LibreOffice is **not** required for core PDF tools. DOCX→PDF is marked unavailable until `soffice` is present.
+- LibreOffice is optional. Word→PDF uses a built-in converter when `soffice` is missing. Install LibreOffice for closer Word pagination.
 
 ## 1. Environment
 

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import os
-import shutil
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -13,6 +12,12 @@ from docx import Document as DocxDocument
 from openpyxl import Workbook
 from pdf2docx import Converter
 
+from docuflow.conversion.docx_pdf import (
+    BUILTIN_DOCX_TO_PDF_LIMITS,
+    convert_docx_with_builtin,
+    docx_to_pdf_available,
+    find_libreoffice,
+)
 from docuflow.exceptions import EngineUnavailableError, InvalidFileError, UnsupportedOperationError
 from docuflow.pdf.sniff import sniff_file
 
@@ -40,7 +45,8 @@ PDF_TO_XLSX_LIMITS = [
 ]
 
 DOCX_TO_PDF_LIMITS = [
-    "Requires LibreOffice headless. Pagination and fonts depend on the conversion engine.",
+    "LibreOffice is used when installed. Otherwise a built-in converter writes an approximate PDF.",
+    "Pagination, fonts, headers, and floating objects may differ from Word.",
     "Macros are never executed. Embedded scripts are not processed.",
 ]
 
@@ -100,11 +106,27 @@ class ConversionService:
         kind = sniff_file(source)
         if kind.kind != "docx":
             raise UnsupportedOperationError("DOCX to PDF requires a DOCX input.")
-        soffice = shutil.which("soffice") or shutil.which("libreoffice")
-        if not soffice:
-            raise EngineUnavailableError(
-                "LibreOffice is not installed. DOCX to PDF is configured but unavailable on this host."
-            )
+        soffice = find_libreoffice()
+        if soffice:
+            try:
+                self._docx_to_pdf_libreoffice(source, output, soffice)
+                return ConversionResult(
+                    outputs=[output],
+                    output_format="pdf",
+                    engine="libreoffice-headless",
+                    limitations=DOCX_TO_PDF_LIMITS,
+                )
+            except EngineUnavailableError:
+                logger.warning("libreoffice_failed_using_builtin")
+        convert_docx_with_builtin(source, output)
+        return ConversionResult(
+            outputs=[output],
+            output_format="pdf",
+            engine="docx-builtin",
+            limitations=BUILTIN_DOCX_TO_PDF_LIMITS,
+        )
+
+    def _docx_to_pdf_libreoffice(self, source: Path, output: Path, soffice: str) -> None:
         output.parent.mkdir(parents=True, exist_ok=True)
         env = {
             "PATH": os.environ.get("PATH", ""),
@@ -142,17 +164,12 @@ class ConversionService:
             raise EngineUnavailableError("LibreOffice could not convert the document.")
         if candidate != output:
             candidate.replace(output)
-        return ConversionResult(
-            outputs=[output],
-            output_format="pdf",
-            engine="libreoffice-headless",
-            limitations=DOCX_TO_PDF_LIMITS,
-        )
 
     def docx_preview_unsupported_without_engine(self) -> dict[str, Any]:
         return {
             "operation": "docx_to_pdf",
-            "available": bool(shutil.which("soffice") or shutil.which("libreoffice")),
+            "available": docx_to_pdf_available(),
+            "engine": "libreoffice-headless" if find_libreoffice() else "docx-builtin",
             "limitations": DOCX_TO_PDF_LIMITS,
         }
 

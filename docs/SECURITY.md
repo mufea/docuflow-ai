@@ -6,7 +6,7 @@ PDFs, Office files, and images are treated as hostile input.
 
 - File type is determined from magic bytes / package contents, not the filename.
 - Embedded scripts and macros are never executed.
-- LibreOffice is launched headless with a stripped environment when present.
+- LibreOffice is launched headless with a stripped environment when present. Otherwise Word→PDF uses the built-in renderer and never executes macros.
 - Conversion and OCR run in temporary directories that are deleted afterwards.
 - Original uploads are never overwritten.
 

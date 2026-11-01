@@ -63,6 +63,10 @@ Not every operational path (live Stripe, live OpenAI, LibreOffice) is exercised;
 
 ## Render signup JSON proxy — verified on `feat/phase-1-pdf-engine-hardening`
 
+Word→PDF no longer requires LibreOffice. The job uses a built-in
+python-docx + PyMuPDF renderer when `soffice` is missing, so Render Free
+hosts can convert DOCX. Complex Word layout stays approximate.
+
 Signup/login through `/v1` now retries HTML, 502/503, and truncated JSON; maps
 Starlette `Invalid host header` to JSON; rejects a self-proxy
 `API_INTERNAL_URL`; and production host checks return JSON. Register no longer
@@ -118,7 +122,7 @@ curl http://127.0.0.1:43123/
 
 ## Honest limitations
 
-- DOCX→PDF requires LibreOffice (`soffice`). Unavailable in this image; the API reports that.
+- Word→PDF uses a built-in python-docx + PyMuPDF converter when LibreOffice is missing. Complex Word layout is approximate.
 - Live Stripe/Midtrans/OpenAI calls are not made. Webhooks and the mock AI provider are tested with fixtures.
 - Render deployment has not been performed or verified.
 - Automated tests use SQLite; production is PostgreSQL. Credit `FOR UPDATE` locking is fully meaningful on Postgres.
@@ -127,6 +131,6 @@ curl http://127.0.0.1:43123/
 ## Next recommended work
 
 1. Authorize a Render deploy and an S3-compatible bucket.
-2. Optionally install LibreOffice in the API/worker image for DOCX→PDF.
+2. Optionally install LibreOffice in the API/worker image for closer Word pagination.
 3. Provide sandbox Stripe/Midtrans keys if billing should be exercised end-to-end.
 4. Provide an AI key only if live analysis should replace the mock provider.

@@ -5,6 +5,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
+from docuflow.conversion.engines import write_simple_docx
 from tests.conftest import register_and_login
 from tests.pdf.conftest import write_text_pdf
 
@@ -98,3 +99,38 @@ def test_path_traversal_filename_is_sanitized(client: TestClient, tmp_path: Path
     assert response.status_code == 200
     assert "/" not in response.json()["original_filename"]
     assert ".." not in response.json()["original_filename"]
+
+
+def test_docx_to_pdf_job_without_libreoffice(client: TestClient, tmp_path: Path) -> None:
+    session = register_and_login(client)
+    csrf = session["csrf"]
+    source = write_simple_docx(tmp_path / "memo.docx", ["Word to PDF job works on this host."])
+    with source.open("rb") as handle:
+        uploaded = client.post(
+            "/v1/documents",
+            files={
+                "file": (
+                    source.name,
+                    handle,
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+            },
+            headers={"X-CSRF-Token": csrf, "Origin": "http://testserver"},
+        )
+    assert uploaded.status_code == 200, uploaded.text
+    created = client.post(
+        "/v1/jobs",
+        json={"operation": "docx_to_pdf", "document_ids": [uploaded.json()["id"]], "params": {}},
+        headers={"X-CSRF-Token": csrf, "Origin": "http://testserver"},
+    )
+    assert created.status_code == 200, created.text
+    job = _wait_job(client, created.json()["id"])
+    assert job["status"] == "completed", job
+    assert job["result_payload"]["engine"] == "docx-builtin"
+    download = client.get(f"/v1/documents/{job['result_document_ids'][0]}/download")
+    assert download.status_code == 200
+    assert download.content[:5] == b"%PDF-"
+
+    meta = client.get("/v1/meta/tools")
+    assert meta.status_code == 200
+    assert meta.json()["docx_to_pdf"]["available"] is True

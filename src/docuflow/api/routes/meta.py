@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-import shutil
-
 from fastapi import APIRouter, Request
 
 from docuflow.billing.plans import DEFAULT_OPERATION_COSTS
+from docuflow.conversion.docx_pdf import docx_to_pdf_available, find_libreoffice
 from docuflow.jobs.operations import JOB_OPERATIONS
 from docuflow.ocr.engine import OcrEngine
 
@@ -112,9 +111,9 @@ TOOLS = [
     {
         "slug": "docx_to_pdf",
         "name": "Word to PDF",
-        "description": "Convert DOCX to PDF using LibreOffice when installed.",
+        "description": "Convert a Word document to PDF. Layout is approximate without LibreOffice.",
         "inputs": "docx",
-        "available": bool(shutil.which("soffice") or shutil.which("libreoffice")),
+        "available": True,
     },
     {
         "slug": "ocr",
@@ -168,6 +167,7 @@ def tools(request: Request) -> dict:
         },
         "ocr": ocr,
         "docx_to_pdf": {
-            "available": bool(shutil.which("soffice") or shutil.which("libreoffice")),
+            "available": docx_to_pdf_available(),
+            "engine": "libreoffice-headless" if find_libreoffice() else "docx-builtin",
         },
     }

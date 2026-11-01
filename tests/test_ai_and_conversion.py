@@ -65,3 +65,68 @@ def test_docx_fixture_roundtrip_kind(tmp_path: Path) -> None:
 
     path = write_simple_docx(tmp_path / "note.docx", ["Hello from DocuFlow"])
     assert sniff_file(path).kind == "docx"
+
+
+def test_docx_to_pdf_works_without_libreoffice(tmp_path: Path, monkeypatch) -> None:
+    import fitz
+    from docx import Document
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.shared import Inches
+    from PIL import Image
+
+    from docuflow.conversion.docx_pdf import convert_docx_with_builtin
+    from docuflow.pdf.sniff import sniff_file
+
+    monkeypatch.setattr("docuflow.conversion.engines.find_libreoffice", lambda: None)
+    monkeypatch.setattr("docuflow.conversion.docx_pdf.find_libreoffice", lambda: None)
+
+    image_path = tmp_path / "dot.png"
+    Image.new("RGB", (32, 32), color=(20, 80, 180)).save(image_path)
+
+    source = tmp_path / "brief.docx"
+    document = Document()
+    document.add_heading("Quarterly brief", level=1)
+    document.add_paragraph("Hello from DocuFlow Word to PDF.")
+    centered = document.add_paragraph("Centered note")
+    centered.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    table = document.add_table(rows=2, cols=2)
+    table.cell(0, 0).text = "Name"
+    table.cell(0, 1).text = "Amount"
+    table.cell(1, 0).text = "Ada"
+    table.cell(1, 1).text = "10"
+    document.add_picture(str(image_path), width=Inches(1))
+    document.save(str(source))
+
+    dest = tmp_path / "brief.pdf"
+    result = ConversionService().docx_to_pdf(source, dest)
+    assert dest.is_file()
+    assert dest.read_bytes()[:5] == b"%PDF-"
+    assert sniff_file(dest).kind == "pdf"
+    assert result.engine == "docx-builtin"
+    assert result.output_format == "pdf"
+
+    pdf = fitz.open(dest.as_posix())
+    text = "".join(page.get_text() for page in pdf)
+    pdf.close()
+    assert "Quarterly brief" in text
+    assert "Hello from DocuFlow" in text
+    assert "Ada" in text
+
+    convert_docx_with_builtin(source, tmp_path / "again.pdf")
+    assert (tmp_path / "again.pdf").is_file()
+
+
+def test_docx_to_pdf_falls_back_when_libreoffice_fails(tmp_path: Path, monkeypatch) -> None:
+    from docuflow.exceptions import EngineUnavailableError
+
+    source = write_simple_docx(tmp_path / "note.docx", ["Fallback after LibreOffice failure."])
+    dest = tmp_path / "note.pdf"
+
+    def boom(_self: ConversionService, _source: Path, _output: Path, _soffice: str) -> None:
+        raise EngineUnavailableError("LibreOffice could not convert the document.")
+
+    monkeypatch.setattr("docuflow.conversion.engines.find_libreoffice", lambda: "/usr/bin/soffice")
+    monkeypatch.setattr(ConversionService, "_docx_to_pdf_libreoffice", boom)
+    result = ConversionService().docx_to_pdf(source, dest)
+    assert dest.is_file()
+    assert result.engine == "docx-builtin"

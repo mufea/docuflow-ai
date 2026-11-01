@@ -7,6 +7,7 @@ describe("tool catalog", () => {
     expect(slugs).toContain("merge");
     expect(slugs).toContain("unlock");
     expect(toolBySlug("compress")?.name).toBe("Compress PDF");
+    expect(toolBySlug("docx_to_pdf")?.description).toMatch(/Word document to PDF/i);
   });
 
   it("does not point ask at a fake placeholder", () => {

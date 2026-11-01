@@ -22,7 +22,7 @@ export const TOOLS: ToolDefinition[] = [
   { slug: "pdf_to_images", name: "PDF to images", description: "Export pages as PNG or JPEG.", href: "/tools/pdf_to_images", group: "convert", inputs: "pdf" },
   { slug: "pdf_to_docx", name: "PDF to Word", description: "Convert to DOCX. Layout is approximate.", href: "/tools/pdf_to_docx", group: "convert", inputs: "pdf" },
   { slug: "pdf_to_xlsx", name: "PDF to Excel", description: "Export detected tables to XLSX.", href: "/tools/pdf_to_xlsx", group: "convert", inputs: "pdf" },
-  { slug: "docx_to_pdf", name: "Word to PDF", description: "Convert DOCX when LibreOffice is installed.", href: "/tools/docx_to_pdf", group: "convert", inputs: "docx" },
+  { slug: "docx_to_pdf", name: "Word to PDF", description: "Convert a Word document to PDF. Complex layout is approximate.", href: "/tools/docx_to_pdf", group: "convert", inputs: "docx" },
   { slug: "ocr", name: "OCR", description: "Recognize text on scanned pages.", href: "/tools/ocr", group: "ai", inputs: "pdf" },
   { slug: "summarize", name: "Summarize", description: "Summarize extracted text with page citations.", href: "/tools/summarize", group: "ai", inputs: "pdf" },
   { slug: "ask", name: "Ask a PDF", description: "Question a document using retrieved excerpts.", href: "/app/assistant", group: "ai", inputs: "pdf" },

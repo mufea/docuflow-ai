@@ -45,7 +45,7 @@ export function ToolWorkspace({ tool, available = true, unavailableReason, credi
   const hint = useMemo(() => {
     if (tool.inputs === "pdf+") return "PDF files, maximum 50 MB each on Free. Contents are validated, not just the extension.";
     if (tool.inputs === "image+") return "JPEG, PNG, GIF, or WebP. Images are inspected before conversion.";
-    if (tool.inputs === "docx") return "DOCX only. Conversion requires LibreOffice on the server.";
+    if (tool.inputs === "docx") return "DOCX only. Text, tables, and images are converted. Complex Word layout is approximate.";
     return "A single PDF. Encrypted files need the password you are authorized to use.";
   }, [tool.inputs]);
 

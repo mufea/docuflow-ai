@@ -21,7 +21,7 @@ The Python package is shared by the API process and the background worker so job
 - Integer credit ledger with reservations, settlement, and refunds
 - Stripe and Midtrans webhook adapters with signature verification (sandbox; live billing is not activated)
 - Mock AI summaries, Q&A, and structured extraction with page citations
-- OCR when Tesseract is installed; DOCX→PDF when LibreOffice is installed
+- OCR when Tesseract is installed; Word→PDF with a built-in converter (LibreOffice used when present)
 
 ## Quick start
 
