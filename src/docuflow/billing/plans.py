@@ -1,8 +1,21 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TypedDict
 
-DEFAULT_PLANS = [
+
+class PlanSeed(TypedDict):
+    slug: str
+    name: str
+    monthly_credits: int
+    max_file_bytes: int
+    max_pages: int
+    max_ai_requests_per_day: int
+    features: dict[str, bool]
+    is_public: bool
+
+
+DEFAULT_PLANS: list[PlanSeed] = [
     {
         "slug": "free",
         "name": "Free",

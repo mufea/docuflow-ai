@@ -41,9 +41,11 @@ class StripeAdapter:
         credits = int(metadata.get("credits") or 0)
         status = data.get("status")
         subscription_id = data.get("subscription") if event_type.startswith("checkout") else data.get("id")
-        if event_type in {"checkout.session.completed", "invoice.paid", "customer.subscription.updated"}:
+        if event_type in {"checkout.session.completed", "invoice.paid"}:
             credits = credits or _credits_for_plan(plan)
             status = status or "active"
+        elif event_type == "customer.subscription.updated":
+            status = status or data.get("status") or "active"
         return WebhookResult(
             provider=self.name,
             event_id=event_id,

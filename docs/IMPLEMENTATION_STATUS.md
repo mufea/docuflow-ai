@@ -80,10 +80,11 @@ pnpm --filter web test
 # 15 passed
 ```
 
-## Phase 8 — Render production readiness — in progress on `feat/phase-8-render-readiness`
+## Phase 8 — Render production readiness — merged
 
-Base: `feat/phase-1-pdf-engine-hardening` @ `81cdb41` (includes verified job
-inline fallback). `origin/main` remains `da4ee00`. `main` was not modified.
+Merged to `main` as `11dbfd0bb21eb29d87db073142d96bda9c08e46c`
+(`Merge pull request #1 from mufea/feat/phase-8-render-readiness`).
+GitHub `main` was verified at that commit before Phase 9 work began.
 
 Hardening in this phase:
 
@@ -95,9 +96,10 @@ Hardening in this phase:
 - Blueprint documents two modes: API `JOB_BROKER=inline` (minimal cost) vs worker `rq`.
 - Docs no longer claim `JOB_BROKER=rq` is mandatory in production.
 
-Deployment status: **NOT DEPLOYED**. Not verified from this environment.
+Local tests for Phase 8 were recorded on `feat/phase-8-render-readiness`.
+Live Render deployment was **not** verified from this environment.
 
-Verification on this branch:
+Verification recorded on that branch:
 
 ```
 uv run pytest -q
@@ -183,9 +185,58 @@ uv run pytest -q
 - Automated tests use SQLite; production is PostgreSQL. Credit `FOR UPDATE` locking is fully meaningful on Postgres.
 - Next.js “Publish to Vercel” is not the production path: the product needs API + worker + Redis + Postgres + object storage on Render.
 
+## Phase 9 — Production safety and data integrity — on `cursor/phase-9-production-safety-3b1a`
+
+Base: GitHub `main` @ `11dbfd0`. `main` was not modified by this work.
+
+Fixes:
+
+- `seed_reference_data()` no longer mass-updates `User.plan_slug` to Free.
+- Catalog seed may insert missing plans/costs, update name/`is_public`, and raise (never lower) plan limits. Feature flags are merged. Credit balances and ledger rows are untouched.
+- `CreditService.grant()` is idempotent on the ledger key before mutating balance.
+- Monthly period refresh checks the grant ledger key before adding allowance, after locking the account.
+- Abandoned `processing` jobs refund reserved credits.
+- Completed jobs record `credits_settled`.
+- Duplicate payment events that race the unique constraint return `duplicate`.
+- Subscription webhooks upsert by provider subscription id instead of inserting a new row each time.
+- `customer.subscription.updated` no longer invents a credit grant.
+- Document delete marks the row deleted, then removes storage (orphan object is preferred over an accessible row whose bytes are already gone).
+- GitHub Actions CI runs Python tests/lint/typecheck and web lint/typecheck/tests/build. No secrets. No Postgres/Redis services.
+
+Local verification (this branch):
+
+```
+uv run pytest -q
+# 110 passed
+
+uv run ruff check src tests
+# All checks passed
+
+uv run mypy src/docuflow
+# Success: no issues found in 65 source files
+
+pnpm --filter web lint
+# passed
+
+pnpm --filter web typecheck
+# passed
+
+pnpm --filter web test
+# 15 passed
+
+pnpm --filter web build
+# passed
+
+git diff --check
+# clean
+```
+
+Live deployment verification: **not performed**. Render env, DNS, and production data were not accessed.
+
 ## Next recommended work
 
-1. Authorize a Render deploy and an S3-compatible bucket.
-2. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
-3. Provide sandbox Stripe/Midtrans keys if billing should be exercised end-to-end.
-4. Provide an AI key only if live analysis should replace the mock provider.
+1. Review and merge Phase 9. Do not merge from this agent unless authorized.
+2. Push the branch to GitHub `mufea/docuflow-ai` if CI should run there, then authorize a Render deploy separately.
+3. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
+4. Provide sandbox Stripe/Midtrans keys only if billing should be exercised end-to-end. Live charges stay off.
+5. Provide an AI key only if live analysis should replace the mock provider.

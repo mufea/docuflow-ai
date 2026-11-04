@@ -76,6 +76,7 @@ class JobRunner:
                 job.progress = 100
                 job.completed_at = datetime.now(UTC)
                 CreditService(session).settle(user, job.credits_reserved, job_id=job.id)
+                job.credits_settled = job.credits_reserved
                 session.commit()
             except DocuflowError as exc:
                 session.rollback()
