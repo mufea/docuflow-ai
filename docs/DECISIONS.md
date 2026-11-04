@@ -34,6 +34,14 @@ Render native Python images do not ship the `tesseract` binary. OCR stays
 on with `OCR_ENABLED=true` and uses RapidOCR ONNX (`rapidocr` + `onnxruntime`)
 when Tesseract is missing. Tesseract is still preferred when it is on PATH.
 
+## Seed never changes user entitlements
+
+`seed_reference_data()` runs on API startup. It may insert missing plans and
+operation costs, update catalog display fields, and raise (never lower) plan
+limits. It must not write `User`, `CreditAccount`, or `CreditLedger` rows.
+Plan changes for an account go through billing webhooks or an explicit admin
+grant.
+
 ## Hatchling / uv for Python, pnpm for the web
 
 Lockfiles: `uv.lock` and `pnpm-lock.yaml`.

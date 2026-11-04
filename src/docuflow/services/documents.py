@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 import uuid
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -14,6 +15,8 @@ from docuflow.models import Document, User
 from docuflow.pdf.engine import PdfEngine
 from docuflow.pdf.sniff import sniff_file
 from docuflow.storage.base import ObjectStorage
+
+logger = logging.getLogger("docuflow.documents")
 
 
 class DocumentService:
@@ -51,20 +54,29 @@ class DocumentService:
 
     def delete(self, user: User, document_id: str) -> None:
         document = self.get_owned(user, document_id)
-        self.storage.delete(document.storage_key)
+        key = document.storage_key
         document.deleted_at = datetime.now(UTC)
         self.session.commit()
+        self._delete_storage(key)
 
     def purge_expired(self) -> int:
         now = datetime.now(UTC)
         rows = list(
             self.session.scalars(select(Document).where(Document.deleted_at.is_(None), Document.expires_at < now))
         )
+        keys = [document.storage_key for document in rows]
         for document in rows:
-            self.storage.delete(document.storage_key)
             document.deleted_at = now
         self.session.commit()
+        for key in keys:
+            self._delete_storage(key)
         return len(rows)
+
+    def _delete_storage(self, key: str) -> None:
+        try:
+            self.storage.delete(key)
+        except Exception:
+            logger.warning("storage_delete_failed")
 
     def _store(
         self,

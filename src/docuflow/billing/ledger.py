@@ -18,6 +18,7 @@ class CreditService:
     def ensure_account(self, user: User) -> CreditAccount:
         account = self.session.get(CreditAccount, user.id)
         if account:
+            self._lock(account)
             self._maybe_reset_period(account)
             return account
         plan = self.session.get(Plan, user.plan_slug)
@@ -124,6 +125,8 @@ class CreditService:
             raise ConflictError("Grant amount must be positive.")
         account = self.ensure_account(user)
         self._lock(account)
+        if self._ledger_exists(idempotency_key):
+            return
         account.balance += amount
         account.version += 1
         self._write(
@@ -153,17 +156,25 @@ class CreditService:
         user = self.session.get(User, account.user_id)
         plan = self.session.get(Plan, user.plan_slug) if user else None
         allowance = plan.monthly_credits if plan else account.period_allowance
-        account.period_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        period_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        key = f"grant:{account.user_id}:{period_start.date().isoformat()}"
+        account.period_start = period_start
         account.period_allowance = allowance
         account.period_used = 0
+        if self._ledger_exists(key):
+            return
         account.balance += allowance
         self._write(
             user_id=account.user_id,
             amount=allowance,
             entry_type="grant",
             description="Monthly credit refresh",
-            idempotency_key=f"grant:{account.user_id}:{account.period_start.date().isoformat()}",
+            idempotency_key=key,
         )
+
+    def _ledger_exists(self, idempotency_key: str) -> bool:
+        row = self.session.scalar(select(CreditLedger).where(CreditLedger.idempotency_key == idempotency_key))
+        return row is not None
 
     def _write(
         self,

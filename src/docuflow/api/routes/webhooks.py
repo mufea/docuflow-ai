@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import hashlib
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Request
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from docuflow.billing.ledger import CreditService
 from docuflow.exceptions import NotFoundError, ValidationError
 from docuflow.models import PaymentEvent, Subscription, User
+from docuflow.payments.base import WebhookResult
 from docuflow.payments.midtrans_adapter import MidtransAdapter
 from docuflow.payments.stripe_adapter import StripeAdapter
 
@@ -31,7 +34,7 @@ async def midtrans_webhook(request: Request) -> dict[str, str]:
     return _apply_payment(request.app.state.ctx.session_factory(), payload, result)
 
 
-def _apply_payment(session: Session, payload: bytes, result) -> dict[str, str]:
+def _apply_payment(session: Session, payload: bytes, result: WebhookResult) -> dict[str, str]:
     try:
         existing = session.scalar(
             select(PaymentEvent).where(
@@ -63,15 +66,7 @@ def _apply_payment(session: Session, payload: bytes, result) -> dict[str, str]:
             "completed",
         }:
             user.plan_slug = result.plan_slug
-            session.add(
-                Subscription(
-                    user_id=user.id,
-                    plan_slug=result.plan_slug,
-                    status="active",
-                    provider=result.provider,
-                    provider_subscription_id=result.provider_subscription_id,
-                )
-            )
+            _upsert_subscription(session, user, result)
             if result.credits > 0:
                 CreditService(session).grant(
                     user,
@@ -82,5 +77,45 @@ def _apply_payment(session: Session, payload: bytes, result) -> dict[str, str]:
                 )
         session.commit()
         return {"status": "ok"}
+    except IntegrityError:
+        session.rollback()
+        return {"status": "duplicate"}
+    except Exception:
+        session.rollback()
+        raise
     finally:
         session.close()
+
+
+def _upsert_subscription(session: Session, user: User, result: WebhookResult) -> None:
+    existing = None
+    if result.provider_subscription_id:
+        existing = session.scalar(
+            select(Subscription).where(
+                Subscription.provider == result.provider,
+                Subscription.provider_subscription_id == result.provider_subscription_id,
+            )
+        )
+    if existing is None:
+        existing = session.scalar(
+            select(Subscription).where(
+                Subscription.user_id == user.id,
+                Subscription.provider == result.provider,
+                Subscription.status == "active",
+            )
+        )
+    if existing:
+        existing.plan_slug = result.plan_slug or existing.plan_slug
+        existing.status = "active"
+        existing.provider_subscription_id = result.provider_subscription_id or existing.provider_subscription_id
+        existing.updated_at = datetime.now(UTC)
+        return
+    session.add(
+        Subscription(
+            user_id=user.id,
+            plan_slug=result.plan_slug,
+            status="active",
+            provider=result.provider,
+            provider_subscription_id=result.provider_subscription_id,
+        )
+    )

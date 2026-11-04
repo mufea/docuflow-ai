@@ -78,6 +78,21 @@ def test_insufficient_credits(tmp_path) -> None:
         pass
 
 
+def test_grant_is_idempotent_for_the_same_key(tmp_path) -> None:
+    session = _session(tmp_path)
+    user = session.query(User).one()
+    service = CreditService(session)
+    service.ensure_account(user)
+    service.grant(user, 10, reason="bonus", idempotency_key="bonus-1")
+    service.grant(user, 10, reason="bonus", idempotency_key="bonus-1")
+    account = service.ensure_account(user)
+    assert account.balance == 30
+    from docuflow.models import CreditLedger
+
+    grants = [row for row in session.query(CreditLedger).all() if row.idempotency_key == "bonus-1"]
+    assert len(grants) == 1
+
+
 def test_ledger_matches_balance_changes(tmp_path) -> None:
     session = _session(tmp_path)
     user = session.query(User).one()
