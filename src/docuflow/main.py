@@ -28,6 +28,9 @@ logger = logging.getLogger("docuflow.api")
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings)
+    if settings.is_production:
+        for item in settings.production_readiness_errors():
+            logger.error("production_readiness %s", item)
     engine = create_engine_from_settings(settings)
     if settings.database_url.startswith("sqlite"):
         Path("data").mkdir(parents=True, exist_ok=True)

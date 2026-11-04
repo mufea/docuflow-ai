@@ -9,7 +9,7 @@ Browser → Next.js (apps/web)
           FastAPI (src/docuflow)
             │ enqueue job_id
             ▼
-          RQ worker  (or inline thread pool in development)
+          RQ worker  (or inline thread pool in development / minimal-cost Render)
             │
      ┌──────┼──────────┐
      ▼      ▼          ▼

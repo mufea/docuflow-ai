@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, Request
 from sqlalchemy import text
+
+logger = logging.getLogger("docuflow.health")
 
 router = APIRouter(tags=["health"])
 
@@ -20,6 +24,7 @@ def ready(request: Request) -> dict[str, object]:
         session.execute(text("SELECT 1"))
         checks["database"] = True
     except Exception:
+        logger.warning("ready_database_failed")
         checks["database"] = False
     finally:
         session.close()
@@ -30,9 +35,28 @@ def ready(request: Request) -> dict[str, object]:
             Redis.from_url(ctx.settings.redis_url).ping()
             checks["redis"] = True
         except Exception:
+            logger.warning("ready_redis_failed")
             checks["redis"] = False
     else:
         checks["redis"] = True
-    checks["storage"] = True
+    try:
+        ctx.storage.ping()
+        checks["storage"] = True
+    except Exception:
+        logger.warning("ready_storage_failed")
+        checks["storage"] = False
+    rq_workers = 0
+    if ctx.settings.job_broker == "rq":
+        count_fn = getattr(ctx.broker, "active_worker_count", None)
+        if callable(count_fn):
+            try:
+                rq_workers = int(count_fn())
+            except Exception:
+                rq_workers = 0
     ok = all(checks.values())
-    return {"status": "ready" if ok else "degraded", "checks": checks}
+    return {
+        "status": "ready" if ok else "degraded",
+        "checks": checks,
+        "broker": ctx.settings.job_broker,
+        "rq_workers": rq_workers,
+    }

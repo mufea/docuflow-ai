@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from sqlalchemy import update
 from sqlalchemy.orm import Session, sessionmaker
 
 from docuflow.ai.chunking import chunk_pages, retrieve
@@ -47,19 +48,24 @@ class JobRunner:
     def process(self, job_id: str) -> None:
         session = self.session_factory()
         try:
+            claimed = session.execute(
+                update(Job)
+                .where(Job.id == job_id, Job.status == "queued")
+                .values(
+                    status="processing",
+                    started_at=datetime.now(UTC),
+                    attempt=Job.attempt + 1,
+                    progress=5,
+                )
+            )
+            session.commit()
+            if int(getattr(claimed, "rowcount", 0) or 0) != 1:
+                logger.info("job_skip_not_queued id=%s", job_id)
+                return
             job = session.get(Job, job_id)
             if job is None:
                 logger.warning("job_missing id=%s", job_id)
                 return
-            if job.status in {"completed", "cancelled", "failed"}:
-                return
-            if job.status == "processing":
-                return
-            job.status = "processing"
-            job.started_at = datetime.now(UTC)
-            job.attempt += 1
-            job.progress = 5
-            session.commit()
             user = session.get(User, job.user_id)
             if user is None:
                 raise UnsupportedOperationError("Job owner no longer exists.")

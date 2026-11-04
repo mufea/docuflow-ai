@@ -80,11 +80,54 @@ pnpm --filter web test
 # 15 passed
 ```
 
-## Phase 8 — Render readiness — configuration present, not deployed
+## Phase 8 — Render production readiness — in progress on `feat/phase-8-render-readiness`
 
-`infra/render.yaml` exists with Free compute for web, API, Postgres, and Redis.
-The worker stays on `0.5c-512mb` because Render has no Free worker plan. No
-Render deployment has been performed from this environment.
+Base: `feat/phase-1-pdf-engine-hardening` @ `81cdb41` (includes verified job
+inline fallback). `origin/main` remains `da4ee00`. `main` was not modified.
+
+Hardening in this phase:
+
+- `/ready` actually pings storage (S3 `head_bucket` or writable filesystem).
+- Production readiness checks for secret, Postgres, S3 credentials, and RQ Redis.
+- Job runner claims `queued` rows atomically so duplicate enqueue cannot double-charge.
+- RQ enqueue uses `WORKER_TIMEOUT_SECONDS` and ignores stale worker heartbeats.
+- API boot migrations use `python -m docuflow.migrate` with a Postgres advisory lock.
+- Blueprint documents two modes: API `JOB_BROKER=inline` (minimal cost) vs worker `rq`.
+- Docs no longer claim `JOB_BROKER=rq` is mandatory in production.
+
+Deployment status: **NOT DEPLOYED**. Not verified from this environment.
+
+Verification on this branch:
+
+```
+uv run pytest -q
+# 93 passed
+
+uv run ruff check src tests
+# All checks passed
+
+uv run ruff format --check src tests
+# Would reformat tests/test_database_url.py (pre-existing on main; not changed)
+
+uv run mypy src/docuflow
+# Fails in services/seed.py DEFAULT_PLANS dict types (pre-existing)
+# New Phase 8 modules typecheck clean
+
+pnpm --filter web test
+# 15 passed
+
+pnpm --filter web lint
+# passed
+
+pnpm --filter web typecheck
+# passed
+
+pnpm --filter web build
+# passed
+
+git diff --check
+# clean
+```
 
 ## Commands executed
 

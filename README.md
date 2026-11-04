@@ -39,7 +39,7 @@ pnpm install
 pnpm --filter web dev -- --port 43123
 ```
 
-The API uses SQLite + filesystem storage + an inline job broker when those values are set in `.env`. That is the supported local path. Production on Render must use PostgreSQL, Redis, S3-compatible storage, and `JOB_BROKER=rq`.
+The API uses SQLite + filesystem storage + an inline job broker when those values are set in `.env`. That is the supported local path. Production on Render must use PostgreSQL and S3-compatible storage. Use `JOB_BROKER=inline` for the minimal-cost stack (no paid worker). Use `JOB_BROKER=rq` on the API only when `docuflow-worker` is running.
 
 Default local demo admin (development only): create an account in the UI, or see `docs/SETUP.md`.
 

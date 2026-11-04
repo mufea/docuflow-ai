@@ -36,6 +36,7 @@ def test_rq_broker_uses_redis_when_workers_exist(monkeypatch) -> None:
     queued: list[str] = []
     runner = RecordingRunner()
     broker = RQBroker.__new__(RQBroker)
+    broker.job_timeout = 300
     broker.queue = SimpleNamespace(enqueue=lambda *args, **kwargs: queued.append(str(kwargs.get("job_id") or args[-1])))
     broker.inline = InlineBroker(runner, workers=1)  # type: ignore[arg-type]
     monkeypatch.setattr(broker, "active_worker_count", lambda: 2)

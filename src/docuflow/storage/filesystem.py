@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import os
 import shutil
 from pathlib import Path
 
-from docuflow.exceptions import NotFoundError
+from docuflow.exceptions import NotFoundError, TransientError
 from docuflow.storage.base import StoredObject
 
 
@@ -44,3 +45,8 @@ class FilesystemStorage:
 
     def signed_url(self, key: str, *, expires_seconds: int, filename: str | None = None) -> str | None:
         return None
+
+    def ping(self) -> None:
+        self.root.mkdir(parents=True, exist_ok=True)
+        if not os.access(self.root, os.W_OK):
+            raise TransientError("Local storage is not writable.")

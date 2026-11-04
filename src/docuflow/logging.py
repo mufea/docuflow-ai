@@ -18,6 +18,12 @@ SENSITIVE_KEYS = {
     "credit_card",
     "user_password",
     "owner_password",
+    "access_key",
+    "secret_access",
+    "signed",
+    "x-amz",
+    "database_url",
+    "redis_url",
 }
 
 

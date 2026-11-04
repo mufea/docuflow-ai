@@ -13,9 +13,10 @@ The Blueprint is `infra/render.yaml` (not the repo root). Web, API, Postgres,
 and Redis/Key Value are set to Render **Free**. Background workers have no Free
 compute plan, so `docuflow-worker` stays on `0.5c-512mb` (cheapest paid).
 
-A Render deploy is still supported on this setup. Four of five resources are
-Free. The worker is the only paid piece and is the reason Render may ask for a
-payment method.
+A Render deploy is still supported on this setup. Four of five resources can
+be Free. The worker is the only paid piece and is the reason Render may ask
+for a payment method. Skip the worker and keep `JOB_BROKER=inline` for the
+minimal-cost mode.
 
 Free limits that matter here: web services spin down after 15 minutes idle and
 wake in about a minute; Free Postgres is 1 GB, one per workspace, and expires
@@ -136,16 +137,6 @@ Render keeps the current plan when a Blueprint omits `plan`. This file now
 sets `plan` explicitly. A Blueprint apply still will not recreate a datastore
 just to change its plan; use the dashboard if Postgres or Redis stay paid.
 
-## Status
-
-| Checkpoint | Status |
-| --- | --- |
-| Local development | Supported |
-| Automated tests | See `docs/IMPLEMENTATION_STATUS.md` |
-| Render configuration | Blueprint present; validate in the Render dashboard |
-| Successful Render deployment | **Not performed** |
-| Live provider verification | **Not performed** — requires authorization |
-
 Do not treat the Blueprint as a completed production deploy.
 
 ## Build and start
@@ -153,36 +144,76 @@ Do not treat the Blueprint as a completed production deploy.
 - Web: `corepack pnpm install --frozen-lockfile && corepack pnpm --filter web build`
   then `corepack pnpm --filter web start -p $PORT`. Do not run `corepack enable`
   on Render — it tries to write `/usr/bin/pnpm` and fails with EROFS.
-- API: `pip install .` then `uvicorn docuflow.main:app --host 0.0.0.0 --port $PORT`
-- Worker: `python -m docuflow.worker`
-- Migrations: Render Free rejects `preDeployCommand`, so the API
-  `startCommand` runs `alembic upgrade head` and then uvicorn. That is
-  idempotent and safe on a single Free instance (including after spin-up).
-  If you later scale the API on a paid plan, move migrations back to
-  pre-deploy or a one-off job so replicas do not race.
+- API: `pip install -r requirements.txt` then
+  `python -m docuflow.migrate && uvicorn docuflow.main:app --host 0.0.0.0 --port $PORT`
+- Worker: `python -m docuflow.worker` (requires `JOB_BROKER=rq`)
+- Migrations: Render Free rejects `preDeployCommand`, so the API start command
+  runs `python -m docuflow.migrate` (Alembic upgrade under a Postgres advisory
+  lock) and then uvicorn. Alembic itself is idempotent. The lock is for a
+  later multi-replica API. Do not run migrate on the worker.
 
 ## Required production environment
 
 See `.env.example`. At minimum:
 
 - `DOCUFLOW_ENV=production`
-- `DOCUFLOW_SECRET_KEY` (long random)
+- `DOCUFLOW_SECRET_KEY` (unique, at least 32 characters)
 - `DATABASE_URL` (Render Postgres). Leave the injected `postgres://` value as-is.
   The API and Alembic rewrite it to `postgresql+psycopg://` so SQLAlchemy uses
   psycopg3. Do not install `psycopg2`.
-- `REDIS_URL`
-- `JOB_BROKER=rq`
-- `STORAGE_BACKEND=s3` plus bucket credentials
-- `COOKIE_SECURE=true`
+- `STORAGE_BACKEND=s3` plus bucket credentials (Render disk is ephemeral)
+- `COOKIE_SECURE=true` (forced on when `DOCUFLOW_ENV=production`)
 - `DOCUFLOW_PUBLIC_WEB_URL` / `DOCUFLOW_PUBLIC_API_URL`
 - `DOCUFLOW_CORS_ORIGINS` and `DOCUFLOW_TRUSTED_HOSTS`
+- `API_INTERNAL_URL` on the **web** service = API public `https://…onrender.com` URL
+
+Job broker (choose one mode; do not mix):
+
+| Mode | API `JOB_BROKER` | Worker | Redis |
+| --- | --- | --- | --- |
+| Minimal cost | `inline` (Blueprint default) | Do not create / leave stopped | Optional. Blueprint still provisions Free Key Value |
+| Worker deployment | `rq` | Paid `docuflow-worker` running | Required. Same `REDIS_URL` and `RQ_QUEUE_NAME=docuflow` |
 
 Optional: SMTP, Stripe, Midtrans, `AI_API_KEY`.
 
+## Two Render modes
+
+### A. Minimal cost
+
+- `docuflow-web` Free, `docuflow-api` Free, `docuflow-db` Free, optional Free Redis
+- Skip `docuflow-worker`
+- `JOB_BROKER=inline` on the API
+- Jobs run in the API process. Slower, and a Free instance can time out or die on spin-down
+- No verified dollar amount is claimed here; this is the stack that avoids a paid worker
+
+### B. Worker deployment
+
+- Same web, API, Postgres, and Redis
+- Paid `docuflow-worker` (`0.5c-512mb` in the Blueprint because Render has no Free worker)
+- `JOB_BROKER=rq` on **both** API and worker
+- Same S3 bucket and `DOCUFLOW_SECRET_KEY` on API and worker
+- Better isolation for heavy PDFs; Redis restart still does not lose durable job rows
+
+Do not set the API to `rq` unless the worker is actually running. The API will
+fall back to inline when no RQ worker heartbeat is visible, but a live service
+that still has `JOB_BROKER=rq` from an older Blueprint should be changed to
+`inline` in the dashboard if you skipped the worker.
+
+## Status
+
+| Checkpoint | Status |
+| --- | --- |
+| Local development | Supported |
+| Automated tests | See `docs/IMPLEMENTATION_STATUS.md` |
+| Render configuration | Blueprint present; validate in the Render dashboard |
+| Successful Render deployment | **NOT DEPLOYED** — not verified from this environment |
+| Live provider verification | **Not performed** — requires authorization |
+
 ## Health
 
-- `/health` liveness
-- `/ready` checks database (and Redis when `JOB_BROKER=rq`) without echoing secrets
+- `/health` liveness (no dependency checks)
+- `/ready` checks database, Redis when `JOB_BROKER=rq`, and object storage
+  (`head_bucket` or a writable local directory). It does not echo secrets.
 
 ## Object storage
 

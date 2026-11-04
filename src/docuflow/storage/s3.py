@@ -71,3 +71,9 @@ class S3Storage:
             )
         except ClientError:
             return None
+
+    def ping(self) -> None:
+        try:
+            self.client.head_bucket(Bucket=self.bucket)
+        except ClientError as exc:
+            raise TransientError("Object storage is unavailable.") from exc
