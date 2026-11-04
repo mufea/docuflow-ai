@@ -48,6 +48,24 @@ def write_image_pdf(path: Path, color: tuple[int, int, int] = (30, 90, 160), siz
     return path
 
 
+def write_scanned_text_pdf(path: Path, text: str = "INVOICE 48291") -> Path:
+    from PIL import ImageDraw, ImageFont
+
+    image = Image.new("RGB", (1600, 480), (255, 255, 255))
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 96)
+    draw.text((80, 160), text, fill=(0, 0, 0), font=font)
+    buf_path = path.with_suffix(".png")
+    image.save(buf_path)
+    doc = fitz.open()
+    page = doc.new_page(width=595, height=180)
+    page.insert_image(page.rect, filename=buf_path.as_posix())
+    doc.save(path.as_posix())
+    doc.close()
+    buf_path.unlink(missing_ok=True)
+    return path
+
+
 @pytest.fixture
 def sample_pdf(tmp_path: Path) -> Path:
     return write_text_pdf(tmp_path / "sample.pdf", [f"Page {n} unique marker ALPHA-{n}" for n in range(1, 5)])

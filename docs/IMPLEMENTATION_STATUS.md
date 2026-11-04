@@ -9,7 +9,7 @@ Phases are marked complete only when commands below were executed and passed.
 - Python 3.12.3, Node v22.23.4, pnpm 10.33.4, uv 0.13.6
 - Docker: not available
 - PostgreSQL 16 and Redis 7 installed for local use; default app path is SQLite + inline jobs
-- Tesseract OCR installed; LibreOffice not installed
+- Tesseract OCR is optional; RapidOCR ONNX is bundled. LibreOffice not installed
 - PixelForge was not present and was not modified
 
 ## Phase 0 — Discovery and scaffold — verified
@@ -163,9 +163,21 @@ curl http://127.0.0.1:43123/
 # HTTP 200 (landing, tools, pricing, register, login, merge workspace)
 ```
 
+## OCR without Tesseract — verified on `feat/phase-8-render-readiness`
+
+Render native Python does not ship `tesseract`. OCR stays enabled with
+`OCR_ENABLED=true` and uses RapidOCR ONNX (`rapidocr` + `onnxruntime`) when
+Tesseract is missing. Tesseract is still preferred when it is on PATH.
+
+```
+uv run pytest -q
+# 101 passed
+```
+
 ## Honest limitations
 
 - Word→PDF uses a built-in python-docx + PyMuPDF converter when LibreOffice is missing. Complex Word layout is approximate.
+- OCR uses RapidOCR ONNX when Tesseract is missing. Accuracy depends on scan quality; handwriting may be incomplete.
 - Live Stripe/Midtrans/OpenAI calls are not made. Webhooks and the mock AI provider are tested with fixtures.
 - Render deployment has not been performed or verified.
 - Automated tests use SQLite; production is PostgreSQL. Credit `FOR UPDATE` locking is fully meaningful on Postgres.
@@ -174,6 +186,6 @@ curl http://127.0.0.1:43123/
 ## Next recommended work
 
 1. Authorize a Render deploy and an S3-compatible bucket.
-2. Optionally install LibreOffice in the API/worker image for closer Word pagination.
+2. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
 3. Provide sandbox Stripe/Midtrans keys if billing should be exercised end-to-end.
 4. Provide an AI key only if live analysis should replace the mock provider.

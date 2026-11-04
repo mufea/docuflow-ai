@@ -28,6 +28,12 @@ background worker, so the worker remains on `0.5c-512mb`. Free web spin-down,
 30-day Postgres expiry, and in-memory Redis are accepted for this hobby slice;
 they are not production SLAs.
 
+## Built-in OCR on hosts without Tesseract
+
+Render native Python images do not ship the `tesseract` binary. OCR stays
+on with `OCR_ENABLED=true` and uses RapidOCR ONNX (`rapidocr` + `onnxruntime`)
+when Tesseract is missing. Tesseract is still preferred when it is on PATH.
+
 ## Hatchling / uv for Python, pnpm for the web
 
 Lockfiles: `uv.lock` and `pnpm-lock.yaml`.

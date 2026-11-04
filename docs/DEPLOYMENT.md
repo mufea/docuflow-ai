@@ -174,6 +174,10 @@ Job broker (choose one mode; do not mix):
 | Minimal cost | `inline` (Blueprint default) | Do not create / leave stopped | Optional. Blueprint still provisions Free Key Value |
 | Worker deployment | `rq` | Paid `docuflow-worker` running | Required. Same `REDIS_URL` and `RQ_QUEUE_NAME=docuflow` |
 
+Keep `OCR_ENABLED=true`. Native Render Python images do not include Tesseract;
+OCR uses the bundled RapidOCR ONNX engine in that case. Tesseract is used when
+it is present on PATH.
+
 Optional: SMTP, Stripe, Midtrans, `AI_API_KEY`.
 
 ## Two Render modes

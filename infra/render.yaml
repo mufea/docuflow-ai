@@ -98,6 +98,8 @@ services:
         value: mock
       - key: EMAIL_BACKEND
         value: console
+      - key: OCR_ENABLED
+        value: "true"
 
   - type: worker
     name: docuflow-worker
@@ -159,6 +161,8 @@ services:
         value: auto
       - key: AI_PROVIDER
         value: mock
+      - key: OCR_ENABLED
+        value: "true"
       - key: WORKER_CONCURRENCY
         value: "2"
       - key: WORKER_TIMEOUT_SECONDS

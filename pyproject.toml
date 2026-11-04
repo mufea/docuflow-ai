@@ -34,6 +34,9 @@ dependencies = [
     "stripe>=11.0.0,<15",
     "cryptography>=44.0.0,<47",
     "pytesseract>=0.3.13,<0.4",
+    "rapidocr>=3.10.0,<4",
+    "onnxruntime>=1.19.0,<2",
+    "opencv-python-headless>=4.5.1.48,<6",
 ]
 
 [project.optional-dependencies]

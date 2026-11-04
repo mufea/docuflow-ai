@@ -22,7 +22,7 @@ Browser → Next.js (apps/web)
 
 - `pdf/` — deterministic PDF engine
 - `conversion/` — DOCX/XLSX adapters
-- `ocr/` — Tesseract OCR
+- `ocr/` — OCR (Tesseract when installed, otherwise RapidOCR ONNX)
 - `ai/` — provider interface, chunking, retrieval, citations
 - `jobs/` — runner, brokers, retention
 - `billing/` — integer ledger and plans
