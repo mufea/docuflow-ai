@@ -76,6 +76,9 @@ def get_job(
 ) -> JobOut:
     ctx = get_context(request)
     job = JobService(db, DocumentService(db, ctx.storage, ctx.settings), ctx.settings).get_owned(user, job_id)
+    if job.status == "queued":
+        ctx.broker.enqueue(job.id)
+        db.refresh(job)
     return _to_out(job)
 
 

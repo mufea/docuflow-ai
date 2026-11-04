@@ -94,11 +94,20 @@ the API accepts that origin plus `*.onrender.com` in production. Still set
 the browser (custom domain or `https://<web>.onrender.com`), then redeploy the
 API and web.
 
+### Jobs stay `queued` (Word to PDF never starts)
+
+The Blueprint used to set `JOB_BROKER=rq` on the API. Redis then holds the job
+until `docuflow-worker` picks it up. Render workers are paid, so a Free stack
+often has **no worker** and the job never leaves `queued`.
+
+The API now runs the job itself when no RQ worker is listening. On the live
+`docuflow-api` service, set `JOB_BROKER=inline` (the Blueprint default) and
+redeploy the API. You do not need the paid worker for Word to PDF.
+
 ### Fully Free (no worker bill)
 
-If you do not want to add a card: in the Blueprint review, skip creating
-`docuflow-worker`, and on `docuflow-api` set `JOB_BROKER=inline`. PDF jobs
-then run inside the API process. That is slower and can time out on large
+Skip creating `docuflow-worker`. Keep `JOB_BROKER=inline` on `docuflow-api`.
+PDF jobs run inside the API process. That is slower and can time out on large
 files, but the stack stays $0.
 
 ### Already created the services?

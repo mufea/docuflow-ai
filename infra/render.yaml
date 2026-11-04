@@ -45,7 +45,9 @@ services:
           type: redis
           property: connectionString
       - key: JOB_BROKER
-        value: rq
+        # Free workspaces usually have no paid worker. Run jobs in the API.
+        # Set rq only when docuflow-worker is running.
+        value: inline
       - key: STORAGE_BACKEND
         value: s3
       - key: LOG_JSON

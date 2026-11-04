@@ -51,7 +51,9 @@ class JobRunner:
             if job is None:
                 logger.warning("job_missing id=%s", job_id)
                 return
-            if job.status in {"completed", "cancelled"}:
+            if job.status in {"completed", "cancelled", "failed"}:
+                return
+            if job.status == "processing":
                 return
             job.status = "processing"
             job.started_at = datetime.now(UTC)

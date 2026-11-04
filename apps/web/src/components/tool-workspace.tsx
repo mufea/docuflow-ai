@@ -103,7 +103,7 @@ export function ToolWorkspace({ tool, available = true, unavailableReason, credi
   }
 
   async function poll(id: string) {
-    for (let attempt = 0; attempt < 80; attempt += 1) {
+    for (let attempt = 0; attempt < 180; attempt += 1) {
       const current = await Jobs.get(id);
       setJob(current);
       if (["completed", "failed", "cancelled"].includes(current.status)) {
@@ -111,8 +111,9 @@ export function ToolWorkspace({ tool, available = true, unavailableReason, credi
         if (current.status === "failed") toast.error(current.error_message || "Job failed");
         return;
       }
-      await new Promise((resolve) => setTimeout(resolve, 400));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
+    toast.error("The job is still queued. Redeploy the API or start the worker, then open job history to retry.");
   }
 
   return (
@@ -207,6 +208,12 @@ export function ToolWorkspace({ tool, available = true, unavailableReason, credi
         {job && (
           <div className="space-y-3 text-sm">
             <p className="capitalize">{job.status}</p>
+            {job.status === "queued" && (
+              <p className="text-muted-foreground">
+                Waiting for a processor. On Free Render the API runs jobs itself after this update. Refresh this page if
+                it stays queued.
+              </p>
+            )}
             <Progress value={job.progress} />
             {job.error_message && <p className="text-destructive">{job.error_message}</p>}
             {job.result_document_ids.map((id) => (
