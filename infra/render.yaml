@@ -28,7 +28,8 @@ services:
     plan: free
     buildCommand: pip install -r requirements.txt
     # Free web services reject preDeployCommand. Run migrations on boot instead.
-    startCommand: alembic upgrade head && uvicorn docuflow.main:app --host 0.0.0.0 --port $PORT
+    # python -m docuflow.migrate takes a Postgres advisory lock so replicas do not race.
+    startCommand: python -m docuflow.migrate && uvicorn docuflow.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
       - key: DOCUFLOW_ENV
@@ -45,11 +46,25 @@ services:
           type: redis
           property: connectionString
       - key: JOB_BROKER
-        # Free workspaces usually have no paid worker. Run jobs in the API.
-        # Set rq only when docuflow-worker is running.
+        # Minimal-cost mode: API runs jobs. Set rq only when docuflow-worker is running.
         value: inline
+      - key: RQ_QUEUE_NAME
+        value: docuflow
+      - key: WORKER_TIMEOUT_SECONDS
+        value: "300"
+      - key: WORKER_CONCURRENCY
+        value: "2"
       - key: STORAGE_BACKEND
         value: s3
+      - key: S3_FORCE_PATH_STYLE
+        value: "true"
+      - key: COOKIE_SAMESITE
+        value: lax
+      - key: DOCUFLOW_PUBLIC_API_URL
+        fromService:
+          name: docuflow-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
       - key: LOG_JSON
         value: "true"
       - key: COOKIE_SECURE
@@ -83,6 +98,8 @@ services:
         value: mock
       - key: EMAIL_BACKEND
         value: console
+      - key: OCR_ENABLED
+        value: "true"
 
   - type: worker
     name: docuflow-worker
@@ -107,8 +124,12 @@ services:
           property: connectionString
       - key: JOB_BROKER
         value: rq
+      - key: RQ_QUEUE_NAME
+        value: docuflow
       - key: STORAGE_BACKEND
         value: s3
+      - key: S3_FORCE_PATH_STYLE
+        value: "true"
       - key: LOG_JSON
         value: "true"
       - key: DOCUFLOW_SECRET_KEY
@@ -140,6 +161,8 @@ services:
         value: auto
       - key: AI_PROVIDER
         value: mock
+      - key: OCR_ENABLED
+        value: "true"
       - key: WORKER_CONCURRENCY
         value: "2"
       - key: WORKER_TIMEOUT_SECONDS

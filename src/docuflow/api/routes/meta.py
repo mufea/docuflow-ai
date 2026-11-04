@@ -118,7 +118,7 @@ TOOLS = [
     {
         "slug": "ocr",
         "name": "OCR scanned PDF",
-        "description": "Recognize text on scanned pages with Tesseract.",
+        "description": "Recognize text on scanned pages. Tesseract is used when installed.",
         "inputs": "pdf",
         "available": True,
     },

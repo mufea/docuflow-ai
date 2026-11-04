@@ -21,7 +21,7 @@ The Python package is shared by the API process and the background worker so job
 - Integer credit ledger with reservations, settlement, and refunds
 - Stripe and Midtrans webhook adapters with signature verification (sandbox; live billing is not activated)
 - Mock AI summaries, Q&A, and structured extraction with page citations
-- OCR when Tesseract is installed; Word→PDF with a built-in converter (LibreOffice used when present)
+- OCR with a built-in RapidOCR engine (Tesseract is used when installed); Word→PDF with a built-in converter (LibreOffice used when present)
 
 ## Quick start
 
@@ -39,7 +39,7 @@ pnpm install
 pnpm --filter web dev -- --port 43123
 ```
 
-The API uses SQLite + filesystem storage + an inline job broker when those values are set in `.env`. That is the supported local path. Production on Render must use PostgreSQL, Redis, S3-compatible storage, and `JOB_BROKER=rq`.
+The API uses SQLite + filesystem storage + an inline job broker when those values are set in `.env`. That is the supported local path. Production on Render must use PostgreSQL and S3-compatible storage. Use `JOB_BROKER=inline` for the minimal-cost stack (no paid worker). Use `JOB_BROKER=rq` on the API only when `docuflow-worker` is running.
 
 Default local demo admin (development only): create an account in the UI, or see `docs/SETUP.md`.
 

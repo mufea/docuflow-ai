@@ -11,6 +11,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from docuflow.dsn import normalize_database_url
 from docuflow.security.hosts import origin_variants
 
+DEV_SECRET_VALUES = {"dev-only-change-me-use-32-plus-chars!!"}
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -118,7 +120,30 @@ class Settings(BaseSettings):
             self.public_api_url.startswith("http://127.0.0.1") or self.public_api_url.startswith("http://localhost")
         ):
             self.public_api_url = render_url
+        if self.env == "production":
+            self.cookie_secure = True
+            if os.environ.get("LOG_JSON") is None:
+                self.log_json = True
         return self
+
+    def production_readiness_errors(self) -> list[str]:
+        if not self.is_production:
+            return []
+        errors: list[str] = []
+        secret = self.secret_key.get_secret_value()
+        if len(secret) < 32 or secret in DEV_SECRET_VALUES:
+            errors.append("DOCUFLOW_SECRET_KEY must be a unique value of at least 32 characters.")
+        if self.database_url.startswith("sqlite"):
+            errors.append("DATABASE_URL must be PostgreSQL in production. Render disks are ephemeral.")
+        if self.storage_backend != "s3":
+            errors.append("STORAGE_BACKEND must be s3 in production. Render disks are ephemeral.")
+        elif not self.reveal_secret(self.s3_access_key_id) or not self.reveal_secret(self.s3_secret_access_key):
+            errors.append("S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY are required when STORAGE_BACKEND=s3.")
+        elif not self.s3_bucket.strip():
+            errors.append("S3_BUCKET is required when STORAGE_BACKEND=s3.")
+        if self.job_broker == "rq" and not self.redis_url.strip():
+            errors.append("REDIS_URL is required when JOB_BROKER=rq.")
+        return errors
 
     @property
     def cors_origin_list(self) -> list[str]:

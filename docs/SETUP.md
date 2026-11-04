@@ -6,7 +6,7 @@
 - Node.js 22 / pnpm 10
 - uv 0.13
 - PostgreSQL 16 and Redis 7 (optional; installed for realism)
-- Tesseract OCR (optional)
+- Tesseract OCR is optional. OCR uses a bundled RapidOCR ONNX engine when `tesseract` is missing. Keep `OCR_ENABLED=true`.
 - LibreOffice is optional. Word→PDF uses a built-in converter when `soffice` is missing. Install LibreOffice for closer Word pagination.
 
 ## 1. Environment

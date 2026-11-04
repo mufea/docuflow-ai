@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 from docuflow.conversion.engines import write_simple_docx
 from tests.conftest import register_and_login
-from tests.pdf.conftest import write_text_pdf
+from tests.pdf.conftest import write_scanned_text_pdf, write_text_pdf
 
 
 def _upload(client: TestClient, path: Path, csrf: str) -> str:
@@ -134,3 +134,25 @@ def test_docx_to_pdf_job_without_libreoffice(client: TestClient, tmp_path: Path)
     meta = client.get("/v1/meta/tools")
     assert meta.status_code == 200
     assert meta.json()["docx_to_pdf"]["available"] is True
+    assert meta.json()["ocr"]["available"] is True
+    assert meta.json()["ocr"]["enabled"] is True
+
+
+def test_ocr_job_without_tesseract(client: TestClient, tmp_path: Path) -> None:
+    session = register_and_login(client)
+    csrf = session["csrf"]
+    source = write_scanned_text_pdf(tmp_path / "invoice.pdf", "INVOICE 48291")
+    doc_id = _upload(client, source, csrf)
+    created = client.post(
+        "/v1/jobs",
+        json={"operation": "ocr", "document_ids": [doc_id], "params": {"pages": [1]}},
+        headers={"X-CSRF-Token": csrf, "Origin": "http://testserver"},
+    )
+    assert created.status_code == 200, created.text
+    job = _wait_job(client, created.json()["id"], timeout=60.0)
+    assert job["status"] == "completed", job
+    payload = job["result_payload"]
+    assert payload["engine"] in {"rapidocr", "tesseract"}
+    blob = " ".join(item["text"] for item in payload["pages"]).upper()
+    assert "INVOICE" in blob
+    assert "48291" in blob.replace(" ", "")

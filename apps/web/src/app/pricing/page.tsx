@@ -22,7 +22,7 @@ export default function PricingPage() {
             <div className="space-y-3 px-6 pb-6 text-sm">
               <p>10 MB · 25 pages</p>
               <p className="text-muted-foreground">
-                Core PDF tools, conversion, OCR when installed, and the mock AI assistant. No card required.
+                Core PDF tools, conversion, OCR, and the mock AI assistant. No card required.
               </p>
               <Link className={buttonVariants()} href="/register">
                 Create a free account

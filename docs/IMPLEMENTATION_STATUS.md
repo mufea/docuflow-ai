@@ -9,7 +9,7 @@ Phases are marked complete only when commands below were executed and passed.
 - Python 3.12.3, Node v22.23.4, pnpm 10.33.4, uv 0.13.6
 - Docker: not available
 - PostgreSQL 16 and Redis 7 installed for local use; default app path is SQLite + inline jobs
-- Tesseract OCR installed; LibreOffice not installed
+- Tesseract OCR is optional; RapidOCR ONNX is bundled. LibreOffice not installed
 - PixelForge was not present and was not modified
 
 ## Phase 0 — Discovery and scaffold — verified
@@ -80,11 +80,54 @@ pnpm --filter web test
 # 15 passed
 ```
 
-## Phase 8 — Render readiness — configuration present, not deployed
+## Phase 8 — Render production readiness — in progress on `feat/phase-8-render-readiness`
 
-`infra/render.yaml` exists with Free compute for web, API, Postgres, and Redis.
-The worker stays on `0.5c-512mb` because Render has no Free worker plan. No
-Render deployment has been performed from this environment.
+Base: `feat/phase-1-pdf-engine-hardening` @ `81cdb41` (includes verified job
+inline fallback). `origin/main` remains `da4ee00`. `main` was not modified.
+
+Hardening in this phase:
+
+- `/ready` actually pings storage (S3 `head_bucket` or writable filesystem).
+- Production readiness checks for secret, Postgres, S3 credentials, and RQ Redis.
+- Job runner claims `queued` rows atomically so duplicate enqueue cannot double-charge.
+- RQ enqueue uses `WORKER_TIMEOUT_SECONDS` and ignores stale worker heartbeats.
+- API boot migrations use `python -m docuflow.migrate` with a Postgres advisory lock.
+- Blueprint documents two modes: API `JOB_BROKER=inline` (minimal cost) vs worker `rq`.
+- Docs no longer claim `JOB_BROKER=rq` is mandatory in production.
+
+Deployment status: **NOT DEPLOYED**. Not verified from this environment.
+
+Verification on this branch:
+
+```
+uv run pytest -q
+# 93 passed
+
+uv run ruff check src tests
+# All checks passed
+
+uv run ruff format --check src tests
+# Would reformat tests/test_database_url.py (pre-existing on main; not changed)
+
+uv run mypy src/docuflow
+# Fails in services/seed.py DEFAULT_PLANS dict types (pre-existing)
+# New Phase 8 modules typecheck clean
+
+pnpm --filter web test
+# 15 passed
+
+pnpm --filter web lint
+# passed
+
+pnpm --filter web typecheck
+# passed
+
+pnpm --filter web build
+# passed
+
+git diff --check
+# clean
+```
 
 ## Commands executed
 
@@ -120,9 +163,21 @@ curl http://127.0.0.1:43123/
 # HTTP 200 (landing, tools, pricing, register, login, merge workspace)
 ```
 
+## OCR without Tesseract — verified on `feat/phase-8-render-readiness`
+
+Render native Python does not ship `tesseract`. OCR stays enabled with
+`OCR_ENABLED=true` and uses RapidOCR ONNX (`rapidocr` + `onnxruntime`) when
+Tesseract is missing. Tesseract is still preferred when it is on PATH.
+
+```
+uv run pytest -q
+# 101 passed
+```
+
 ## Honest limitations
 
 - Word→PDF uses a built-in python-docx + PyMuPDF converter when LibreOffice is missing. Complex Word layout is approximate.
+- OCR uses RapidOCR ONNX when Tesseract is missing. Accuracy depends on scan quality; handwriting may be incomplete.
 - Live Stripe/Midtrans/OpenAI calls are not made. Webhooks and the mock AI provider are tested with fixtures.
 - Render deployment has not been performed or verified.
 - Automated tests use SQLite; production is PostgreSQL. Credit `FOR UPDATE` locking is fully meaningful on Postgres.
@@ -131,6 +186,6 @@ curl http://127.0.0.1:43123/
 ## Next recommended work
 
 1. Authorize a Render deploy and an S3-compatible bucket.
-2. Optionally install LibreOffice in the API/worker image for closer Word pagination.
+2. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
 3. Provide sandbox Stripe/Midtrans keys if billing should be exercised end-to-end.
 4. Provide an AI key only if live analysis should replace the mock provider.
