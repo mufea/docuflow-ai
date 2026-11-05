@@ -147,10 +147,14 @@ Do not treat the Blueprint as a completed production deploy.
 - API: `pip install -r requirements.txt` then
   `python -m docuflow.migrate && uvicorn docuflow.main:app --host 0.0.0.0 --port $PORT`
 - Worker: `python -m docuflow.worker` (requires `JOB_BROKER=rq`)
+- Cleanup cron: `python -m docuflow.migrate && python -m docuflow.cleanup` every 15 minutes.
+  Render bills the cron only while it runs. Skip creating it only if you accept
+  cleanup only while the API or worker process is awake.
 - Migrations: Render Free rejects `preDeployCommand`, so the API start command
   runs `python -m docuflow.migrate` (Alembic upgrade under a Postgres advisory
   lock) and then uvicorn. Alembic itself is idempotent. The lock is for a
-  later multi-replica API. Do not run migrate on the worker.
+  later multi-replica API. Do not run migrate on the worker. The cleanup cron
+  also runs migrate so a new `storage_deletions` revision exists before the first sweep.
 
 ## Required production environment
 

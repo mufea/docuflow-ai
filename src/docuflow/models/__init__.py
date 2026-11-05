@@ -1,5 +1,6 @@
 from docuflow.models.entities import (
     AuditLog,
+    CleanupLease,
     CreditAccount,
     CreditLedger,
     Document,
@@ -9,12 +10,14 @@ from docuflow.models.entities import (
     PaymentEvent,
     Plan,
     SessionToken,
+    StorageDeletion,
     Subscription,
     User,
 )
 
 __all__ = [
     "AuditLog",
+    "CleanupLease",
     "CreditAccount",
     "CreditLedger",
     "Document",
@@ -24,6 +27,7 @@ __all__ = [
     "PaymentEvent",
     "Plan",
     "SessionToken",
+    "StorageDeletion",
     "Subscription",
     "User",
 ]

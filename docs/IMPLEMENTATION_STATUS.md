@@ -185,9 +185,10 @@ uv run pytest -q
 - Automated tests use SQLite; production is PostgreSQL. Credit `FOR UPDATE` locking is fully meaningful on Postgres.
 - Next.js “Publish to Vercel” is not the production path: the product needs API + worker + Redis + Postgres + object storage on Render.
 
-## Phase 9 — Production safety and data integrity — on `cursor/phase-9-production-safety-3b1a`
+## Phase 9 — Production safety and data integrity — merged
 
-Base: GitHub `main` @ `11dbfd0`. `main` was not modified by this work.
+Merged to `main` as `61294af2f0f2c1445b64e480d58f728d0584af55`
+(`Merge pull request #2 from mufea/cursor/phase-9-production-safety-3b1a`).
 
 Fixes:
 
@@ -231,12 +232,55 @@ git diff --check
 # clean
 ```
 
-Live deployment verification: **not performed**. Render env, DNS, and production data were not accessed.
+Local verification for Phase 9 was recorded on `cursor/phase-9-production-safety-3b1a` (110 passed).
+Live deployment verification: **not performed**.
+
+## Phase 9.1 — Runtime reliability hardening — on `cursor/phase-9-1-runtime-reliability-3b1a`
+
+Base: GitHub `main` @ `61294af`. `main` was not modified by this work.
+
+- Abandoned-job and expired-file cleanup run on a 15-minute Render Cron (`python -m docuflow.cleanup`) and on an in-process interval thread in the API/worker. Cleanup is not attached to HTTP requests.
+- Overlapping cleanup is serialized (Postgres advisory lock / `cleanup_leases`). Job fail uses an atomic `processing` claim; refunds stay ledger-idempotent.
+- Stale threshold is `JOB_STALE_MINUTES` (default 90), never below worker timeout plus grace. Active jobs with a recent `heartbeat_at` are left alone.
+- Storage deletes go through `storage_deletions` with bounded exponential backoff. A failed object delete never undeletes the document row.
+- Structured logs count abandoned jobs, refunded credits, expired documents, storage failures/retries, and duration. No secrets, keys, URLs, or file contents.
+
+Local verification (this branch):
+
+```
+uv run pytest -q
+# 119 passed
+
+uv run ruff check src tests
+# All checks passed
+
+uv run mypy src/docuflow
+# Success: no issues found in 67 source files
+
+pnpm --filter web lint
+# passed
+
+pnpm --filter web typecheck
+# passed
+
+pnpm --filter web test
+# 15 passed
+
+pnpm --filter web build
+# passed
+
+git diff --check
+# clean
+```
+
+GitHub Actions: **not observed from this environment**. The workflow in `.github/workflows/ci.yml` matches the local commands above. Do not treat CI as green until a run exists on GitHub.
+
+Live deployment verification: **not performed**.
 
 ## Next recommended work
 
-1. Review and merge Phase 9. Do not merge from this agent unless authorized.
-2. Push the branch to GitHub `mufea/docuflow-ai` if CI should run there, then authorize a Render deploy separately.
+1. Review Phase 9.1. Do not merge or deploy from this agent unless authorized.
+2. Push the branch to GitHub `mufea/docuflow-ai` so Actions can run, then authorize a Render deploy separately (includes the new cron and Alembic `0002`).
 3. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
 4. Provide sandbox Stripe/Midtrans keys only if billing should be exercised end-to-end. Live charges stay off.
 5. Provide an AI key only if live analysis should replace the mock provider.

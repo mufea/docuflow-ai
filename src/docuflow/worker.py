@@ -8,6 +8,7 @@ from docuflow.ai.providers import build_ai_provider
 from docuflow.config import get_settings
 from docuflow.db import create_engine_from_settings, session_factory
 from docuflow.jobs.runner import JobRunner
+from docuflow.jobs.scheduler import CleanupScheduler
 from docuflow.logging import configure_logging
 from docuflow.storage.factory import build_storage
 
@@ -38,15 +39,24 @@ def run() -> None:
 
     connection = Redis.from_url(settings.redis_url)
     worker = Worker([settings.rq_queue_name], connection=connection)
+    engine = create_engine_from_settings(settings)
+    factory = session_factory(engine)
+    scheduler = CleanupScheduler(factory, build_storage(settings), settings)
+    scheduler.start()
 
     def _shutdown(_signum: int, _frame: object) -> None:
         logger.info("worker_shutdown")
+        scheduler.stop()
         if hasattr(worker, "request_stop"):
             worker.request_stop()  # type: ignore[call-arg]
 
     signal.signal(signal.SIGTERM, _shutdown)
     logger.info("worker_start queue=%s", settings.rq_queue_name)
-    worker.work(with_scheduler=False)
+    try:
+        worker.work(with_scheduler=False)
+    finally:
+        scheduler.stop()
+        engine.dispose()
 
 
 if __name__ == "__main__":

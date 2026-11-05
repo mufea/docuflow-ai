@@ -130,6 +130,7 @@ class Job(Base):
     attempt: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    heartbeat_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     owner: Mapped[User] = relationship(back_populates="jobs")
@@ -189,6 +190,30 @@ class PaymentEvent(Base):
     payload_hash: Mapped[str] = mapped_column(String(64))
     processed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     result: Mapped[str] = mapped_column(String(32), default="ok")
+
+
+class StorageDeletion(Base):
+    __tablename__ = "storage_deletions"
+    __table_args__ = (UniqueConstraint("storage_key", name="uq_storage_deletion_key"),)
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    document_id: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
+    storage_key: Mapped[str] = mapped_column(String(512))
+    status: Mapped[str] = mapped_column(String(32), default="pending", index=True)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    max_attempts: Mapped[int] = mapped_column(Integer, default=8)
+    next_attempt_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    last_error: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class CleanupLease(Base):
+    __tablename__ = "cleanup_leases"
+
+    name: Mapped[str] = mapped_column(String(32), primary_key=True)
+    locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    token: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
 
 class AuditLog(Base):
