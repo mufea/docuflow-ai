@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -16,6 +18,7 @@ from docuflow.email.backend import build_email_backend
 from docuflow.exceptions import DocuflowError
 from docuflow.jobs.broker import build_broker
 from docuflow.jobs.runner import JobRunner
+from docuflow.jobs.scheduler import CleanupScheduler
 from docuflow.logging import configure_logging
 from docuflow.security.hosts import host_is_allowed
 from docuflow.security.rate_limit import MemoryRateLimiter
@@ -47,6 +50,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     runner = JobRunner(session_factory=factory, storage=storage, settings=settings, ai=ai)
     broker = build_broker(settings, runner)
     email = build_email_backend(settings)
+    scheduler = CleanupScheduler(factory, storage, settings)
+
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+        scheduler.start()
+        yield
+        scheduler.stop()
 
     app = FastAPI(
         title="DocuFlow AI API",
@@ -54,6 +64,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         default_response_class=ORJSONResponse,
         docs_url="/docs" if not settings.is_production else None,
         redoc_url=None,
+        lifespan=lifespan,
     )
     app.state.ctx = AppContext(
         settings=settings,

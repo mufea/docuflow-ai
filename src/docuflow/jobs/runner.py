@@ -54,6 +54,7 @@ class JobRunner:
                 .values(
                     status="processing",
                     started_at=datetime.now(UTC),
+                    heartbeat_at=datetime.now(UTC),
                     attempt=Job.attempt + 1,
                     progress=5,
                 )
@@ -119,9 +120,11 @@ class JobRunner:
                 self.storage.download(doc.storage_key, dest)
                 local_paths.append(dest)
             job.progress = 25
+            job.heartbeat_at = datetime.now(UTC)
             session.commit()
             outputs, extra = self._run_operation(job, local_paths, work, password)
             job.progress = 80
+            job.heartbeat_at = datetime.now(UTC)
             session.commit()
             result_ids: list[str] = []
             stored_names: list[str] = []

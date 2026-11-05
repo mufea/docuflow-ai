@@ -63,6 +63,9 @@ class Settings(BaseSettings):
     max_images_per_job: int = Field(default=40, alias="MAX_IMAGES_PER_JOB")
     file_retention_hours: int = Field(default=24, alias="FILE_RETENTION_HOURS")
     result_retention_hours: int = Field(default=48, alias="RESULT_RETENTION_HOURS")
+    job_stale_minutes: int = Field(default=90, alias="JOB_STALE_MINUTES")
+    cleanup_interval_seconds: int = Field(default=900, alias="CLEANUP_INTERVAL_SECONDS")
+    storage_delete_max_attempts: int = Field(default=8, alias="STORAGE_DELETE_MAX_ATTEMPTS")
     temp_dir: str | None = Field(default=None, alias="TEMP_DIR")
 
     session_cookie_name: str = Field(default="df_session", alias="SESSION_COOKIE_NAME")

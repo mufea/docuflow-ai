@@ -32,6 +32,7 @@ def _persistent_settings(tmp_path: Path) -> Settings:
         stripe_webhook_secret="whsec_test",
         midtrans_server_key="midtrans-test",
         public_web_url="http://testserver",
+        cleanup_interval_seconds=0,
     )
 
 
