@@ -25,7 +25,7 @@ Status vocabulary (never combined):
 | Phase 9.6 docs follow-up | `d29a9649597dd8e41ba2259fe3b659bb5a4a61ee` |
 | Working tree at start | Clean |
 | Feature branch | `cursor/phase-9-7-staging-readiness` |
-| Final implementation commit | Recorded in git on this branch (see `git log -1`) |
+| Final implementation commit | `8e7eb329dea06bf0a7388b9079316306d31c981b` |
 
 No extra commits existed on `main` after the Phase 9.6 merge SHA named in the
 Phase 9.6 report.
@@ -65,7 +65,7 @@ already on `main` and were regression-tested.
 | Ruff | Locally tested | `uv run ruff check src tests scripts` | Local | All checks passed | this branch |
 | Mypy | Locally tested | `uv run mypy src/docuflow` | Local | 72 files, no issues | this branch |
 | Frontend | Not run locally | no frontend source changes | — | CI will run web job after push | — |
-| GitHub Actions on this branch | not yet CI verified | — | — | pending push | — |
+| GitHub Actions on this branch | not yet CI verified | — | pending push | — | — |
 | Provider verified | no | live S3 | — | not run | — |
 | Staging verified | no | Render staging workspace | — | not provisioned | — |
 | Production verified | no | live workspace | — | not deployed | — |
