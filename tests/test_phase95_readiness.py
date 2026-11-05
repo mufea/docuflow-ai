@@ -27,6 +27,7 @@ def test_ready_does_not_leak_dependency_errors(client: TestClient, app) -> None:
 
     app.state.ctx.storage = LeakyStorage()
     response = client.get("/ready")
+    assert response.status_code == 503
     text = response.text
     assert "supersecret" not in text
     assert "postgres://" not in text
@@ -111,10 +112,10 @@ def test_optional_live_s3_provider_roundtrip(tmp_path: Path) -> None:
             "(TEST_S3_BUCKET / TEST_S3_ACCESS_KEY_ID / TEST_S3_SECRET_ACCESS_KEY)"
         )
 
-    prefix = f"docuflow-phase95/{uuid.uuid4().hex}/"
+    prefix = f"docuflow-test/{uuid.uuid4().hex}/"
     key = f"{prefix}probe.bin"
     source = tmp_path / "probe.bin"
-    source.write_bytes(b"docuflow-phase95-probe")
+    source.write_bytes(b"docuflow-test-probe")
     dest = tmp_path / "downloaded.bin"
     settings = Settings(
         env="test",
@@ -131,7 +132,7 @@ def test_optional_live_s3_provider_roundtrip(tmp_path: Path) -> None:
         storage.put(key, source, "application/octet-stream")
         assert storage.exists(key) is True
         storage.download(key, dest)
-        assert dest.read_bytes() == b"docuflow-phase95-probe"
+        assert dest.read_bytes() == b"docuflow-test-probe"
         signed = storage.signed_url(key, expires_seconds=60)
         assert signed is None or signed.startswith("http")
         storage.delete(key)

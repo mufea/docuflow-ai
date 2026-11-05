@@ -12,11 +12,12 @@ from fastapi.responses import JSONResponse, ORJSONResponse
 from docuflow.ai.providers import build_ai_provider
 from docuflow.api.deps import AppContext
 from docuflow.api.routes import admin, auth, billing, documents, health, jobs, meta, webhooks
-from docuflow.config import Settings, get_settings
+from docuflow.config import ProductionConfigError, Settings, get_settings
 from docuflow.db import Base, create_engine_from_settings, session_factory
 from docuflow.email.backend import build_email_backend
 from docuflow.exceptions import DocuflowError
 from docuflow.jobs.broker import build_broker
+from docuflow.jobs.recovery import recover_queued_jobs
 from docuflow.jobs.runner import JobRunner
 from docuflow.jobs.scheduler import CleanupScheduler
 from docuflow.logging import configure_logging
@@ -31,9 +32,7 @@ logger = logging.getLogger("docuflow.api")
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings)
-    if settings.is_production:
-        for item in settings.production_readiness_errors():
-            logger.error("production_readiness %s", item)
+    _enforce_production_configuration(settings)
     engine = create_engine_from_settings(settings)
     if settings.database_url.startswith("sqlite"):
         Path("data").mkdir(parents=True, exist_ok=True)
@@ -55,6 +54,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         scheduler.start()
+        recover_queued_jobs(factory, broker)
         yield
         scheduler.stop()
 
@@ -124,6 +124,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(webhooks.router)
     app.include_router(admin.router)
     return app
+
+
+def _enforce_production_configuration(settings: Settings) -> None:
+    if not settings.is_production:
+        return
+    for item in settings.production_readiness_warnings():
+        logger.warning("production_readiness_warning %s", item)
+    errors = settings.production_readiness_errors()
+    if not errors:
+        return
+    for item in errors:
+        logger.error("production_readiness %s", item)
+    raise ProductionConfigError(errors)
 
 
 app = create_app()

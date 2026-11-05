@@ -91,7 +91,7 @@ def test_register_succeeds_when_verify_email_fails(client: TestClient, app) -> N
 def test_production_unknown_host_returns_json(tmp_path) -> None:
     reset_settings()
     settings = Settings(
-        env="production",
+        env="test",
         secret_key="test-secret-key-please-change",
         database_url=f"sqlite+pysqlite:///{tmp_path / 'prod-host.db'}",
         storage_backend="filesystem",
@@ -105,6 +105,7 @@ def test_production_unknown_host_returns_json(tmp_path) -> None:
         cors_origins="https://pdf.example.com",
     )
     application = create_app(settings)
+    settings.env = "production"
     try:
         with TestClient(application, base_url="https://evil.example") as client:
             rejected = client.get("/health")

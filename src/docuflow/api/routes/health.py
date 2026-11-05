@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 
 from fastapi import APIRouter, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 logger = logging.getLogger("docuflow.health")
@@ -16,18 +17,20 @@ def health() -> dict[str, str]:
 
 
 @router.get("/ready")
-def ready(request: Request) -> dict[str, object]:
+def ready(request: Request) -> JSONResponse:
     ctx = request.app.state.ctx
     checks: dict[str, bool] = {}
-    session = ctx.session_factory()
+    session = None
     try:
+        session = ctx.session_factory()
         session.execute(text("SELECT 1"))
         checks["database"] = True
     except Exception:
         logger.warning("ready_database_failed")
         checks["database"] = False
     finally:
-        session.close()
+        if session is not None:
+            session.close()
     if ctx.settings.job_broker == "rq":
         try:
             from redis import Redis
@@ -54,9 +57,12 @@ def ready(request: Request) -> dict[str, object]:
             except Exception:
                 rq_workers = 0
     ok = all(checks.values())
-    return {
-        "status": "ready" if ok else "degraded",
-        "checks": checks,
-        "broker": ctx.settings.job_broker,
-        "rq_workers": rq_workers,
-    }
+    return JSONResponse(
+        {
+            "status": "ready" if ok else "degraded",
+            "checks": checks,
+            "broker": ctx.settings.job_broker,
+            "rq_workers": rq_workers,
+        },
+        status_code=200 if ok else 503,
+    )
