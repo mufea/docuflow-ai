@@ -1,0 +1,198 @@
+# Isolated STAGING Blueprint for DocuFlow AI.
+#
+# This file is a template. It does not deploy anything by itself.
+# It is NOT a production configuration and is NOT proof that staging exists.
+#
+# Apply only after owner approval, and only in a dedicated Render workspace
+# that does not already run docuflow-api / docuflow-db / docuflow-web.
+# Render Free allows one Postgres instance per workspace. Putting this
+# Blueprint in the same workspace as production can create paid resources
+# or collide with production service names.
+#
+# Default architecture (same as production cost stack, isolated names):
+#   staging web + staging API + staging Postgres + staging cleanup cron
+#   JOB_BROKER=inline  — no paid worker
+#   Optional Free Redis is unused while jobs are inline
+#
+# Fill S3_* with a dedicated STAGING bucket (not the production bucket).
+# The application has no global object-key prefix, so prefix isolation is
+# not enough. Do not reuse production secrets.
+
+previewsEnabled: false
+
+databases:
+  - name: docuflow-staging-db
+    plan: free
+    postgresMajorVersion: 16
+    ipAllowList: []
+
+services:
+  - type: redis
+    name: docuflow-staging-redis
+    plan: free
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
+
+  - type: web
+    name: docuflow-staging-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m docuflow.migrate && uvicorn docuflow.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DOCUFLOW_ENV
+        value: production
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: docuflow-staging-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: docuflow-staging-redis
+          type: redis
+          property: connectionString
+      - key: JOB_BROKER
+        value: inline
+      - key: RQ_QUEUE_NAME
+        value: docuflow-staging
+      - key: WORKER_TIMEOUT_SECONDS
+        value: "300"
+      - key: WORKER_CONCURRENCY
+        value: "2"
+      - key: STORAGE_BACKEND
+        value: s3
+      - key: S3_FORCE_PATH_STYLE
+        value: "true"
+      - key: COOKIE_SAMESITE
+        value: lax
+      - key: DOCUFLOW_PUBLIC_API_URL
+        fromService:
+          name: docuflow-staging-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: LOG_JSON
+        value: "true"
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: DOCUFLOW_SECRET_KEY
+        generateValue: true
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+      - key: S3_ENDPOINT_URL
+        sync: false
+      - key: S3_REGION
+        value: auto
+      - key: DOCUFLOW_PUBLIC_WEB_URL
+        fromService:
+          name: docuflow-staging-web
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: DOCUFLOW_CORS_ORIGINS
+        fromService:
+          name: docuflow-staging-web
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: DOCUFLOW_TRUSTED_HOSTS
+        value: .onrender.com
+      - key: AI_PROVIDER
+        value: mock
+      - key: EMAIL_BACKEND
+        value: console
+      - key: OCR_ENABLED
+        value: "true"
+      - key: JOB_STALE_MINUTES
+        value: "90"
+      - key: CLEANUP_INTERVAL_SECONDS
+        value: "0"
+      - key: CLEANUP_LEASE_MINUTES
+        value: "5"
+      - key: STORAGE_DELETE_MAX_ATTEMPTS
+        value: "8"
+      - key: STORAGE_DELETE_LEASE_MINUTES
+        value: "5"
+
+  - type: cron
+    name: docuflow-staging-cleanup
+    runtime: python
+    schedule: "*/15 * * * *"
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m docuflow.migrate && python -m docuflow.cleanup
+    envVars:
+      - key: DOCUFLOW_ENV
+        value: production
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: LOG_JSON
+        value: "true"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: docuflow-staging-db
+          property: connectionString
+      - key: STORAGE_BACKEND
+        value: s3
+      - key: S3_FORCE_PATH_STYLE
+        value: "true"
+      - key: S3_REGION
+        value: auto
+      - key: S3_BUCKET
+        fromService:
+          name: docuflow-staging-api
+          type: web
+          envVarKey: S3_BUCKET
+      - key: S3_ACCESS_KEY_ID
+        fromService:
+          name: docuflow-staging-api
+          type: web
+          envVarKey: S3_ACCESS_KEY_ID
+      - key: S3_SECRET_ACCESS_KEY
+        fromService:
+          name: docuflow-staging-api
+          type: web
+          envVarKey: S3_SECRET_ACCESS_KEY
+      - key: S3_ENDPOINT_URL
+        fromService:
+          name: docuflow-staging-api
+          type: web
+          envVarKey: S3_ENDPOINT_URL
+      - key: JOB_STALE_MINUTES
+        value: "90"
+      - key: STORAGE_DELETE_MAX_ATTEMPTS
+        value: "8"
+      - key: STORAGE_DELETE_LEASE_MINUTES
+        value: "5"
+      - key: CLEANUP_LEASE_MINUTES
+        value: "5"
+      - key: WORKER_TIMEOUT_SECONDS
+        value: "300"
+
+  - type: web
+    name: docuflow-staging-web
+    runtime: node
+    plan: free
+    buildCommand: corepack pnpm install --frozen-lockfile && corepack pnpm --filter web build
+    startCommand: corepack pnpm --filter web start -p $PORT
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: COREPACK_ENABLE_DOWNLOAD_PROMPT
+        value: "0"
+      - key: API_INTERNAL_URL
+        fromService:
+          name: docuflow-staging-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: DOCUFLOW_PUBLIC_API_URL
+        fromService:
+          name: docuflow-staging-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: NEXT_PUBLIC_API_BASE
+        value: /v1

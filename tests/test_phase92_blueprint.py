@@ -33,6 +33,7 @@ def test_blueprint_uses_inline_jobs_and_single_cleanup_cron() -> None:
     assert "healthCheckPath: /health" in text
     assert "python -m docuflow.migrate" in active
     assert "infra/render.scaling.yaml" in text or Path("infra/render.scaling.yaml").is_file()
+    assert "infra/render.staging.yaml" in text or Path("infra/render.staging.yaml").is_file()
 
 
 def test_scaling_blueprint_documents_rq_worker() -> None:

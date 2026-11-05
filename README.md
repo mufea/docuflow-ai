@@ -71,7 +71,9 @@ Default local demo admin (development only): create an account in the UI, or see
 
 ## Deployment
 
-See `docs/DEPLOYMENT.md` and `infra/render.yaml`. This repository is **not claimed as deployed** until a Render deploy is authorized and verified.
+See `docs/DEPLOYMENT.md` and `infra/render.yaml`. Isolated staging uses the
+template `infra/render.staging.yaml` (not applied). This repository is
+**not claimed as deployed** until a Render deploy is authorized and verified.
 
 ## License
 

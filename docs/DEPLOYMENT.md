@@ -53,11 +53,42 @@ and are **not** a billing quote:
 
 | Layer | What it means | Status |
 | --- | --- | --- |
-| Local verification | pytest / ruff / mypy / web lint-typecheck-test-build | See `docs/IMPLEMENTATION_STATUS.md` (Phase 9.6) |
-| CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.5 merge is `068d6af` (PR #8). Phase 9.6 branch CI succeeded on `956c66d` ([run 42041167330](https://github.com/mufea/docuflow-ai/actions/runs/42041167330), 5 Nov 2026, 21:02 Asia/Jakarta) |
+| Local development | SQLite or local Postgres, filesystem storage, `JOB_BROKER=inline` | Supported. See `README.md` |
+| Local verification | pytest / ruff / mypy / web lint-typecheck-test-build | See `docs/IMPLEMENTATION_STATUS.md` |
+| CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.6 merge is `d65f087` (PR #9). Phase 9.7 branch CI succeeded on `2cbecde` ([run 42046952750](https://github.com/mufea/docuflow-ai/actions/runs/42046952750), 5 Nov 2026, 21:38 Asia/Jakarta) |
 | Provider verification | Dedicated test bucket + `TEST_S3_*` credentials | **Pending** — mocked S3 tests are not provider verification |
-| Staging deployment | Non-production environment with migrations applied | **Not performed** |
+| Staging deployment | Isolated non-production Render workspace + staging DB + staging bucket | **Not performed / not verified** |
 | Production deployment | Live Render workspace serving users | **NOT DEPLOYED — Awaiting owner approval** |
+
+## Local vs staging vs production
+
+| | Local development | Staging (template only) | Production |
+| --- | --- | --- | --- |
+| Purpose | Engineer laptop / CI | Owner-approved isolated preview | Live users |
+| Blueprint | none | `infra/render.staging.yaml` | `infra/render.yaml` |
+| `DOCUFLOW_ENV` | `development` or `test` | `production` (fail-fast still applies) | `production` |
+| Database | SQLite or local Postgres | Dedicated `docuflow-staging-db` | Dedicated `docuflow-db` |
+| Object storage | filesystem | Dedicated staging bucket | Dedicated production bucket |
+| Job broker | `inline` | `inline` | `inline` (default) |
+| Exists today? | Yes | **No evidence in this repository** | **NOT DEPLOYED** |
+
+Do not treat a Git merge or GitHub Actions success as staging or production.
+
+## Staging verification workflow
+
+This workflow is for an owner. It has **not** been executed from this environment.
+
+1. Review `infra/render.staging.yaml` and `docs/staging.env.example`.
+2. Use a **separate** Render workspace. Do not sync the staging Blueprint into a workspace that already has `docuflow-api`.
+3. Create a dedicated S3-compatible **staging** bucket. Do not reuse the production bucket.
+4. Fill `S3_*` and confirm `DOCUFLOW_SECRET_KEY` is unique and at least 32 characters.
+5. Apply the staging Blueprint only after owner approval. This phase does not apply it.
+6. Run the staging migration checklist below against that staging database only.
+7. Hit staging `/health` (HTTP 200) and `/ready` (HTTP 200, or HTTP 503 if a required dependency is down).
+8. Optionally: `STAGING_API_URL=https://… python scripts/staging_smoke.py`
+9. Optionally: `uv run pytest -q -m provider` with dedicated `TEST_S3_*` (not production).
+
+Until those steps run against a real staging workspace, staging remains **not verified**.
 
 ## First deploy on Render
 
@@ -246,38 +277,97 @@ those are intentionally enabled. See **AI and email readiness** below.
 
 Do this only against a **staging** database. Do not run it against production
 from this environment. Do not delete or recreate the production database.
+This checklist has **not** been executed against a hosted staging database
+from this environment.
 
-1. **Verify the target.** Print the destination DSN host and database name
-   (not the password). Abort if the host is the production Render Postgres.
-2. **Backup / recovery.** Free Render Postgres has **no managed backups**.
-   Take a `pg_dump` (or use a paid plan with PITR) *before* migrating. Store
-   the dump outside the target instance.
-3. **Check the current revision.**
-   `DATABASE_URL=... uv run alembic current`
-   Expected before `0003`: `0002_runtime_reliability`. If `0003` is already
-   current, stop — do not re-run blindly.
-4. **Apply in staging.**
-   `DATABASE_URL=... python -m docuflow.migrate`
+1. **Database backup.** Print the destination DSN host and database name (not
+   the password). Abort if the host is production. Take a `pg_dump` first.
+   Free Render Postgres has **no managed backups**. Store the dump outside
+   the target instance. See **Database backup and recovery** below.
+2. **Database connectivity.** `DATABASE_URL=... uv run alembic current` must
+   connect. Expected before `0003`: `0002_runtime_reliability`. If `0003` is
+   already current, stop — do not re-run blindly.
+3. **Migration execution.** `DATABASE_URL=... python -m docuflow.migrate`
    On PostgreSQL this takes advisory lock `86420138` so two boots do not race.
-5. **Verify schema.** Confirm `cleanup_leases.acquired_at` / `updated_at` and
-   `storage_deletions.started_at` / `lease_until` / `owner_token` exist, all
-   nullable. Confirm index `ix_storage_deletions_lease_until`.
-   `uv run alembic current` should report `0003_cost_efficient_reliability`
-   and match `alembic heads`. Existing `storage_deletions.storage_key` rows
-   must still be present.
-6. **Health and tests.** Hit staging `/health` (process liveness only) and
-   `/ready` (database, storage, and Redis only when `JOB_BROKER=rq`). Neither
-   payload should include credentials, DSNs, signed URLs, or stack traces.
-   Run `TEST_DATABASE_URL=<isolated> uv run pytest -q -m integration` against
-   a throwaway database, never against production or the staging primary if
-   that database holds real staging documents.
-7. **Rollback limits.** `alembic downgrade 0002` drops those columns and the
-   lease index. In-flight leases and deletion owner tokens are lost.
-   Pre-existing outbox `storage_key` values remain. Restore from the dump if
-   the downgrade is not enough. There is no automatic Render rollback of
-   Postgres on Free. Do not invent a lossless in-place rollback.
+4. **Schema verification.** Confirm `cleanup_leases.acquired_at` /
+   `updated_at` and `storage_deletions.started_at` / `lease_until` /
+   `owner_token` exist, all nullable. Confirm index
+   `ix_storage_deletions_lease_until`. `alembic current` should report
+   `0003_cost_efficient_reliability` and match `alembic heads`. Existing
+   `storage_deletions.storage_key` rows must still be present.
+5. **Application smoke test.** Hit staging `/health` (HTTP 200) and `/ready`
+   (HTTP 200 if dependencies are up, HTTP 503 if a required dependency is
+   down). Neither payload should include credentials, DSNs, signed URLs, or
+   stack traces. Then follow **Staging smoke-test checklist** below.
+   Integration tests belong on a throwaway database, never on production and
+   not on the staging primary if it holds real staging documents.
+6. **Backup restoration procedure.** `alembic downgrade 0002` drops those
+   columns and the lease index. In-flight leases and deletion owner tokens
+   are lost. Pre-existing outbox `storage_key` values remain. Restore from
+   the dump if the downgrade is not enough. There is no automatic Render
+   rollback of Postgres on Free. Do not invent a lossless in-place rollback.
+
+Local automated coverage for upgrade/downgrade exists in
+`tests/integration/test_migrations.py` (isolated Postgres). That is **not**
+staging verification.
 
 Production migration status: **not applied and not verified.**
+Staging migration status: **not executed / not verified.**
+
+## Owner-operated S3 provider verification
+
+Mocked S3 tests are **not** provider verification.
+
+Use a dedicated test bucket and keys. Never production.
+
+```bash
+export TEST_S3_BUCKET=...
+export TEST_S3_ACCESS_KEY_ID=...
+export TEST_S3_SECRET_ACCESS_KEY=...
+# optional
+export TEST_S3_ENDPOINT_URL=...
+export TEST_S3_REGION=auto
+uv run pytest -q -m provider
+```
+
+The test writes only `docuflow-test/<uuid>/probe.bin` and deletes that key.
+It skips when credentials are missing so CI stays green. Do not log the
+values. The application has no global key prefix, so a **dedicated bucket**
+is required for staging/production isolation — a prefix on a shared
+production bucket is not enough.
+
+This procedure has **not** been executed from this environment.
+
+## Staging smoke-test checklist
+
+**NOT EXECUTED** against a staging environment (no `STAGING_API_URL`).
+
+Automated liveness/readiness only:
+
+```bash
+# Exits 2 with NOT EXECUTED when unset — safe for CI.
+python scripts/staging_smoke.py
+STAGING_API_URL=https://docuflow-staging-api.onrender.com python scripts/staging_smoke.py
+```
+
+Owner manual checks after a real staging API exists:
+
+| Step | What to confirm | Status here |
+| --- | --- | --- |
+| 1. API startup | Process stays up; fail-fast does not abort | NOT EXECUTED |
+| 2. `GET /health` | HTTP 200, `status=ok` | NOT EXECUTED |
+| 3. `GET /ready` | HTTP 200 if DB+storage up; HTTP 503 if not | NOT EXECUTED |
+| 4. PostgreSQL | `/ready` checks.database true | NOT EXECUTED |
+| 5. Migration | `alembic current` is `0003_cost_efficient_reliability` | NOT EXECUTED |
+| 6. Authentication | register/login on staging, CSRF cookie set | NOT EXECUTED |
+| 7. Document upload | PDF upload 200 for the staging user | NOT EXECUTED |
+| 8. Document processing | `extract_text` (or similar) job completes | NOT EXECUTED |
+| 9. File download | Owner can download; other user gets 403 | NOT EXECUTED |
+| 10. Background jobs | `JOB_BROKER=inline`; job leaves `queued` | NOT EXECUTED |
+| 11. Credit ledger | reserve then settle or refund once | NOT EXECUTED |
+| 12. Error handling | `/ready` 503 body has no DSN/signature | NOT EXECUTED |
+| 13. Worker/API | No paid worker in default staging stack | N/A (inline) |
+| 14. S3 integration | Upload visible in the **staging** bucket only | NOT EXECUTED |
 
 ## AI and email readiness
 
@@ -323,6 +413,7 @@ that still has `JOB_BROKER=rq` from an older Blueprint should be changed to
 | Automated tests | See `docs/IMPLEMENTATION_STATUS.md` |
 | Render configuration | Blueprint present; validate in the Render dashboard |
 | Successful Render deployment | **NOT DEPLOYED** — not verified from this environment |
+| Staging Blueprint | Template `infra/render.staging.yaml` — **not applied** |
 | Staging migration `0003` | **Not performed** |
 | Production migration `0003` | **Not performed** |
 | Live provider verification | **Not performed** — requires authorization |
