@@ -695,7 +695,11 @@ git diff --check
 The skipped test is the optional live S3 provider roundtrip (no `TEST_S3_*`).
 `scripts/staging_smoke.py` without `STAGING_API_URL`: **NOT EXECUTED** (exit 2).
 Web lint/typecheck/tests/build: **not run locally**. GitHub Actions for this
-feature branch: **not yet verified** (run starts after push).
+feature branch: **CI verified** on `2cbecde` (workflow **CI**,
+[run 42046952750](https://github.com/mufea/docuflow-ai/actions/runs/42046952750),
+conclusion **success**, 5 Nov 2026, 21:38 Asia/Jakarta): unit 201 passed,
+1 skipped, 10 deselected; integration 10 passed; ruff passed; mypy 72 files;
+web 15 tests passed (lint/typecheck/build job succeeded).
 
 Staging deployment: **not performed / not verified.**
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**

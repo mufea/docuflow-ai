@@ -65,7 +65,7 @@ already on `main` and were regression-tested.
 | Ruff | Locally tested | `uv run ruff check src tests scripts` | Local | All checks passed | this branch |
 | Mypy | Locally tested | `uv run mypy src/docuflow` | Local | 72 files, no issues | this branch |
 | Frontend | Not run locally | no frontend source changes | — | CI will run web job after push | — |
-| GitHub Actions on this branch | not yet CI verified | — | pending push | — | — |
+| GitHub Actions on `2cbecde` | CI verified | workflow CI, 2 checks | success: unit 201 passed, 1 skipped; integration 10 passed; web 15 tests | `2cbecdec02f9bbb390317868e1485cca89ebd8c7` | [run 42046952750](https://github.com/mufea/docuflow-ai/actions/runs/42046952750) |
 | Provider verified | no | live S3 | — | not run | — |
 | Staging verified | no | Render staging workspace | — | not provisioned | — |
 | Production verified | no | live workspace | — | not deployed | — |
@@ -89,7 +89,7 @@ already on `main` and were regression-tested.
 | P0 | None found |
 | P1 | No isolated staging workspace, staging database, or staging bucket exists (owner must provision). Production deploy still unauthorized. |
 | P2 | Live S3 `TEST_S3_*` credentials absent. Actual Render Postgres plan unknown from the repo. In-flight `processing` jobs still die on Free API spin-down (fail after `JOB_STALE_MINUTES`). |
-| P3 | This branch's GitHub Actions is pending until push. Frontend not run locally. |
+| P3 | Frontend was not run locally (CI ran it). Docs follow-up commit after this report is not the implementation SHA. |
 
 ## F. Production status
 
