@@ -53,8 +53,9 @@ and are **not** a billing quote:
 
 | Layer | What it means | Status |
 | --- | --- | --- |
-| Local verification | pytest / ruff / mypy / web lint-typecheck-test-build | See `docs/IMPLEMENTATION_STATUS.md` |
-| CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.2 merge CI succeeded on `6be627d`. Phase 9.3 CI exists only after this branch is pushed |
+| Local verification | pytest / ruff / mypy / web lint-typecheck-test-build | See `docs/IMPLEMENTATION_STATUS.md` (Phase 9.5) |
+| CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.4 merge CI succeeded on `72beac5` ([run 42021659758](https://github.com/mufea/docuflow-ai/actions/runs/42021659758), 5 Nov 2026, 18:46 Asia/Jakarta). Phase 9.5 CI exists only after this branch is pushed |
+| Provider verification | Dedicated test bucket + `TEST_S3_*` credentials | **Pending** — mocked S3 tests are not provider verification |
 | Staging deployment | Non-production environment with migrations applied | **Not performed** |
 | Production deployment | Live Render workspace serving users | **NOT DEPLOYED — Awaiting owner approval** |
 
@@ -259,15 +260,22 @@ from this environment. Do not delete or recreate the production database.
    `DATABASE_URL=... python -m docuflow.migrate`
    On PostgreSQL this takes advisory lock `86420138` so two boots do not race.
 5. **Verify schema.** Confirm `cleanup_leases.acquired_at` / `updated_at` and
-   `storage_deletions.started_at` / `lease_until` / `owner_token` exist.
-   `uv run alembic current` should report `0003_cost_efficient_reliability`.
-6. **Health and tests.** Hit staging `/health` and `/ready`. Run
-   `TEST_DATABASE_URL=<staging-or-isolated> uv run pytest -q -m integration`
-   against a throwaway database, never against production.
-7. **Rollback limits.** `alembic downgrade 0002` drops those columns. In-flight
-   leases and deletion owner tokens are lost. Restore from the dump if the
-   downgrade is not enough. There is no automatic Render rollback of Postgres
-   on Free.
+   `storage_deletions.started_at` / `lease_until` / `owner_token` exist, all
+   nullable. Confirm index `ix_storage_deletions_lease_until`.
+   `uv run alembic current` should report `0003_cost_efficient_reliability`
+   and match `alembic heads`. Existing `storage_deletions.storage_key` rows
+   must still be present.
+6. **Health and tests.** Hit staging `/health` (process liveness only) and
+   `/ready` (database, storage, and Redis only when `JOB_BROKER=rq`). Neither
+   payload should include credentials, DSNs, signed URLs, or stack traces.
+   Run `TEST_DATABASE_URL=<isolated> uv run pytest -q -m integration` against
+   a throwaway database, never against production or the staging primary if
+   that database holds real staging documents.
+7. **Rollback limits.** `alembic downgrade 0002` drops those columns and the
+   lease index. In-flight leases and deletion owner tokens are lost.
+   Pre-existing outbox `storage_key` values remain. Restore from the dump if
+   the downgrade is not enough. There is no automatic Render rollback of
+   Postgres on Free. Do not invent a lossless in-place rollback.
 
 Production migration status: **not applied and not verified.**
 

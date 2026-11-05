@@ -28,6 +28,10 @@ def test_blueprint_uses_inline_jobs_and_single_cleanup_cron() -> None:
     assert "docuflow-redis" in active
     assert "AI_PROVIDER" in active
     assert "value: mock" in active
+    assert "EMAIL_BACKEND" in active
+    assert "value: console" in active
+    assert "healthCheckPath: /health" in text
+    assert "python -m docuflow.migrate" in active
     assert "infra/render.scaling.yaml" in text or Path("infra/render.scaling.yaml").is_file()
 
 

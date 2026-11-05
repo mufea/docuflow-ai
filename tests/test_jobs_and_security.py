@@ -79,6 +79,8 @@ def test_cross_user_document_access_denied(client: TestClient, tmp_path: Path) -
     register_and_login(client, "two@example.com")
     denied = client.get(f"/v1/documents/{doc_id}")
     assert denied.status_code == 403
+    download = client.get(f"/v1/documents/{doc_id}/download")
+    assert download.status_code == 403
     job = client.post(
         "/v1/jobs",
         json={"operation": "extract_text", "document_ids": [doc_id], "params": {}},
