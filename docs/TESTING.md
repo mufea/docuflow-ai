@@ -74,6 +74,17 @@ deleted afterward. Do not point these variables at the production bucket or
 production prefixes. CI does not set `TEST_S3_*`, so the test is skipped and
 must not fail the suite.
 
+## Staging smoke script
+
+```bash
+python scripts/staging_smoke.py
+```
+
+Without `STAGING_API_URL` the script prints `NOT EXECUTED` and exits 2. It
+does not contact the network. With the URL it GETs `/health` and `/ready`
+and refuses to print secret-like fragments. It is not a substitute for the
+full checklist in `docs/DEPLOYMENT.md`.
+
 ## Verification layers
 
 Passing local or CI tests is not a production deploy.
@@ -82,6 +93,6 @@ Passing local or CI tests is not a production deploy.
 | --- | --- |
 | Local | Commands in this file, run on a laptop or cloud agent |
 | CI | GitHub Actions on the commit (`postgres:16` service for `-m integration`) |
-| Provider | Dedicated `TEST_S3_*` bucket; **pending** in Phase 9.6 |
-| Staging deploy | Separate Render (or other) environment; not done in Phase 9.6 |
+| Provider | Dedicated `TEST_S3_*` bucket; **pending** in Phase 9.7 |
+| Staging deploy | Separate Render workspace; template only; **not performed** in Phase 9.7 |
 | Production deploy | Owner-approved live workspace; **not performed** |

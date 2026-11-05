@@ -15,6 +15,10 @@
 #
 # Compute plans: web, Postgres, and Key Value use Render's Free tier.
 # Syncing this Blueprint does not always downgrade an existing paid service.
+#
+# Isolated staging uses infra/render.staging.yaml in a separate Render
+# workspace. Do not sync that file into a workspace that already has
+# docuflow-api / docuflow-db. Owner approval is required before applying it.
 
 previewsEnabled: false
 
