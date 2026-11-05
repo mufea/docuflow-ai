@@ -1,7 +1,7 @@
 # Render Blueprint for DocuFlow AI
 # This file describes services. It is not proof of a successful deployment.
 #
-# Cost-efficient default (Phase 9.2):
+# Cost-efficient default (Phase 9.2; unchanged in 9.3):
 #   web + API + Postgres + cleanup cron + optional Free Redis
 #   JOB_BROKER=inline  — jobs run inside the API process
 #   One Render Cron runs cleanup; the API in-process scheduler is disabled

@@ -168,12 +168,12 @@ def test_cleanup_renews_lease_when_run_exceeds_ttl(tmp_path: Path, monkeypatch) 
     renewals = {"n": 0}
     original_purge = DocumentService.purge_expired
 
-    def expire_then_purge(self: DocumentService) -> int:
+    def expire_then_purge(self: DocumentService, **kwargs) -> int:
         row = self.session.get(CleanupLease, LEASE_NAME)
         assert row is not None
         row.lease_until = utc_now() - timedelta(seconds=30)
         self.session.commit()
-        return original_purge(self)
+        return original_purge(self, **kwargs)
 
     original_renew = renew_lease
 
@@ -207,7 +207,7 @@ def test_lost_lease_stops_remaining_cleanup_work(tmp_path: Path, monkeypatch) ->
     storage = FilesystemStorage(tmp_path / "storage")
     stages = []
 
-    def steal_then_purge(self: DocumentService) -> int:
+    def steal_then_purge(self: DocumentService, **kwargs) -> int:
         stages.append("purge")
         row = self.session.get(CleanupLease, LEASE_NAME)
         assert row is not None

@@ -55,6 +55,16 @@ Postgres advisory locks (unsafe with connection pooling). Storage deletes go
 through an outbox whose `in_progress` rows expire and can be reclaimed after a
 crash so a failed S3 call cannot resurrect a document the user already lost.
 
+## Bounded storage timeouts instead of a threaded lease heartbeat
+
+The deletion lease is renewed before the object-storage call. A hung S3 request
+with no client timeout could outlive `STORAGE_DELETE_LEASE_MINUTES`. A
+background heartbeat would need a second SQLAlchemy session (sessions are not
+thread-safe) and an always-running helper thread. Phase 9.3 bounds boto3
+connect/read timeouts so the retry budget stays under half the lease, maps
+timeouts to `TransientError`, and heartbeats the *cleanup* lease between
+items. Overlapping deletes are not claimed to be impossible.
+
 ## Hatchling / uv for Python, pnpm for the web
 
 Lockfiles: `uv.lock` and `pnpm-lock.yaml`.

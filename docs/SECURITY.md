@@ -37,4 +37,4 @@ API responses set `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`
 
 ## Retention
 
-Uploads and results expire. Cleanup marks rows deleted first, then removes storage objects through the `storage_deletions` outbox. Expired `in_progress` deletion leases are reclaimed; already-missing objects count as success. Failed object deletes never undelete the document row. Account deletion deletes the user's stored files and revokes sessions.
+Uploads and results expire. Cleanup marks rows deleted first, then removes storage objects through the `storage_deletions` outbox. Expired `in_progress` deletion leases are reclaimed; completion and failure require the claiming owner token. Already-missing objects count as success. Failed object deletes never undelete the document row. Account deletion deletes the user's stored files and revokes sessions.

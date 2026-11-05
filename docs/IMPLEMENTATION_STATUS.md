@@ -182,8 +182,8 @@ uv run pytest -q
 - OCR uses RapidOCR ONNX when Tesseract is missing. Accuracy depends on scan quality; handwriting may be incomplete.
 - Live Stripe/Midtrans/OpenAI calls are not made. Webhooks and the mock AI provider are tested with fixtures.
 - Render deployment has not been performed or verified.
-- Automated tests use SQLite; production is PostgreSQL. Credit `FOR UPDATE` locking is fully meaningful on Postgres.
-- Next.js “Publish to Vercel” is not the production path: the product needs API + worker + Redis + Postgres + object storage on Render.
+- Automated unit tests use SQLite. PostgreSQL integration tests run locally when `TEST_DATABASE_URL` is set, and in GitHub Actions against an isolated `postgres:16` service. Credit `FOR UPDATE` locking is fully meaningful on Postgres.
+- Next.js “Publish to Vercel” is not the production path. The default Render stack is web + API + Postgres + object storage + one cleanup cron. A paid worker and Redis are optional scaling pieces (`JOB_BROKER=rq`), not required for inline jobs.
 
 ## Phase 9 — Production safety and data integrity — merged
 
@@ -202,7 +202,7 @@ Fixes:
 - Subscription webhooks upsert by provider subscription id instead of inserting a new row each time.
 - `customer.subscription.updated` no longer invents a credit grant.
 - Document delete marks the row deleted, then removes storage (orphan object is preferred over an accessible row whose bytes are already gone).
-- GitHub Actions CI runs Python tests/lint/typecheck and web lint/typecheck/tests/build. No secrets. No Postgres/Redis services.
+- GitHub Actions CI at this merge ran Python tests/lint/typecheck and web lint/typecheck/tests/build, with no Postgres or Redis services. Later phases added a `postgres:16` CI service for integration tests; see Phase 9.2. Redis is still not started in CI.
 
 Local verification (this branch):
 
@@ -235,12 +235,13 @@ git diff --check
 Local verification for Phase 9 was recorded on `cursor/phase-9-production-safety-3b1a` (110 passed).
 Live deployment verification: **not performed**.
 
-## Phase 9.1 — Runtime reliability hardening — on `cursor/phase-9-1-runtime-reliability-3b1a`
+## Phase 9.1 — Runtime reliability hardening — merged
 
-Base: GitHub `main` @ `61294af`. `main` was not modified by this work.
+Merged to `main` as `bce1a60` (`Merge pull request #3 from mufea/cursor/phase-9-1-runtime-reliability-3b1a`).
+Recorded on feature branch `cursor/phase-9-1-runtime-reliability-3b1a` before that merge.
 
 - Abandoned-job and expired-file cleanup run on a 15-minute Render Cron (`python -m docuflow.cleanup`) and on an in-process interval thread in the API/worker. Cleanup is not attached to HTTP requests.
-- Overlapping cleanup is serialized (Postgres advisory lock / `cleanup_leases`). Job fail uses an atomic `processing` claim; refunds stay ledger-idempotent.
+- Overlapping cleanup is serialized (`cleanup_leases`). Phase 9.2 later replaced session-level PostgreSQL advisory locks on this path because they are unsafe with connection pooling. Job fail uses an atomic `processing` claim; refunds stay ledger-idempotent.
 - Stale threshold is `JOB_STALE_MINUTES` (default 90), never below worker timeout plus grace. Active jobs with a recent `heartbeat_at` are left alone.
 - Storage deletes go through `storage_deletions` with bounded exponential backoff. A failed object delete never undeletes the document row.
 - Structured logs count abandoned jobs, refunded credits, expired documents, storage failures/retries, and duration. No secrets, keys, URLs, or file contents.
@@ -273,13 +274,14 @@ git diff --check
 # clean
 ```
 
-GitHub Actions: **not observed from this environment**. The workflow in `.github/workflows/ci.yml` matches the local commands above. Do not treat CI as green until a run exists on GitHub.
+GitHub Actions: **not observed from that feature-branch environment.** Later `main` CI (from Phase 9.2 onward) is recorded below. Live deployment verification: **not performed**.
 
-Live deployment verification: **not performed**.
+## Phase 9.2 — Cost-efficient reliability — merged
 
-## Phase 9.2 — Cost-efficient reliability — on `cursor/phase-9-2-cost-efficient-reliability-8f43`
-
-Base: GitHub `main` @ `85dfc4392dc89c4342c525457a942860fcc1306d`. `main` was not modified by this work.
+Merged to `main` as `6be627d9102ee5eaa9e1f393a7ddb60d934e1bf1`
+(`Merge pull request #5 from mufea/cursor/phase-9-2-cost-efficient-reliability-8f43`)
+on 5 Nov 2026, 16:19 Asia/Jakarta. Feature branch
+`cursor/phase-9-2-cost-efficient-reliability-8f43` is historical.
 
 Implemented:
 
@@ -295,30 +297,64 @@ Database: Alembic `0003_cost_efficient_reliability` (additive, backward compatib
 
 Live deployment verification: **NOT DEPLOYED — Awaiting owner approval.**
 
-Local verification (this branch):
+Verification recorded on the merged commit (do not treat as a production deploy):
+
+Local (feature branch, before merge) and GitHub Actions on `main` @ `6be627d`
+([CI run 42001480346](https://github.com/mufea/docuflow-ai/actions/runs/42001480346), conclusion **success**, 5 Nov 2026, 16:19 Asia/Jakarta):
 
 ```
 uv run pytest -q -m "not integration"
-# 144 passed, 7 deselected
+# 152 passed, 9 deselected
 
 TEST_DATABASE_URL=postgresql+psycopg://docuflow:docuflow@127.0.0.1:5432/docuflow_test \
   uv run pytest -q -m integration
-# 7 passed, 144 deselected
-
-TEST_DATABASE_URL=... uv run pytest -q
-# 151 passed
+# 9 passed, 152 deselected
 
 uv run ruff check src tests
 # All checks passed
 
-uv run ruff format --check src tests
-# Would reformat tests/test_database_url.py (pre-existing on main; not changed)
-
 uv run mypy src/docuflow
 # Success: no issues found in 70 source files
 
-uv run alembic heads
-# 0003_cost_efficient_reliability (head)
+pnpm --filter web lint / typecheck / test / build
+# lint passed; typecheck passed; 15 tests passed; production build passed
+```
+
+CI starts an isolated `postgres:16` service for integration tests. It does not use production. Redis is not started in CI.
+
+Staging deployment: **not performed.**
+Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
+Production migration of Alembic `0003`: **not applied / not verified.**
+
+## Phase 9.3 — Documentation accuracy, lease follow-up, cost docs — on `cursor/phase-9-3-docs-reliability-followup`
+
+Base: GitHub `main` @ `6be627d9102ee5eaa9e1f393a7ddb60d934e1bf1` (Phase 9.2 already merged). This phase does not repeat Phase 9.2.
+
+Implemented:
+
+- Documentation now states that Phase 9.2 is merged, records the merge commit, and separates local verification, GitHub Actions CI, staging deployment, and production deployment.
+- Storage deletion: S3 HTTP connect/read timeouts are bounded so one delete attempt (including client retries) stays under half of `STORAGE_DELETE_LEASE_MINUTES`. Timeouts are `TransientError` (retry), not “object missing.” Finish/fail/renew updates remain owner-token conditional. Duplicate object deletes are still possible if a provider ignores the timeout; they are idempotent.
+- Cleanup: the runtime lease is heartbeaten between expired-document rows and between storage-deletion items. A process that loses the cleanup lease stops remaining work. No SQLAlchemy session is shared across threads; there is no heartbeat *during* a single blocking storage call.
+- Staging migration procedure and rollback limits are documented. Alembic `0003` is **not** applied to production from this environment.
+- Default Render stack is unchanged: web + API + Postgres + cleanup cron + optional Free Key Value. No paid worker. `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`.
+
+Not implemented (explicit non-goals): production deploy, production migration, live AI/email/billing, Redis upgrade, new always-on worker, architectural rewrite.
+
+Local verification (this branch):
+
+```
+uv run pytest -q -m "not integration"
+# 158 passed, 9 deselected
+
+TEST_DATABASE_URL=postgresql+psycopg://docuflow:docuflow@127.0.0.1:5432/docuflow_test \
+  uv run pytest -q -m integration
+# 9 passed, 158 deselected
+
+uv run ruff check src tests
+# All checks passed
+
+uv run mypy src/docuflow
+# Success: no issues found in 71 source files
 
 pnpm --filter web lint
 # passed
@@ -336,14 +372,19 @@ git diff --check
 # clean
 ```
 
-GitHub Actions: **not observed from this environment**. The workflow now runs unit tests then PostgreSQL integration tests. Do not treat CI as green until a run exists on GitHub.
+GitHub Actions for this feature branch: **not observed until a PR/push run exists.** Do not copy Phase 9.2 CI results forward as Phase 9.3 CI.
+
+Staging deployment: **not performed.**
+Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
+Production migration: **not performed.**
 
 ## Next recommended work
 
-1. Review Phase 9.2. Do not merge or deploy from this agent unless authorized.
-2. Apply Alembic `0003` only after owner approval of a Render deploy. Do not run it from this environment.
+1. Review Phase 9.3. Do not merge or deploy from this agent unless authorized.
+2. Apply Alembic `0003` only on an approved **staging** database, using the procedure in `docs/DEPLOYMENT.md`. Do not run it against production from this environment.
 3. If an older workspace still has an idle paid `docuflow-worker`, stop or delete it in the dashboard only after confirming `JOB_BROKER=inline`.
 4. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
 5. Provide sandbox Stripe/Midtrans keys only if billing should be exercised end-to-end. Live charges stay off.
-6. Provide an AI key only if live analysis should replace the mock provider.
-7. Queue-based scaling remains a separate later phase (`JOB_BROKER=rq` + paid worker).
+6. Provide an AI key only if live analysis should replace the mock provider. Keep `AI_PROVIDER=mock` until then.
+7. Production email needs a non-console backend **and** a host that can reach SMTP (Render Free web services block outbound 25/465/587). Do not enable `EMAIL_BACKEND=smtp` on Free without verifying current Render network policy.
+8. Queue-based scaling remains a separate later phase (`JOB_BROKER=rq` + paid worker).

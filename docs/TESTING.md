@@ -48,3 +48,14 @@ git diff --check
 ```
 
 Do not point `DATABASE_URL` or `TEST_DATABASE_URL` at Render production.
+
+## Verification layers
+
+Passing local or CI tests is not a production deploy.
+
+| Layer | Evidence |
+| --- | --- |
+| Local | Commands in this file, run on a laptop or cloud agent |
+| CI | GitHub Actions on the commit (`postgres:16` service for `-m integration`) |
+| Staging deploy | Separate Render (or other) environment; not done in Phase 9.3 |
+| Production deploy | Owner-approved live workspace; **not performed** |
