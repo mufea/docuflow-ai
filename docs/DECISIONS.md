@@ -22,11 +22,14 @@ Checkout returns `not_activated` until secrets are configured and an operator ex
 
 ## Render Free compute where Render allows it
 
-Web, API, Postgres, and Key Value use `plan: free` in `infra/render.yaml` so a
-hobby workspace is not billed for those four. Render does not sell a Free
-background worker, so the worker remains on `0.5c-512mb`. Free web spin-down,
-30-day Postgres expiry, and in-memory Redis are accepted for this hobby slice;
-they are not production SLAs.
+Web, API, Postgres, and Key Value use `plan: free` in `infra/render.yaml`.
+Phase 9.2 keeps `JOB_BROKER=inline` and omits the paid background worker from
+the default Blueprint because the API does not enqueue to RQ in that mode.
+Redis stays listed for compatibility and as the future RQ transport; it is
+unused while jobs are inline. A paid worker remains a documented scaling
+option in `infra/render.scaling.yaml`. Free web spin-down, 30-day Postgres
+expiry, and in-memory Redis are accepted for this hobby slice; they are not
+production SLAs.
 
 ## Built-in OCR on hosts without Tesseract
 
@@ -44,10 +47,13 @@ grant.
 
 ## Scheduled cleanup, not request-path cleanup
 
-Abandoned jobs and expired files are processed by `python -m docuflow.cleanup`
-and an in-process interval thread. A Render Cron Job is the deployed path that
-still runs when the Free API is asleep. Storage deletes go through an outbox
-so a failed S3 call cannot resurrect a document the user already lost.
+Abandoned jobs and expired files are processed by `python -m docuflow.cleanup`.
+The default Render Cron is the single production scheduler. The API
+in-process interval is disabled there (`CLEANUP_INTERVAL_SECONDS=0`). Cleanup
+coordination uses a database lease on `cleanup_leases`, not session-level
+Postgres advisory locks (unsafe with connection pooling). Storage deletes go
+through an outbox whose `in_progress` rows expire and can be reclaimed after a
+crash so a failed S3 call cannot resurrect a document the user already lost.
 
 ## Hatchling / uv for Python, pnpm for the web
 

@@ -65,7 +65,9 @@ class Settings(BaseSettings):
     result_retention_hours: int = Field(default=48, alias="RESULT_RETENTION_HOURS")
     job_stale_minutes: int = Field(default=90, alias="JOB_STALE_MINUTES")
     cleanup_interval_seconds: int = Field(default=900, alias="CLEANUP_INTERVAL_SECONDS")
+    cleanup_lease_minutes: int = Field(default=5, alias="CLEANUP_LEASE_MINUTES")
     storage_delete_max_attempts: int = Field(default=8, alias="STORAGE_DELETE_MAX_ATTEMPTS")
+    storage_delete_lease_minutes: int = Field(default=5, alias="STORAGE_DELETE_LEASE_MINUTES")
     temp_dir: str | None = Field(default=None, alias="TEMP_DIR")
 
     session_cookie_name: str = Field(default="df_session", alias="SESSION_COOKIE_NAME")

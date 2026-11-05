@@ -39,7 +39,7 @@ pnpm install
 pnpm --filter web dev -- --port 43123
 ```
 
-The API uses SQLite + filesystem storage + an inline job broker when those values are set in `.env`. That is the supported local path. Production on Render must use PostgreSQL and S3-compatible storage. Use `JOB_BROKER=inline` for the minimal-cost stack (no paid worker). Use `JOB_BROKER=rq` on the API only when `docuflow-worker` is running.
+The API uses SQLite + filesystem storage + an inline job broker when those values are set in `.env`. That is the supported local path. Production on Render must use PostgreSQL and S3-compatible storage. Use `JOB_BROKER=inline` for the default cost-efficient stack (no paid worker; Redis unused). Use `JOB_BROKER=rq` on the API only when `docuflow-worker` is running — see `infra/render.scaling.yaml`.
 
 Default local demo admin (development only): create an account in the UI, or see `docs/SETUP.md`.
 
@@ -47,7 +47,8 @@ Default local demo admin (development only): create an account in the UI, or see
 
 | Task | Command |
 | --- | --- |
-| Python tests | `uv run pytest` |
+| Python unit tests | `uv run pytest -q -m "not integration"` |
+| PostgreSQL integration tests | `TEST_DATABASE_URL=... uv run pytest -q -m integration` |
 | Python lint | `uv run ruff check src tests` |
 | Python types | `uv run mypy src/docuflow` |
 | API | `uv run uvicorn docuflow.main:app --host 127.0.0.1 --port 43124` |

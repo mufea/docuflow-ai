@@ -3,22 +3,25 @@ from __future__ import annotations
 import logging
 import time
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
-from sqlalchemy import and_, or_, select, text, update
+from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
 
-from docuflow.billing.ledger import CreditService
 from docuflow.config import Settings
-from docuflow.models import CleanupLease, Job, User
+from docuflow.jobs.clock import as_utc, utc_now
+from docuflow.jobs.leases import LEASE_NAME, LeaseGuard, acquire_lease, release_lease
+from docuflow.jobs.refunds import fail_job_and_refund, refund_terminal_job
+from docuflow.models import Job
 from docuflow.services.documents import DocumentService
 from docuflow.storage.base import ObjectStorage
 
 logger = logging.getLogger("docuflow.cleanup")
 
+# Kept for tests and docs that still mention the historical advisory-lock key.
 CLEANUP_LOCK_KEY = 86420139
-LEASE_NAME = "runtime"
 LEASE_MINUTES = 5
 
 
@@ -32,6 +35,7 @@ class CleanupStats:
     storage_retries: int = 0
     duration_ms: int = 0
     skipped: bool = False
+    aborted: bool = False
 
     def as_log_fields(self) -> dict[str, int | bool]:
         return {
@@ -43,6 +47,7 @@ class CleanupStats:
             "storage_retries": self.storage_retries,
             "duration_ms": self.duration_ms,
             "skipped": self.skipped,
+            "aborted": self.aborted,
         }
 
 
@@ -64,28 +69,48 @@ def run_runtime_cleanup(session: Session, storage: ObjectStorage, settings: Sett
     started = time.monotonic()
     stats = CleanupStats()
     token = uuid.uuid4().hex
-    if not _acquire_cleanup_lease(session, token):
+    ttl = timedelta(minutes=max(1, int(settings.cleanup_lease_minutes)))
+    if not acquire_lease(session, token, name=LEASE_NAME, ttl=ttl):
         stats.skipped = True
         stats.duration_ms = int((time.monotonic() - started) * 1000)
         logger.info("cleanup_skipped reason=lease_held duration_ms=%s", stats.duration_ms)
         return stats
+    guard = LeaseGuard(session, token, name=LEASE_NAME, ttl=ttl)
     try:
         stale_minutes = effective_stale_minutes(settings)
-        abandoned = _fail_stale_jobs(session, stale_minutes=stale_minutes)
-        stats.abandoned_jobs = abandoned.abandoned_jobs
-        stats.refunded_credits = abandoned.refunded_credits
-        documents = DocumentService(session, storage, settings)
-        stats.expired_documents = documents.purge_expired()
-        deletion = documents.retry_storage_deletions()
-        stats.storage_deleted += deletion["deleted"]
-        stats.storage_failures += deletion["failures"]
-        stats.storage_retries += deletion["retries"]
+        if _hold(guard, stats):
+            abandoned = _fail_stale_jobs(session, stale_minutes=stale_minutes, heartbeat=guard.heartbeat)
+            stats.abandoned_jobs = abandoned.abandoned_jobs
+            stats.refunded_credits = abandoned.refunded_credits
+            stats.aborted = stats.aborted or abandoned.aborted
+        if _hold(guard, stats):
+            recovered = _refund_stranded_terminal_jobs(session, heartbeat=guard.heartbeat)
+            stats.refunded_credits += recovered.refunded_credits
+            stats.aborted = stats.aborted or recovered.aborted
+        documents: DocumentService | None = None
+        if _hold(guard, stats):
+            documents = DocumentService(session, storage, settings)
+            stats.expired_documents = documents.purge_expired()
+        if _hold(guard, stats) and documents is not None:
+            deletion = documents.retry_storage_deletions()
+            stats.storage_deleted += deletion["deleted"]
+            stats.storage_failures += deletion["failures"]
+            stats.storage_retries += deletion["retries"]
+        if stats.aborted:
+            logger.warning("cleanup_aborted reason=lease_lost duration_ms=%s", int((time.monotonic() - started) * 1000))
+    except Exception:
+        session.rollback()
+        raise
     finally:
-        _release_cleanup_lease(session, token)
+        try:
+            release_lease(session, token, name=LEASE_NAME)
+        except Exception:
+            logger.exception("cleanup_lease_release_failed")
+            session.rollback()
     stats.duration_ms = int((time.monotonic() - started) * 1000)
     logger.info(
         "cleanup_finished abandoned_jobs=%s refunded_credits=%s expired_documents=%s "
-        "storage_deleted=%s storage_failures=%s storage_retries=%s duration_ms=%s",
+        "storage_deleted=%s storage_failures=%s storage_retries=%s duration_ms=%s aborted=%s",
         stats.abandoned_jobs,
         stats.refunded_credits,
         stats.expired_documents,
@@ -93,12 +118,27 @@ def run_runtime_cleanup(session: Session, storage: ObjectStorage, settings: Sett
         stats.storage_failures,
         stats.storage_retries,
         stats.duration_ms,
+        stats.aborted,
     )
     return stats
 
 
-def _fail_stale_jobs(session: Session, *, stale_minutes: int) -> CleanupStats:
-    cutoff = datetime.now(UTC) - timedelta(minutes=stale_minutes)
+def _hold(guard: LeaseGuard, stats: CleanupStats) -> bool:
+    if stats.aborted:
+        return False
+    if guard.heartbeat():
+        return True
+    stats.aborted = True
+    return False
+
+
+def _fail_stale_jobs(
+    session: Session,
+    *,
+    stale_minutes: int,
+    heartbeat: Callable[[], bool] | None = None,
+) -> CleanupStats:
+    cutoff = utc_now() - timedelta(minutes=stale_minutes)
     candidates = list(
         session.scalars(
             select(Job).where(
@@ -110,67 +150,59 @@ def _fail_stale_jobs(session: Session, *, stale_minutes: int) -> CleanupStats:
             )
         )
     )
-    credits = CreditService(session)
     stats = CleanupStats()
     for job in candidates:
-        now = datetime.now(UTC)
-        claimed = session.execute(
-            update(Job)
-            .where(Job.id == job.id, Job.status == "processing")
-            .values(
-                status="failed",
-                error_code="timeout",
-                error_message="The worker did not finish before the timeout.",
-                completed_at=now,
-            )
+        if heartbeat is not None and not heartbeat():
+            stats.aborted = True
+            break
+        last_beat = as_utc(job.heartbeat_at) if job.heartbeat_at is not None else None
+        started = as_utc(job.started_at) if job.started_at is not None else None
+        if last_beat is not None and last_beat >= cutoff:
+            continue
+        if last_beat is None and started is not None and started >= cutoff:
+            continue
+        result = fail_job_and_refund(
+            session,
+            job.id,
+            code="timeout",
+            message="The worker did not finish before the timeout.",
+            expected_statuses=("processing",),
+            commit=True,
         )
-        session.commit()
-        if int(getattr(claimed, "rowcount", 0) or 0) != 1:
+        if not result.claimed:
             continue
         stats.abandoned_jobs += 1
-        user = session.get(User, job.user_id)
-        if user and job.credits_reserved:
-            credits.refund_reservation(user, job.credits_reserved, job_id=job.id)
-            session.commit()
-            stats.refunded_credits += job.credits_reserved
-        logger.info("abandoned_job_failed refunded_credits=%s", job.credits_reserved if user else 0)
+        if result.refund is not None:
+            stats.refunded_credits += result.refund.released
+        logger.info(
+            "abandoned_job_failed refunded_credits=%s already_refunded=%s",
+            0 if result.refund is None else result.refund.released,
+            False if result.refund is None else result.refund.already_refunded,
+        )
     return stats
 
 
-def _acquire_cleanup_lease(session: Session, token: str) -> bool:
-    bind = session.get_bind()
-    if bind is not None and bind.dialect.name == "postgresql":
-        got = session.execute(text("SELECT pg_try_advisory_lock(:k)"), {"k": CLEANUP_LOCK_KEY}).scalar()
-        session.commit()
-        return bool(got)
-    now = datetime.now(UTC)
-    until = now + timedelta(minutes=LEASE_MINUTES)
-    lease = session.get(CleanupLease, LEASE_NAME)
-    if lease is None:
-        session.add(CleanupLease(name=LEASE_NAME, locked_until=until, token=token))
-        session.commit()
-        return True
-    claimed = session.execute(
-        update(CleanupLease)
-        .where(
-            CleanupLease.name == LEASE_NAME,
-            or_(CleanupLease.locked_until.is_(None), CleanupLease.locked_until < now),
+def _refund_stranded_terminal_jobs(
+    session: Session,
+    *,
+    heartbeat: Callable[[], bool] | None = None,
+) -> CleanupStats:
+    """Recover reservations left behind if a historical fail committed without a refund."""
+    stats = CleanupStats()
+    rows = list(
+        session.scalars(
+            select(Job).where(
+                Job.status.in_(("failed", "cancelled")),
+                Job.credits_reserved > 0,
+                Job.credits_settled == 0,
+            )
         )
-        .values(locked_until=until, token=token)
     )
-    session.commit()
-    return int(getattr(claimed, "rowcount", 0) or 0) == 1
-
-
-def _release_cleanup_lease(session: Session, token: str) -> None:
-    bind = session.get_bind()
-    if bind is not None and bind.dialect.name == "postgresql":
-        session.execute(text("SELECT pg_advisory_unlock(:k)"), {"k": CLEANUP_LOCK_KEY})
-        session.commit()
-        return
-    session.execute(
-        update(CleanupLease)
-        .where(CleanupLease.name == LEASE_NAME, CleanupLease.token == token)
-        .values(locked_until=None, token=None)
-    )
-    session.commit()
+    for job in rows:
+        if heartbeat is not None and not heartbeat():
+            stats.aborted = True
+            break
+        result = refund_terminal_job(session, job, commit=True)
+        if result.released:
+            stats.refunded_credits += result.released
+    return stats
