@@ -78,6 +78,7 @@ filterwarnings = [
 markers = [
     "integration: tests that need postgres/redis",
     "slow: slower processing tests",
+    "provider: live S3-compatible bucket tests; skipped without TEST_S3_* credentials",
 ]
 
 [tool.ruff]

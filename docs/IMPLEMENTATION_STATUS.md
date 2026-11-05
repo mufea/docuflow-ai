@@ -383,9 +383,15 @@ Staging deployment: **not performed.**
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 Production migration: **not performed.**
 
-## Phase 9.4 — Storage reliability and retry hardening — on `cursor/phase-9-4-storage-reliability`
+## Phase 9.4 — Storage reliability and retry hardening — merged
 
-Base: GitHub `main` @ `15a9e278d64ad8ee17ba3b2b2403d79d48196388` (Phase 9.3 already merged). This phase does not repeat Phase 9.3.
+Merged to `main` as `72beac5fb47438bf0589cf7521192eadab917e7d`
+(`Merge pull request #7 from mufea/cursor/phase-9-4-storage-reliability`)
+on 5 Nov 2026, 18:46 Asia/Jakarta. Implementation commit
+`de5e8363edcd2ecd1b374759a9bb9afaa28f683f`. Feature branch
+`cursor/phase-9-4-storage-reliability` is historical.
+
+Base at the time of the work: GitHub `main` @ `15a9e278d64ad8ee17ba3b2b2403d79d48196388` (Phase 9.3 already merged). This phase did not repeat Phase 9.3.
 
 Implemented:
 
@@ -422,17 +428,146 @@ git diff --check
 
 Web lint/typecheck/tests/build: **not run** (no frontend or shared-interface changes).
 
+GitHub Actions on the merge commit `72beac5` (workflow **CI**,
+[run 42021659758](https://github.com/mufea/docuflow-ai/actions/runs/42021659758),
+conclusion **success**, created 5 Nov 2026, 18:46 Asia/Jakarta):
+
+- unit: 178 passed, 9 deselected
+- integration: 9 passed, 178 deselected (`postgres:16`)
+- ruff passed; mypy 71 files; web 15 tests + production build passed
+
+Staging deployment: **not performed.**
+Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
+Production migration: **not performed.**
+
+## Phase 9.5 — Staging and production readiness verification — on `cursor/phase-9-5-staging-readiness`
+
+Base: GitHub `main` @ `72beac5fb47438bf0589cf7521192eadab917e7d` (Phase 9.4 already merged; matches the expected merge SHA). Implementation commit of Phase 9.4 is `de5e8363edcd2ecd1b374759a9bb9afaa28f683f`. This phase does not repeat Phases 9.1–9.4.
+
+Scope: verification-first. No product features, no paid worker, no Redis requirement, default `JOB_BROKER=inline`, `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`. No production deploy, no production migration, no live Stripe/Midtrans/AI/email.
+
+### Status vocabulary used below
+
+| Label | Meaning |
+| --- | --- |
+| Implemented | Code or docs exist in this repository |
+| Locally tested | Executed in this environment |
+| CI verified | GitHub Actions on the named commit |
+| Provider verified | Live S3-compatible bucket with dedicated test credentials |
+| Staging verified | Applied to a non-production Render (or equivalent) environment |
+| Production verified | Owner-approved live workspace |
+
+### Workstream results
+
+**A. Repository and CI audit — CI verified on `main` @ `72beac5` and on this branch @ `a52929d`.**
+
+- Repository: `https://github.com/mufea/docuflow-ai`
+- `origin/main` HEAD: `72beac5fb47438bf0589cf7521192eadab917e7d` (Merge PR #7). Matches the expected baseline.
+- Phase 9 through 9.4 are on `main`. Python lockfile, Alembic chain `0001` → `0002_runtime_reliability` → `0003_cost_efficient_reliability`, GitHub Actions workflow **CI**, Render Blueprint, health/ready, storage, cleanup scheduling, and `JOB_BROKER=inline` were inspected and left in place.
+- GitHub Actions on latest `main` (do not treat this as this feature branch):
+
+  | Field | Value |
+  | --- | --- |
+  | Workflow | CI |
+  | Run URL | https://github.com/mufea/docuflow-ai/actions/runs/42021659758 |
+  | Commit SHA | `72beac5fb47438bf0589cf7521192eadab917e7d` |
+  | Conclusion | success |
+  | Timestamp | 5 Nov 2026, 18:46 Asia/Jakarta (`createdAt` 2026-11-05T11:46:21Z) |
+
+  CI workflow itself was not modified.
+
+- GitHub Actions on this feature branch (implementation commit `a52929d`):
+
+  | Field | Value |
+  | --- | --- |
+  | Workflow | CI |
+  | Run URL | https://github.com/mufea/docuflow-ai/actions/runs/42024681610 |
+  | Commit SHA | `a52929d8c48822fdd1330ce9a39b2250c37794c9` |
+  | Conclusion | success (2 checks: Python tests and checks; Web lint, typecheck, tests, and build) |
+  | Timestamp | 5 Nov 2026, 19:08 Asia/Jakarta (`createdAt` 2026-11-05T12:08:55Z) |
+
+**B. Database migration `0003_cost_efficient_reliability` — locally tested on isolated PostgreSQL; not staging verified; not production verified.**
+
+- Upgrade from `0002_runtime_reliability` keeps existing `storage_deletions` rows and the seeded `cleanup_leases.token`.
+- New nullable columns: `cleanup_leases.acquired_at` / `updated_at`; `storage_deletions.started_at` / `lease_until` / `owner_token`.
+- Index `ix_storage_deletions_lease_until` is created.
+- After upgrade, `alembic` current equals head `0003_cost_efficient_reliability`, and `acquire_lease` / `release_lease` work against the migrated schema.
+- Downgrade was run only on a disposable local database. It drops those columns and the lease index. Pre-existing `storage_key` / `attempts` survive. In-flight lease timestamps and deletion owner tokens are lost. That is **not** a lossless production rollback.
+
+**C. S3-compatible storage — locally tested with mocks; provider verification pending.**
+
+Phase 9.4 classification/retry/timeout logic was not rewritten. Added regression coverage for signed URL success, signed-URL ClientError returning `None` without leaking signatures, `InvalidAccessKeyId`, and a successful mocked `put`/`exists`. Existing Phase 9.4 tests already cover missing objects, AccessDenied, NoSuchBucket, HTTP 500/503, SlowDown, retries, timeout budget, and cleanup outbox authorization/transient paths.
+
+Live provider test `test_optional_live_s3_provider_roundtrip` is skipped unless dedicated `TEST_S3_BUCKET` / `TEST_S3_ACCESS_KEY_ID` / `TEST_S3_SECRET_ACCESS_KEY` are set. It uses prefix `docuflow-phase95/<uuid>/` and deletes only that object. **Mocked tests do not establish real provider compatibility.**
+
+**D. Cleanup and reliability — locally tested (existing Phase 9.2/9.3 suites; no code change).**
+
+Existing tests already cover lease acquisition, heartbeat, owner-token finish, expired reclaim, concurrent skip, crash during deletion, transient storage failure, authorization failure, duplicate deletion, retry exhaustion, owner-token mismatch, and not processing another worker’s active lease. Credit refund idempotency remains in the Phase 9.2 refund suite. No extra always-on worker was added.
+
+**E. Health and readiness — locally tested; not staging verified.**
+
+`/health` remains process liveness (`status` + `service`). `/ready` checks database, storage, and Redis-only-when-RQ, and returns `ready` or `degraded` without credentials, connection strings, signed URLs, or exception text. A regression test now poisons storage with a fake DSN/signature/traceback and asserts those strings never appear in the JSON body. Endpoints were not duplicated.
+
+**F. Render deployment readiness — documented and locally asserted; not deployed.**
+
+`infra/render.yaml` still has Next.js web, FastAPI API (`JOB_BROKER=inline`, `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`), PostgreSQL, cleanup cron (`python -m docuflow.migrate && python -m docuflow.cleanup`), optional Free Redis, `healthCheckPath: /health`, and migrate-on-boot. No paid worker. Blueprint was not applied. Production environment settings were not modified.
+
+**G. Security and billing regression — locally tested; live payments not activated.**
+
+Cross-user GET/download/delete remain 403. CSRF, credit reservation/settlement/refund, duplicate payment webhooks, and subscription upsert coverage from earlier phases still pass in the unit suite. No live Stripe or Midtrans calls.
+
+Implemented in this phase (smallest verification gaps only):
+
+- Isolated PostgreSQL Alembic scenarios for `0003` (upgrade from `0002`, data preservation, index, current/head, app lease compatibility, disposable downgrade).
+- Readiness secret-leak regression, signed-URL mocks, `InvalidAccessKeyId`, optional skipped live S3 test, download isolation assertion, Blueprint `EMAIL_BACKEND` / health-check / migrate assertions.
+- Documentation of actual verification layers.
+
+Bugs fixed: none in application code. Phase 9.4 storage behavior was preserved.
+
+Not implemented: production deploy, production migration, staging deploy, live object-storage verification, live billing, live AI, paid worker, Redis as a required service.
+
+Local verification (this branch):
+
+```
+uv run pytest -q -m "not integration"
+# 184 passed, 1 skipped, 10 deselected
+
+TEST_DATABASE_URL=postgresql+psycopg://docuflow:docuflow@127.0.0.1:5432/docuflow_test \
+  uv run pytest -q -m integration
+# 10 passed, 186 deselected
+
+uv run ruff check src tests
+# All checks passed
+
+uv run mypy src/docuflow
+# Success: no issues found in 71 source files
+
+git diff --check
+# clean
+```
+
+The skipped test is the optional live S3 provider roundtrip (no `TEST_S3_*` credentials in this environment). Web lint/typecheck/tests/build were **not run locally** (no frontend or shared-interface changes); GitHub Actions ran them on this branch and they passed.
+
+GitHub Actions for this feature branch on `a52929d` (workflow **CI**,
+[run 42024681610](https://github.com/mufea/docuflow-ai/actions/runs/42024681610),
+conclusion **success**, 5 Nov 2026, 19:08 Asia/Jakarta):
+
+- unit: 184 passed, 1 skipped, 10 deselected
+- integration: 10 passed, 185 deselected (`postgres:16`)
+- ruff passed; mypy 71 files; web 15 tests passed (lint/typecheck/build job succeeded)
+
 Staging deployment: **not performed.**
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 Production migration: **not performed.**
 
 ## Next recommended work
 
-1. Review Phase 9.4. Do not merge or deploy from this agent unless authorized.
+1. Review Phase 9.5. Do not merge or deploy from this agent unless authorized.
 2. Apply Alembic `0003` only on an approved **staging** database, using the procedure in `docs/DEPLOYMENT.md`. Do not run it against production from this environment.
-3. If an older workspace still has an idle paid `docuflow-worker`, stop or delete it in the dashboard only after confirming `JOB_BROKER=inline`.
-4. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
-5. Provide sandbox Stripe/Midtrans keys only if billing should be exercised end-to-end. Live charges stay off.
-6. Provide an AI key only if live analysis should replace the mock provider. Keep `AI_PROVIDER=mock` until then.
-7. Production email needs a non-console backend **and** a host that can reach SMTP (Render Free web services block outbound 25/465/587). Do not enable `EMAIL_BACKEND=smtp` on Free without verifying current Render network policy.
-8. Queue-based scaling remains a separate later phase (`JOB_BROKER=rq` + paid worker).
+3. Provide dedicated non-production `TEST_S3_*` credentials if live object-storage compatibility should be recorded. Do not use the production bucket or production object prefixes.
+4. If an older workspace still has an idle paid `docuflow-worker`, stop or delete it in the dashboard only after confirming `JOB_BROKER=inline`.
+5. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
+6. Provide sandbox Stripe/Midtrans keys only if billing should be exercised end-to-end. Live charges stay off.
+7. Provide an AI key only if live analysis should replace the mock provider. Keep `AI_PROVIDER=mock` until then.
+8. Production email needs a non-console backend **and** a host that can reach SMTP (Render Free web services block outbound 25/465/587). Do not enable `EMAIL_BACKEND=smtp` on Free without verifying current Render network policy.
+9. Queue-based scaling remains a separate later phase (`JOB_BROKER=rq` + paid worker).
