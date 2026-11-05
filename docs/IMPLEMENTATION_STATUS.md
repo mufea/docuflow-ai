@@ -459,7 +459,7 @@ Scope: verification-first. No product features, no paid worker, no Redis require
 
 ### Workstream results
 
-**A. Repository and CI audit — CI verified on `main` @ `72beac5`; this branch locally tested.**
+**A. Repository and CI audit — CI verified on `main` @ `72beac5` and on this branch @ `a52929d`.**
 
 - Repository: `https://github.com/mufea/docuflow-ai`
 - `origin/main` HEAD: `72beac5fb47438bf0589cf7521192eadab917e7d` (Merge PR #7). Matches the expected baseline.
@@ -474,7 +474,17 @@ Scope: verification-first. No product features, no paid worker, no Redis require
   | Conclusion | success |
   | Timestamp | 5 Nov 2026, 18:46 Asia/Jakarta (`createdAt` 2026-11-05T11:46:21Z) |
 
-  CI workflow itself was not modified. This branch’s CI is **not yet verified** until the branch is pushed.
+  CI workflow itself was not modified.
+
+- GitHub Actions on this feature branch (implementation commit `a52929d`):
+
+  | Field | Value |
+  | --- | --- |
+  | Workflow | CI |
+  | Run URL | https://github.com/mufea/docuflow-ai/actions/runs/42024681610 |
+  | Commit SHA | `a52929d8c48822fdd1330ce9a39b2250c37794c9` |
+  | Conclusion | success (2 checks: Python tests and checks; Web lint, typecheck, tests, and build) |
+  | Timestamp | 5 Nov 2026, 19:08 Asia/Jakarta (`createdAt` 2026-11-05T12:08:55Z) |
 
 **B. Database migration `0003_cost_efficient_reliability` — locally tested on isolated PostgreSQL; not staging verified; not production verified.**
 
@@ -536,9 +546,15 @@ git diff --check
 # clean
 ```
 
-The skipped test is the optional live S3 provider roundtrip (no `TEST_S3_*` credentials in this environment). Web lint/typecheck/tests/build: **not run** (no frontend or shared-interface changes).
+The skipped test is the optional live S3 provider roundtrip (no `TEST_S3_*` credentials in this environment). Web lint/typecheck/tests/build were **not run locally** (no frontend or shared-interface changes); GitHub Actions ran them on this branch and they passed.
 
-GitHub Actions for this feature branch: **not yet verified** (run starts after push).
+GitHub Actions for this feature branch on `a52929d` (workflow **CI**,
+[run 42024681610](https://github.com/mufea/docuflow-ai/actions/runs/42024681610),
+conclusion **success**, 5 Nov 2026, 19:08 Asia/Jakarta):
+
+- unit: 184 passed, 1 skipped, 10 deselected
+- integration: 10 passed, 185 deselected (`postgres:16`)
+- ruff passed; mypy 71 files; web 15 tests passed (lint/typecheck/build job succeeded)
 
 Staging deployment: **not performed.**
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
