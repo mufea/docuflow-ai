@@ -22,18 +22,19 @@ Do not enable this mode unless `docuflow-worker` is running. Copy the worker fro
 
 ## Graceful shutdown
 
-The worker listens for SIGTERM and requests RQ stop. The API relies on Uvicorn SIGTERM handling. In-flight inline jobs on a Free API die when the instance spins down; remaining `queued` rows stay in Postgres and are kicked again on the next job GET.
+The worker listens for SIGTERM and requests RQ stop. The API relies on Uvicorn SIGTERM handling. In-flight inline jobs on a Free API die when the instance spins down; remaining `queued` rows stay in Postgres. The API re-enqueues up to 100 `queued` jobs at process start and again on the next job GET. `processing` jobs are not reset; cleanup fails them after `JOB_STALE_MINUTES` and refunds once.
 
 ## Health
 
-- `GET /health` — liveness only. Render should use this path.
-- `GET /ready` — database `SELECT 1`, Redis ping when `JOB_BROKER=rq`, and storage `ping()` (S3 `head_bucket` or a writable local directory). Storage is never reported true without a check. `rq_workers` is informational and does not fail readiness.
+- `GET /health` — liveness only (HTTP 200 if the process is up). Render should use this path.
+- `GET /ready` — HTTP 200 when required dependencies can accept traffic; HTTP 503 when database, storage, or Redis (only if `JOB_BROKER=rq`) fails. Storage is never reported true without a check. `rq_workers` is informational and does not fail readiness. The JSON body does not echo secrets.
 
 ## Backups
 
-- PostgreSQL: enable Render point-in-time recovery / daily backups.
-- Object storage: enable bucket versioning.
-- Redis is expendable. Free Key Value is in-memory and loses the queue on restart. Re-open a `queued` job or create a new job; the API re-enqueues from Postgres.
+See **Database backup and recovery** in `docs/DEPLOYMENT.md`. Do not assume the
+live Render Postgres plan matches the Blueprint. Free Postgres has no managed
+backups; take `pg_dump` copies yourself. Object-storage versioning is a
+separate control on the bucket you actually use. Redis is expendable.
 
 ## Credits
 
@@ -70,7 +71,7 @@ python -m docuflow.cleanup
 
 ## Incidents
 
-1. Check `/health` then `/ready`. A `degraded` ready payload names the failed dependency without secrets.
+1. Check `/health` then `/ready`. HTTP 503 with `status=degraded` names the failed dependency without secrets.
 2. Inspect failed jobs in `/admin`.
 3. If jobs stay `queued`, confirm `JOB_BROKER=inline` or that the paid worker is running.
 4. Confirm S3 credentials in the dashboard without printing them.

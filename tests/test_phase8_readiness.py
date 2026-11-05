@@ -67,7 +67,7 @@ def test_ready_reports_storage_failure(client: TestClient, app) -> None:
 
     app.state.ctx.storage = DeadStorage()
     response = client.get("/ready")
-    assert response.status_code == 200
+    assert response.status_code == 503
     body = response.json()
     assert body["status"] == "degraded"
     assert body["checks"]["storage"] is False
@@ -78,7 +78,7 @@ def test_ready_reports_redis_failure_when_rq(client: TestClient, app) -> None:
     app.state.ctx.settings.job_broker = "rq"
     app.state.ctx.settings.redis_url = "redis://127.0.0.1:1/0"
     response = client.get("/ready")
-    assert response.status_code == 200
+    assert response.status_code == 503
     assert response.json()["checks"]["redis"] is False
     assert response.json()["status"] == "degraded"
 
@@ -101,6 +101,7 @@ def test_alembic_config_resolves_repo_ini() -> None:
 
 def test_health_is_liveness_only(client: TestClient) -> None:
     response = client.get("/health")
+    assert response.status_code == 200
     assert response.json() == {"status": "ok", "service": "docuflow-api"}
 
 

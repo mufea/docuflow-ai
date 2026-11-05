@@ -69,9 +69,10 @@ export TEST_S3_REGION=auto
 uv run pytest -q -m provider
 ```
 
-Objects are written only under `docuflow-phase95/<uuid>/` and that key is
+Objects are written only under `docuflow-test/<uuid>/` and that key is
 deleted afterward. Do not point these variables at the production bucket or
-production prefixes.
+production prefixes. CI does not set `TEST_S3_*`, so the test is skipped and
+must not fail the suite.
 
 ## Verification layers
 
@@ -81,6 +82,6 @@ Passing local or CI tests is not a production deploy.
 | --- | --- |
 | Local | Commands in this file, run on a laptop or cloud agent |
 | CI | GitHub Actions on the commit (`postgres:16` service for `-m integration`) |
-| Provider | Dedicated `TEST_S3_*` bucket; **pending** in Phase 9.5 |
-| Staging deploy | Separate Render (or other) environment; not done in Phase 9.5 |
+| Provider | Dedicated `TEST_S3_*` bucket; **pending** in Phase 9.6 |
+| Staging deploy | Separate Render (or other) environment; not done in Phase 9.6 |
 | Production deploy | Owner-approved live workspace; **not performed** |

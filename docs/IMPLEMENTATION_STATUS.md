@@ -440,9 +440,13 @@ Staging deployment: **not performed.**
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 Production migration: **not performed.**
 
-## Phase 9.5 — Staging and production readiness verification — on `cursor/phase-9-5-staging-readiness`
+## Phase 9.5 — Staging and production readiness verification — merged
 
-Base: GitHub `main` @ `72beac5fb47438bf0589cf7521192eadab917e7d` (Phase 9.4 already merged; matches the expected merge SHA). Implementation commit of Phase 9.4 is `de5e8363edcd2ecd1b374759a9bb9afaa28f683f`. This phase does not repeat Phases 9.1–9.4.
+Merged to `main` as `068d6afadc445218336f8702e66a5c89c94055af`
+(`Merge pull request #8 from mufea/cursor/phase-9-5-staging-readiness`).
+Feature branch `cursor/phase-9-5-staging-readiness` is historical.
+
+Base at the time of the work: GitHub `main` @ `72beac5fb47438bf0589cf7521192eadab917e7d` (Phase 9.4 already merged; matches the expected merge SHA). Implementation commit of Phase 9.4 is `de5e8363edcd2ecd1b374759a9bb9afaa28f683f`. This phase did not repeat Phases 9.1–9.4.
 
 Scope: verification-first. No product features, no paid worker, no Redis requirement, default `JOB_BROKER=inline`, `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`. No production deploy, no production migration, no live Stripe/Midtrans/AI/email.
 
@@ -560,14 +564,81 @@ Staging deployment: **not performed.**
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 Production migration: **not performed.**
 
+## Phase 9.6 — Production safety and reliability — on `cursor/phase-9-6-production-safety`
+
+Base: GitHub `main` @ `068d6afadc445218336f8702e66a5c89c94055af` (Phase 9.5 already merged via PR #8). This phase does not repeat Phases 9.1–9.5.
+
+Scope: fail-fast production configuration, `/ready` HTTP semantics, queued-job recovery on process start, database backup documentation, optional live S3 test hygiene, and documentation layers. No product features, no paid worker, no new Redis requirement, no production deploy.
+
+### Workstream results
+
+**A. Production configuration fail-fast — implemented and locally tested.**
+
+`DOCUFLOW_ENV=production` (`Settings.env`, not a separate `APP_ENV` flag) now refuses to start when critical configuration is unsafe: weak/default/short secret, SQLite, non-S3 storage or missing S3 credentials, or `JOB_BROKER=rq` without a `redis://` / `rediss://` URL. Optional gaps (`AI_PROVIDER=mock`, `EMAIL_BACKEND=console`) are warnings only and do not block startup. Redis is not required for `JOB_BROKER=inline`. Development and test environments still start on SQLite. Secret values and DSNs are not written to logs.
+
+**B. Readiness HTTP status — implemented and locally tested.**
+
+`/health` remains process liveness and stays HTTP 200 when dependencies fail. `/ready` returns HTTP 200 when required dependencies are up and HTTP 503 when database, storage, or (only if `JOB_BROKER=rq`) Redis fails. Zero RQ workers remain informational. Render `healthCheckPath` is still `/health`.
+
+**C. Background job recovery — implemented and locally tested.**
+
+On API lifespan start, up to 100 durable `queued` rows are re-enqueued. Duplicate delivery is safe because the runner claims only `status=queued`. `processing` rows are not reset; stale-job cleanup still fails them after `JOB_STALE_MINUTES` with a single refund. No new queue, schema, or paid worker.
+
+**D. Database backup documentation — documented; not executed against any hosted database.**
+
+`docs/DEPLOYMENT.md` now has a practical `pg_dump` / restore checklist. It does **not** claim that a live production database is on the Render Free plan. Backup/restore was not run against staging or production.
+
+**E. Optional live S3 provider test — implemented; provider verification pending.**
+
+The existing skipped roundtrip still requires dedicated `TEST_S3_*` credentials, uses prefix `docuflow-test/<uuid>/`, and deletes only that key. **Not provider verified.**
+
+**F. Deployment documentation — updated.**
+
+Verification layers distinguish implemented / locally tested / CI verified / provider / staging / production. Phase 9.5 historical results are unchanged except the verified merge of PR #8 onto `main` @ `068d6af`.
+
+Bugs fixed:
+
+- Production could boot with SQLite, filesystem storage, or the development secret (errors were logged only).
+- `/ready` returned HTTP 200 while reporting `degraded`, which is not a usable readiness signal.
+- `queued` jobs after an API restart waited for a client GET before re-enqueue (now also recovered at startup).
+
+Not implemented: production deploy, production/staging migration, live S3, live billing, live AI, paid worker.
+
+Local verification (this branch):
+
+```
+uv run pytest -q -m "not integration"
+# 197 passed, 1 skipped, 10 deselected
+
+TEST_DATABASE_URL=postgresql+psycopg://docuflow:docuflow@127.0.0.1:5432/docuflow_test \
+  uv run pytest -q -m integration
+# 10 passed, 198 deselected
+
+uv run ruff check src tests
+# All checks passed
+
+uv run mypy src/docuflow
+# Success: no issues found in 72 source files
+
+git diff --check
+# clean
+```
+
+The skipped test is the optional live S3 provider roundtrip (no `TEST_S3_*` credentials). Web lint/typecheck/tests/build: **not run locally** (no frontend or shared-interface changes). GitHub Actions for this feature branch: **not yet verified** (run starts after push).
+
+Staging deployment: **not performed.**
+Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
+Production migration: **not performed.**
+
 ## Next recommended work
 
-1. Review Phase 9.5. Do not merge or deploy from this agent unless authorized.
+1. Review Phase 9.6. Do not merge or deploy from this agent unless authorized.
 2. Apply Alembic `0003` only on an approved **staging** database, using the procedure in `docs/DEPLOYMENT.md`. Do not run it against production from this environment.
-3. Provide dedicated non-production `TEST_S3_*` credentials if live object-storage compatibility should be recorded. Do not use the production bucket or production object prefixes.
-4. If an older workspace still has an idle paid `docuflow-worker`, stop or delete it in the dashboard only after confirming `JOB_BROKER=inline`.
-5. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
-6. Provide sandbox Stripe/Midtrans keys only if billing should be exercised end-to-end. Live charges stay off.
-7. Provide an AI key only if live analysis should replace the mock provider. Keep `AI_PROVIDER=mock` until then.
-8. Production email needs a non-console backend **and** a host that can reach SMTP (Render Free web services block outbound 25/465/587). Do not enable `EMAIL_BACKEND=smtp` on Free without verifying current Render network policy.
-9. Queue-based scaling remains a separate later phase (`JOB_BROKER=rq` + paid worker).
+3. Confirm the actual Render Postgres plan in the dashboard before relying on managed backups. Free Postgres has none; take `pg_dump` copies yourself.
+4. Provide dedicated non-production `TEST_S3_*` credentials if live object-storage compatibility should be recorded. Do not use the production bucket or production object prefixes.
+5. If an older workspace still has an idle paid `docuflow-worker`, stop or delete it in the dashboard only after confirming `JOB_BROKER=inline`.
+6. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
+7. Provide sandbox Stripe/Midtrans keys only if billing should be exercised end-to-end. Live charges stay off.
+8. Provide an AI key only if live analysis should replace the mock provider. Keep `AI_PROVIDER=mock` until then.
+9. Production email needs a non-console backend **and** a host that can reach SMTP (Render Free web services block outbound 25/465/587). Do not enable `EMAIL_BACKEND=smtp` on Free without verifying current Render network policy.
+10. Queue-based scaling remains a separate later phase (`JOB_BROKER=rq` + paid worker).

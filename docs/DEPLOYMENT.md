@@ -53,8 +53,8 @@ and are **not** a billing quote:
 
 | Layer | What it means | Status |
 | --- | --- | --- |
-| Local verification | pytest / ruff / mypy / web lint-typecheck-test-build | See `docs/IMPLEMENTATION_STATUS.md` (Phase 9.5) |
-| CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.4 merge CI succeeded on `72beac5` ([run 42021659758](https://github.com/mufea/docuflow-ai/actions/runs/42021659758), 5 Nov 2026, 18:46 Asia/Jakarta). Phase 9.5 branch CI succeeded on `a52929d` ([run 42024681610](https://github.com/mufea/docuflow-ai/actions/runs/42024681610), 5 Nov 2026, 19:08 Asia/Jakarta) |
+| Local verification | pytest / ruff / mypy / web lint-typecheck-test-build | See `docs/IMPLEMENTATION_STATUS.md` (Phase 9.6) |
+| CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.5 merge is `068d6af` (PR #8). Phase 9.6 CI exists only after this branch is pushed |
 | Provider verification | Dedicated test bucket + `TEST_S3_*` credentials | **Pending** — mocked S3 tests are not provider verification |
 | Staging deployment | Non-production environment with migrations applied | **Not performed** |
 | Production deployment | Live Render workspace serving users | **NOT DEPLOYED — Awaiting owner approval** |
@@ -329,9 +329,126 @@ that still has `JOB_BROKER=rq` from an older Blueprint should be changed to
 
 ## Health
 
-- `/health` liveness (no dependency checks)
-- `/ready` checks database, Redis when `JOB_BROKER=rq`, and object storage
-  (`head_bucket` or a writable local directory). It does not echo secrets.
+- `/health` — liveness only. HTTP 200 if the API process is up. Render
+  `healthCheckPath` stays `/health` so a dependency outage does not mark the
+  Free web service as fully dead.
+- `/ready` — HTTP 200 when required dependencies can accept traffic; HTTP 503
+  with `status=degraded` when database, object storage, or Redis (only if
+  `JOB_BROKER=rq`) fails. Zero RQ workers is informational and does not fail
+  readiness. The JSON body does not echo secrets, DSNs, signed URLs, or
+  stack traces.
+
+## Database backup and recovery
+
+This section is a runbook. It was **not** executed against staging or
+production from this environment. The Blueprint lists a Free Postgres
+instance; the **live** Render plan must be read from the dashboard. Do not
+assume they match.
+
+### Persistence risk
+
+| Kind | What it is | Typical Render Free Postgres | Paid Render Postgres (confirm plan) |
+| --- | --- | --- | --- |
+| Backup | A point-in-time file you can restore (for example `pg_dump`) | **Not provided.** You must take your own dumps. | Often daily backups; confirm in the dashboard |
+| Snapshot | A disk/image copy of the instance | Not a documented Free feature | May exist on paid instance types |
+| Point-in-time recovery (PITR) | Restore to a timestamp using WAL | **Not available on Free** | Paid plans may offer it; confirm before relying on it |
+
+Free Postgres also has no managed pooling, a 30-day expiry after creation, and
+a 14-day grace period. Losing the instance without a dump is permanent data
+loss.
+
+### Recommended production backup (lowest extra cost)
+
+1. Confirm the dashboard plan. If it is Free, do not wait for Render backups.
+2. Take a logical dump on a schedule you control (`pg_dump`). Store it
+   **outside** the database instance (another machine, object storage you
+   already pay for, or encrypted local disk).
+3. Keep at least three successful dumps (for example daily, with 7-day
+   retention) unless a paid PITR plan is confirmed.
+4. Do **not** add a Render cron whose only job is backup unless the owner
+   accepts the extra runtime cost. A laptop or existing jump host is enough.
+5. Redis/Key Value is expendable. Do not back it up. Job rows live in
+   Postgres.
+6. Object storage (R2/S3) is a separate recovery domain. Enable versioning on
+   the **test or production bucket you actually use**, if the provider offers
+   it. That is not a Postgres backup.
+
+### `pg_dump` (logical backup)
+
+Use a role that can read application tables. Do not put the password on the
+command line or in this repository. Prefer `.pgpass` or `PGPASSWORD` in an
+operator shell that is not logged.
+
+Print only host and database name before you run anything. Abort if the host
+is production and you do not have owner approval.
+
+```bash
+# Replace HOST and DB only. Do not paste passwords into tickets or docs.
+pg_dump --format=custom --no-owner --no-acl \
+  --host HOST --port 5432 --username USER --dbname DB \
+  --file docuflow-$(date -u +%Y%m%dT%H%M%SZ).dump
+```
+
+`--format=custom` is the `pg_restore` format. A directory of SQL is fine for
+tiny databases (`pg_dump --format=plain`), but custom format restores more
+selectively.
+
+### Verify a dump
+
+```bash
+pg_restore --list docuflow-YYYYMMDDThhmmssZ.dump | head
+# Confirm expected tables such as users, jobs, documents, credit_ledger,
+# cleanup_leases, storage_deletions. The dump file size should be non-zero.
+```
+
+Keep the listing output; it is the cheapest proof the file is not empty.
+
+### Restore (disposable target only)
+
+Restore onto an **empty** database you are allowed to destroy. Never restore
+onto the live production database from this environment.
+
+```bash
+# Create an empty database first. Then:
+pg_restore --no-owner --no-acl --dbname DB --host HOST --port 5432 --username USER \
+  docuflow-YYYYMMDDThhmmssZ.dump
+```
+
+If you used `--format=plain`, pipe the SQL file through `psql` instead of
+`pg_restore`. After restore, run `uv run alembic current` against that
+database and compare to `alembic heads`. Hit `/health` and `/ready` only on a
+staging API pointed at that restored database.
+
+### Recovery checklist
+
+1. Identify the incident (data corruption, dropped table, lost Render
+   instance, bad migration).
+2. Stop writers if the source database is still reachable (scale the API to
+   zero or disable the Blueprint services). Owner approval required.
+3. Choose the newest dump that predates the incident.
+4. Restore onto a new database, not over the only remaining copy.
+5. Verify row counts for `users`, `jobs`, and `credit_ledger` against
+   expectations you recorded when the dump was taken.
+6. Point a **staging** API at the restored database and check `/health` plus
+   `/ready`.
+7. Production cutover requires owner approval.
+
+### Data-loss and downtime
+
+| Failure | Without a dump | With a recent dump |
+| --- | --- | --- |
+| Free instance expired or deleted | Permanent loss | Restore time + DNS/config cutover |
+| Accidental `DROP` / bad migration | Permanent unless PITR exists | Restore to a new database; downtime while you cut over |
+| Render regional outage | Service down; data may return | Dump is a second copy, not high availability |
+
+Expect downtime measured by dump size and how long it takes to re-point the
+API. This runbook is not a high-availability design.
+
+### Retention (cost-efficient)
+
+Keep the last 7 daily dumps plus one dump from before each migration. Delete
+older files. Encrypted object storage you already use is cheaper than a new
+backup product. Do not add a paid backup add-on from this phase.
 
 ## Object storage
 

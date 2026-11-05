@@ -12,6 +12,20 @@ from docuflow.dsn import normalize_database_url
 from docuflow.security.hosts import origin_variants
 
 DEV_SECRET_VALUES = {"dev-only-change-me-use-32-plus-chars!!"}
+_WEAK_SECRET_VALUES = DEV_SECRET_VALUES | {
+    "changemechangemechangemechangeme",
+    "passwordpasswordpasswordpassword",
+    "secretsecretsecretsecretsecretse",
+}
+_REDIS_SCHEMES = {"redis", "rediss"}
+
+
+class ProductionConfigError(RuntimeError):
+    """Raised when production settings are unsafe to start the API."""
+
+    def __init__(self, errors: list[str]) -> None:
+        self.errors = list(errors)
+        super().__init__("Production configuration is incomplete.")
 
 
 class Settings(BaseSettings):
@@ -132,11 +146,12 @@ class Settings(BaseSettings):
         return self
 
     def production_readiness_errors(self) -> list[str]:
+        """Critical production configuration problems. Empty outside production."""
         if not self.is_production:
             return []
         errors: list[str] = []
         secret = self.secret_key.get_secret_value()
-        if len(secret) < 32 or secret in DEV_SECRET_VALUES:
+        if self._secret_is_weak(secret):
             errors.append("DOCUFLOW_SECRET_KEY must be a unique value of at least 32 characters.")
         if self.database_url.startswith("sqlite"):
             errors.append("DATABASE_URL must be PostgreSQL in production. Render disks are ephemeral.")
@@ -146,9 +161,34 @@ class Settings(BaseSettings):
             errors.append("S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY are required when STORAGE_BACKEND=s3.")
         elif not self.s3_bucket.strip():
             errors.append("S3_BUCKET is required when STORAGE_BACKEND=s3.")
-        if self.job_broker == "rq" and not self.redis_url.strip():
-            errors.append("REDIS_URL is required when JOB_BROKER=rq.")
+        if self.job_broker == "rq":
+            redis = self.redis_url.strip()
+            if not redis:
+                errors.append("REDIS_URL is required when JOB_BROKER=rq.")
+            else:
+                parsed = urlparse(redis)
+                if parsed.scheme not in _REDIS_SCHEMES or not parsed.hostname:
+                    errors.append("REDIS_URL must be a redis:// or rediss:// URL when JOB_BROKER=rq.")
         return errors
+
+    def production_readiness_warnings(self) -> list[str]:
+        """Optional production gaps. These must not block startup."""
+        if not self.is_production:
+            return []
+        warnings: list[str] = []
+        if self.ai_provider == "mock":
+            warnings.append("AI_PROVIDER is mock; live analysis is disabled.")
+        if self.email_backend == "console":
+            warnings.append("EMAIL_BACKEND is console; outbound email is not sent.")
+        return warnings
+
+    @staticmethod
+    def _secret_is_weak(secret: str) -> bool:
+        if len(secret) < 32:
+            return True
+        if secret in _WEAK_SECRET_VALUES or secret.lower() in _WEAK_SECRET_VALUES:
+            return True
+        return len(set(secret)) == 1
 
     @property
     def cors_origin_list(self) -> list[str]:
