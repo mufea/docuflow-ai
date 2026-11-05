@@ -22,6 +22,10 @@ Redis is optional. It is only a delivery mechanism when `JOB_BROKER=rq`. Job
 status, credits, cleanup leases, and the storage-deletion outbox live in
 Postgres.
 
+Default production shape (see `infra/render.yaml`): web + API + Postgres +
+object storage + one cleanup cron. Redis and a paid worker are scaling
+options (`infra/render.scaling.yaml`), not part of the cost-efficient default.
+
 ## Python package layout
 
 `src/docuflow` is the application kernel:
@@ -63,4 +67,4 @@ Balances are integers. `available = balance - reserved`. Ledger idempotency keys
 
 ## AI
 
-Text is extracted locally first. Chunks keep page metadata. The mock provider is deterministic and only cites pages that exist in the extracted text. Document content is wrapped as untrusted data. Live OpenAI-compatible calls require `AI_PROVIDER=openai_compatible` and `AI_API_KEY` on the server.
+Text is extracted locally first. Chunks keep page metadata. The mock provider is deterministic and only cites pages that exist in the extracted text. Document content is wrapped as untrusted data. The Blueprint keeps `AI_PROVIDER=mock`. Live OpenAI-compatible calls require `AI_PROVIDER=openai_compatible` and `AI_API_KEY` on the server; they are not enabled in this phase. Email defaults to the console backend; SMTP is opt-in and blocked on Render Free SMTP ports.

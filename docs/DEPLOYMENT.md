@@ -19,9 +19,44 @@ The Blueprint is `infra/render.yaml` (not the repo root). Do not treat a
 Blueprint sync as a completed production deploy. This repository is **NOT
 DEPLOYED**.
 
-Free limits that matter here: web services spin down after 15 minutes idle and
-wake in about a minute; Free Postgres is 1 GB, one per workspace, and expires
-after 30 days; Free Key Value is in-memory only and loses data on restart.
+## Required vs optional services
+
+| Service | Required for current default? | Notes |
+| --- | --- | --- |
+| `docuflow-web` | Yes | Next.js UI |
+| `docuflow-api` | Yes | FastAPI; runs jobs when `JOB_BROKER=inline` |
+| `docuflow-db` | Yes | PostgreSQL is the source of truth |
+| Object storage (R2/S3) | Yes in production | Render disks are ephemeral |
+| `docuflow-cleanup` cron | Yes for retention | Billed only while the job runs; disable the API in-process loop (`CLEANUP_INTERVAL_SECONDS=0`) |
+| `docuflow-redis` | Optional | Unused while jobs are inline; kept for a future RQ worker |
+| `docuflow-worker` | Optional / not in default Blueprint | Paid. Use only with `JOB_BROKER=rq` |
+
+Inline processing limits: one Free API instance, jobs share the web request CPU/memory budget, spin-down kills in-flight inline work, large PDFs can time out. A dedicated worker is justified when job runtime regularly exceeds the Free web budget, when you need isolation from HTTP, or when you want more than one consumer.
+
+Provider limits change. Confirm the following against the current Render account
+and [Render Free documentation](https://render.com/docs/free) before relying on
+them. Values below were checked against that page on 5 Nov 2026 (Asia/Jakarta)
+and are **not** a billing quote:
+
+- Free web services spin down after 15 minutes idle and take about a minute to
+  wake. They have an ephemeral filesystem, 750 Free instance hours per workspace
+  per month, and cannot receive private-network traffic.
+- Free Postgres: 1 GB, 100 connections, one active database per workspace,
+  **no backups**, **no managed pooling**, expires 30 days after creation
+  (14-day grace before deletion).
+- Free Key Value: one per workspace, in-memory only, data lost on restart.
+- Background workers are not a Free service type. A dedicated worker is paid
+  (`infra/render.scaling.yaml` uses `0.5c-512mb`).
+- Free web services cannot send outbound traffic on SMTP ports 25/465/587.
+
+## Verification layers
+
+| Layer | What it means | Status |
+| --- | --- | --- |
+| Local verification | pytest / ruff / mypy / web lint-typecheck-test-build | See `docs/IMPLEMENTATION_STATUS.md` |
+| CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.2 merge CI succeeded on `6be627d`. Phase 9.3 CI exists only after this branch is pushed |
+| Staging deployment | Non-production environment with migrations applied | **Not performed** |
+| Production deployment | Live Render workspace serving users | **NOT DEPLOYED — Awaiting owner approval** |
 
 ## First deploy on Render
 
@@ -191,16 +226,60 @@ Job broker (choose one mode; do not mix):
 | Worker deployment | `rq` on API | Paid worker from `infra/render.scaling.yaml` | Required. Same `REDIS_URL` and `RQ_QUEUE_NAME=docuflow` |
 
 Also used by cleanup: `CLEANUP_LEASE_MINUTES` (default 5) and
-`STORAGE_DELETE_LEASE_MINUTES` (default 5). Alembic revision
+`STORAGE_DELETE_LEASE_MINUTES` (default 5). S3 HTTP timeouts are derived from
+the deletion lease (each attempt stays under half the lease). Alembic revision
 `0003_cost_efficient_reliability` adds lease timestamps on `cleanup_leases`
 and reclaim fields on `storage_deletions`. Do not run that migration against
-production from this environment.
+production from this environment. See the staging procedure below.
 
 Keep `OCR_ENABLED=true`. Native Render Python images do not include Tesseract;
 OCR uses the bundled RapidOCR ONNX engine in that case. Tesseract is used when
 it is present on PATH.
 
-Optional: SMTP, Stripe, Midtrans, `AI_API_KEY`.
+Optional: SMTP, Stripe, Midtrans, `AI_API_KEY`. Defaults stay mock/console until
+those are intentionally enabled. See **AI and email readiness** below.
+
+## Staging migration (Alembic `0003`)
+
+Do this only against a **staging** database. Do not run it against production
+from this environment. Do not delete or recreate the production database.
+
+1. **Verify the target.** Print the destination DSN host and database name
+   (not the password). Abort if the host is the production Render Postgres.
+2. **Backup / recovery.** Free Render Postgres has **no managed backups**.
+   Take a `pg_dump` (or use a paid plan with PITR) *before* migrating. Store
+   the dump outside the target instance.
+3. **Check the current revision.**
+   `DATABASE_URL=... uv run alembic current`
+   Expected before `0003`: `0002_runtime_reliability`. If `0003` is already
+   current, stop — do not re-run blindly.
+4. **Apply in staging.**
+   `DATABASE_URL=... python -m docuflow.migrate`
+   On PostgreSQL this takes advisory lock `86420138` so two boots do not race.
+5. **Verify schema.** Confirm `cleanup_leases.acquired_at` / `updated_at` and
+   `storage_deletions.started_at` / `lease_until` / `owner_token` exist.
+   `uv run alembic current` should report `0003_cost_efficient_reliability`.
+6. **Health and tests.** Hit staging `/health` and `/ready`. Run
+   `TEST_DATABASE_URL=<staging-or-isolated> uv run pytest -q -m integration`
+   against a throwaway database, never against production.
+7. **Rollback limits.** `alembic downgrade 0002` drops those columns. In-flight
+   leases and deletion owner tokens are lost. Restore from the dump if the
+   downgrade is not enough. There is no automatic Render rollback of Postgres
+   on Free.
+
+Production migration status: **not applied and not verified.**
+
+## AI and email readiness
+
+Blueprint and application defaults:
+
+| Setting | Current default | Production-ready? |
+| --- | --- | --- |
+| `AI_PROVIDER` | `mock` | No. Deterministic local summaries/Q&A only. Live calls need `openai_compatible`, `AI_API_KEY`, and a base URL/model you control. |
+| `EMAIL_BACKEND` | `console` | No. Prints to logs. SMTP needs `EMAIL_BACKEND=smtp`, `SMTP_HOST`, and credentials. Render Free web services block outbound 25/465/587; verify current network policy before enabling SMTP on Free. |
+
+Do not put AI or SMTP secrets in the Next.js bundle. This phase does not switch
+mock providers to live providers and does not add keys.
 
 ## Two Render modes
 
@@ -234,6 +313,8 @@ that still has `JOB_BROKER=rq` from an older Blueprint should be changed to
 | Automated tests | See `docs/IMPLEMENTATION_STATUS.md` |
 | Render configuration | Blueprint present; validate in the Render dashboard |
 | Successful Render deployment | **NOT DEPLOYED** — not verified from this environment |
+| Staging migration `0003` | **Not performed** |
+| Production migration `0003` | **Not performed** |
 | Live provider verification | **Not performed** — requires authorization |
 
 ## Health

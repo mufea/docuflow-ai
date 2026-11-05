@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import uuid
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -70,16 +71,20 @@ class DocumentService:
         self.session.commit()
         self.retry_storage_deletions(limit=1, document_id=document.id)
 
-    def purge_expired(self) -> int:
+    def purge_expired(self, heartbeat: Callable[[], bool] | None = None) -> int:
         now = datetime.now(UTC)
         rows = list(
             self.session.scalars(select(Document).where(Document.deleted_at.is_(None), Document.expires_at < now))
         )
+        marked = 0
         for document in rows:
+            if heartbeat is not None and not heartbeat():
+                break
             document.deleted_at = now
             self._enqueue_deletion(document.id, document.storage_key)
+            marked += 1
         self.session.commit()
-        return len(rows)
+        return marked
 
     def _enqueue_deletion(self, document_id: str, storage_key: str) -> StorageDeletion:
         existing = self.session.scalar(select(StorageDeletion).where(StorageDeletion.storage_key == storage_key))
@@ -104,7 +109,13 @@ class DocumentService:
         self.session.flush()
         return row
 
-    def retry_storage_deletions(self, *, limit: int = 50, document_id: str | None = None) -> dict[str, int]:
+    def retry_storage_deletions(
+        self,
+        *,
+        limit: int = 50,
+        document_id: str | None = None,
+        heartbeat: Callable[[], bool] | None = None,
+    ) -> dict[str, int]:
         now = utc_now()
         lease_minutes = max(1, int(self.settings.storage_delete_lease_minutes))
         owner_token = uuid.uuid4().hex
@@ -114,7 +125,9 @@ class DocumentService:
         failures = 0
         retries = 0
         for row in due:
-            if not self._claim_deletion(row.id, owner_token=owner_token, now=now, lease_minutes=lease_minutes):
+            if heartbeat is not None and not heartbeat():
+                break
+            if not self._claim_deletion(row.id, owner_token=owner_token, lease_minutes=lease_minutes):
                 continue
             current = self.session.get(StorageDeletion, row.id)
             if current is None:
@@ -172,7 +185,8 @@ class DocumentService:
             query = query.where(StorageDeletion.document_id == document_id)
         return list(self.session.scalars(query))
 
-    def _claim_deletion(self, deletion_id: str, *, owner_token: str, now: datetime, lease_minutes: int) -> bool:
+    def _claim_deletion(self, deletion_id: str, *, owner_token: str, lease_minutes: int) -> bool:
+        now = utc_now()
         claimed = self.session.execute(
             update(StorageDeletion)
             .where(

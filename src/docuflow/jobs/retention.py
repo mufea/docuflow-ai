@@ -90,12 +90,16 @@ def run_runtime_cleanup(session: Session, storage: ObjectStorage, settings: Sett
         documents: DocumentService | None = None
         if _hold(guard, stats):
             documents = DocumentService(session, storage, settings)
-            stats.expired_documents = documents.purge_expired()
+            stats.expired_documents = documents.purge_expired(heartbeat=guard.heartbeat)
+            if guard.lost:
+                stats.aborted = True
         if _hold(guard, stats) and documents is not None:
-            deletion = documents.retry_storage_deletions()
+            deletion = documents.retry_storage_deletions(heartbeat=guard.heartbeat)
             stats.storage_deleted += deletion["deleted"]
             stats.storage_failures += deletion["failures"]
             stats.storage_retries += deletion["retries"]
+            if guard.lost:
+                stats.aborted = True
         if stats.aborted:
             logger.warning("cleanup_aborted reason=lease_lost duration_ms=%s", int((time.monotonic() - started) * 1000))
     except Exception:
