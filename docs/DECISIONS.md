@@ -55,6 +55,14 @@ Postgres advisory locks (unsafe with connection pooling). Storage deletes go
 through an outbox whose `in_progress` rows expire and can be reclaimed after a
 crash so a failed S3 call cannot resurrect a document the user already lost.
 
+## Botocore `total_max_attempts` instead of `max_attempts`
+
+On botocore 1.43, a client Config `retries.max_attempts` value means extra
+*retries*, not total tries (`total = retries + 1`). Phase 9.3 passed
+`max_attempts=2` while budgeting two HTTP attempts, so the SDK could issue
+three. Phase 9.4 sets `total_max_attempts=2` (one retry) and keeps
+application outbox retries on `storage_deletions` as a separate bounded loop.
+
 ## Bounded storage timeouts instead of a threaded lease heartbeat
 
 The deletion lease is renewed before the object-storage call. A hung S3 request

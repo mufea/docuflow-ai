@@ -226,8 +226,10 @@ Job broker (choose one mode; do not mix):
 | Worker deployment | `rq` on API | Paid worker from `infra/render.scaling.yaml` | Required. Same `REDIS_URL` and `RQ_QUEUE_NAME=docuflow` |
 
 Also used by cleanup: `CLEANUP_LEASE_MINUTES` (default 5) and
-`STORAGE_DELETE_LEASE_MINUTES` (default 5). S3 HTTP timeouts are derived from
-the deletion lease (each attempt stays under half the lease). Alembic revision
+`STORAGE_DELETE_LEASE_MINUTES` (default 5). S3 HTTP connect+read time for the
+SDK call (`total_max_attempts=2`) is kept at or below half the deletion lease.
+Botocore standard backoff (about 20s per retry, with jitter) is extra and not a
+hard deadline. Alembic revision
 `0003_cost_efficient_reliability` adds lease timestamps on `cleanup_leases`
 and reclaim fields on `storage_deletions`. Do not run that migration against
 production from this environment. See the staging procedure below.

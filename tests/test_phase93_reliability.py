@@ -16,7 +16,7 @@ from docuflow.jobs.retention import run_runtime_cleanup
 from docuflow.models import CleanupLease, Document, StorageDeletion
 from docuflow.services.documents import DocumentService
 from docuflow.storage.s3 import S3Storage
-from docuflow.storage.timeouts import S3_RETRY_ATTEMPTS, storage_call_timeout_seconds
+from docuflow.storage.timeouts import S3_TOTAL_MAX_ATTEMPTS, storage_call_budget, storage_call_timeout_seconds
 from tests.conftest import register_and_login
 from tests.pdf.conftest import write_text_pdf
 from tests.test_jobs_and_security import _upload
@@ -25,10 +25,13 @@ from tests.test_phase92_storage import CountingStorage, _service
 
 def test_storage_http_timeout_stays_under_half_the_lease() -> None:
     for lease_minutes in (1, 5, 15):
+        budget = storage_call_budget(lease_minutes)
         timeout = storage_call_timeout_seconds(lease_minutes)
-        lease_seconds = lease_minutes * 60
+        assert timeout == budget.read_timeout_seconds
         assert 5 <= timeout <= 60
-        assert timeout * S3_RETRY_ATTEMPTS <= lease_seconds // 2
+        assert budget.http_budget_seconds <= budget.lease_seconds // 2
+        assert budget.total_max_attempts == S3_TOTAL_MAX_ATTEMPTS
+        assert budget.designed_ceiling_seconds < budget.lease_seconds
 
 
 def test_s3_client_uses_bounded_timeouts(monkeypatch) -> None:
@@ -51,11 +54,13 @@ def test_s3_client_uses_bounded_timeouts(monkeypatch) -> None:
     )
     S3Storage(settings)
     config = captured["config"]
+    budget = storage_call_budget(5)
     expected = storage_call_timeout_seconds(5)
-    assert config.connect_timeout <= expected
+    assert config.connect_timeout == budget.connect_timeout_seconds
     assert config.read_timeout == expected
-    assert config.retries["max_attempts"] == S3_RETRY_ATTEMPTS
-    assert expected * S3_RETRY_ATTEMPTS < 5 * 60
+    assert config.retries["total_max_attempts"] == S3_TOTAL_MAX_ATTEMPTS
+    assert config.retries.get("max_attempts") is None
+    assert budget.http_budget_seconds <= 5 * 60 // 2
 
 
 def test_s3_timeout_on_delete_and_exists_is_transient(monkeypatch) -> None:

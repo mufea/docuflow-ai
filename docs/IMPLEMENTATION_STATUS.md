@@ -326,9 +326,14 @@ Staging deployment: **not performed.**
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 Production migration of Alembic `0003`: **not applied / not verified.**
 
-## Phase 9.3 — Documentation accuracy, lease follow-up, cost docs — on `cursor/phase-9-3-docs-reliability-followup`
+## Phase 9.3 — Documentation accuracy, lease follow-up, cost docs — merged
 
-Base: GitHub `main` @ `6be627d9102ee5eaa9e1f393a7ddb60d934e1bf1` (Phase 9.2 already merged). This phase does not repeat Phase 9.2.
+Merged to `main` as `15a9e278d64ad8ee17ba3b2b2403d79d48196388`
+(`Merge pull request #6 from mufea/cursor/phase-9-3-docs-reliability-followup`)
+on 5 Nov 2026, 17:33 Asia/Jakarta. Feature branch
+`cursor/phase-9-3-docs-reliability-followup` is historical.
+
+Base at the time of the work: GitHub `main` @ `6be627d9102ee5eaa9e1f393a7ddb60d934e1bf1` (Phase 9.2 already merged). This phase did not repeat Phase 9.2.
 
 Implemented:
 
@@ -372,7 +377,50 @@ git diff --check
 # clean
 ```
 
-GitHub Actions for this feature branch: **not observed until a PR/push run exists.** Do not copy Phase 9.2 CI results forward as Phase 9.3 CI.
+GitHub Actions: observed on `main` after merge as part of later CI history; this section records the Phase 9.3 local counts above. Staging and production were **not** deployed in Phase 9.3.
+
+Staging deployment: **not performed.**
+Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
+Production migration: **not performed.**
+
+## Phase 9.4 — Storage reliability and retry hardening — on `cursor/phase-9-4-storage-reliability`
+
+Base: GitHub `main` @ `15a9e278d64ad8ee17ba3b2b2403d79d48196388` (Phase 9.3 already merged). This phase does not repeat Phase 9.3.
+
+Implemented:
+
+- Botocore client retries use `total_max_attempts=2` (one initial HTTP request and at most one retry). `max_attempts` is not used; on botocore 1.43 that key means extra retries and would have allowed three tries.
+- Timeout budget: `attempts × (connect + read)` stays at or below half of `STORAGE_DELETE_LEASE_MINUTES`. Designed ceiling adds the documented 20s standard-mode backoff cap per retry. This is **not** a hard SDK wall-clock deadline (jitter, Retry-After, DNS, providers that ignore client timeouts).
+- S3 `ClientError` is classified: missing (`NoSuchKey` / HTTP 404) vs authorization (`AccessDenied`, invalid keys, 403) vs transient (5xx, `SlowDown`, throttling) vs permanent (`NoSuchBucket` and other config failures). `AccessDenied` cannot complete a deletion or look like a missing object. Public messages stay generic; logs record operation, classification, code, and HTTP status only.
+- Download transfer retries are not stacked (`num_download_attempts=1`); application `storage_deletions` retries remain the separate bounded outbox.
+- Cleanup lease heartbeats and owner-token finish rules from Phase 9.3 are unchanged.
+
+Not implemented: production deploy, production migration, live object-storage verification, new infrastructure.
+
+Local verification (this branch):
+
+```
+uv run pytest -q tests/test_phase94_storage.py tests/test_phase93_reliability.py tests/test_phase92_storage.py tests/test_phase92_leases.py tests/test_phase91_cleanup.py
+# 57 passed
+
+uv run pytest -q -m "not integration"
+# 178 passed, 9 deselected
+
+TEST_DATABASE_URL=postgresql+psycopg://docuflow:docuflow@127.0.0.1:5432/docuflow_test \
+  uv run pytest -q -m integration
+# 9 passed, 178 deselected
+
+uv run ruff check src tests
+# All checks passed
+
+uv run mypy src/docuflow
+# Success: no issues found in 71 source files
+
+git diff --check
+# clean
+```
+
+Web lint/typecheck/tests/build: **not run** (no frontend or shared-interface changes).
 
 Staging deployment: **not performed.**
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
@@ -380,7 +428,7 @@ Production migration: **not performed.**
 
 ## Next recommended work
 
-1. Review Phase 9.3. Do not merge or deploy from this agent unless authorized.
+1. Review Phase 9.4. Do not merge or deploy from this agent unless authorized.
 2. Apply Alembic `0003` only on an approved **staging** database, using the procedure in `docs/DEPLOYMENT.md`. Do not run it against production from this environment.
 3. If an older workspace still has an idle paid `docuflow-worker`, stop or delete it in the dashboard only after confirming `JOB_BROKER=inline`.
 4. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
