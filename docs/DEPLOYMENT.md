@@ -54,7 +54,7 @@ and are **not** a billing quote:
 | Layer | What it means | Status |
 | --- | --- | --- |
 | Local verification | pytest / ruff / mypy / web lint-typecheck-test-build | See `docs/IMPLEMENTATION_STATUS.md` (Phase 9.6) |
-| CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.5 merge is `068d6af` (PR #8). Phase 9.6 CI exists only after this branch is pushed |
+| CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.5 merge is `068d6af` (PR #8). Phase 9.6 branch CI succeeded on `956c66d` ([run 42041167330](https://github.com/mufea/docuflow-ai/actions/runs/42041167330), 5 Nov 2026, 21:02 Asia/Jakarta) |
 | Provider verification | Dedicated test bucket + `TEST_S3_*` credentials | **Pending** — mocked S3 tests are not provider verification |
 | Staging deployment | Non-production environment with migrations applied | **Not performed** |
 | Production deployment | Live Render workspace serving users | **NOT DEPLOYED — Awaiting owner approval** |
