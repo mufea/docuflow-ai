@@ -275,3 +275,123 @@ def test_transient_error_type_is_recorded(client: TestClient, app, tmp_path: Pat
         assert "TransientError" in row.last_error
     finally:
         db.close()
+
+
+def test_current_owner_completes_and_fails_deletion(client: TestClient, app, tmp_path: Path) -> None:
+    auth = register_and_login(client)
+    ok_id = _upload(client, write_text_pdf(tmp_path / "own-ok.pdf", ["ok"]), auth["csrf"])
+    fail_id = _upload(client, write_text_pdf(tmp_path / "own-fail.pdf", ["fail"]), auth["csrf"])
+    counted = CountingStorage(app.state.ctx.storage)
+    service, db = _service(app, counted)
+    try:
+        ok_doc = db.get(Document, ok_id)
+        fail_doc = db.get(Document, fail_id)
+        assert ok_doc is not None and fail_doc is not None
+        service.delete(ok_doc.owner, ok_id)
+        ok_row = db.query(StorageDeletion).filter_by(document_id=ok_id).one()
+        assert ok_row.status == "completed"
+        assert ok_row.owner_token is None
+        timed = TimeoutStorage(app.state.ctx.storage)
+        failing = DocumentService(db, timed, app.state.ctx.settings)
+        failing.delete(fail_doc.owner, fail_id)
+        fail_row = db.query(StorageDeletion).filter_by(document_id=fail_id).one()
+        assert fail_row.status == "failed"
+        assert fail_row.owner_token is None
+        assert fail_row.last_error is not None
+        assert "TimeoutError" in fail_row.last_error
+    finally:
+        db.close()
+
+
+def test_expired_in_progress_lease_is_reclaimed_by_second_process(client: TestClient, app, tmp_path: Path) -> None:
+    auth = register_and_login(client)
+    doc_id = _upload(client, write_text_pdf(tmp_path / "reclaim.pdf", ["reclaim"]), auth["csrf"])
+    counted = CountingStorage(app.state.ctx.storage)
+    first, db = _service(app, counted)
+    try:
+        document = db.get(Document, doc_id)
+        assert document is not None
+        document.deleted_at = datetime.now(UTC)
+        row = first._enqueue_deletion(document.id, document.storage_key)
+        row.status = "in_progress"
+        row.attempts = 1
+        row.owner_token = "old-owner"
+        row.lease_until = utc_now() - timedelta(minutes=10)
+        db.commit()
+        second = DocumentService(app.state.ctx.session_factory(), counted, app.state.ctx.settings)
+        try:
+            result = second.retry_storage_deletions()
+            stored = second.session.query(StorageDeletion).filter_by(document_id=doc_id).one()
+            assert result["deleted"] == 1
+            assert stored.status == "completed"
+            assert stored.owner_token is None
+        finally:
+            second.session.close()
+    finally:
+        db.close()
+
+
+def test_old_deletion_worker_cannot_overwrite_or_clear_new_owner(client: TestClient, app, tmp_path: Path) -> None:
+    auth = register_and_login(client)
+    doc_id = _upload(client, write_text_pdf(tmp_path / "race.pdf", ["race"]), auth["csrf"])
+    stolen = {"token": "new-owner"}
+
+    class StealOnDelete:
+        def __init__(self, inner) -> None:
+            self.inner = inner
+            self.delete_calls = 0
+
+        def __getattr__(self, name: str):
+            return getattr(self.inner, name)
+
+        def delete(self, key: str) -> None:
+            self.delete_calls += 1
+            other = app.state.ctx.session_factory()
+            try:
+                row = other.query(StorageDeletion).filter_by(storage_key=key).one()
+                row.status = "in_progress"
+                row.owner_token = stolen["token"]
+                row.lease_until = utc_now() + timedelta(minutes=5)
+                other.commit()
+            finally:
+                other.close()
+
+        def exists(self, key: str) -> bool:
+            return self.inner.exists(key)
+
+    steal = StealOnDelete(app.state.ctx.storage)
+    service, db = _service(app, steal)
+    try:
+        document = db.get(Document, doc_id)
+        assert document is not None
+        service.delete(document.owner, doc_id)
+        check = app.state.ctx.session_factory()
+        try:
+            stored = check.query(StorageDeletion).filter_by(document_id=doc_id).one()
+            assert stored.status == "in_progress"
+            assert stored.owner_token == "new-owner"
+            assert stored.lease_until is not None
+            assert steal.delete_calls == 1
+            finished = DocumentService(check, app.state.ctx.storage, app.state.ctx.settings)
+            assert (
+                finished._finish_owned_deletion(
+                    stored.id,
+                    "old-token-that-is-not-new-owner",
+                    success=True,
+                )
+                is False
+            )
+            check.refresh(stored)
+            assert stored.status == "in_progress"
+            assert stored.owner_token == "new-owner"
+            assert finished._renew_deletion_lease(stored.id, "old-token-that-is-not-new-owner", 5) is False
+            check.refresh(stored)
+            assert stored.owner_token == "new-owner"
+            assert finished._finish_owned_deletion(stored.id, "new-owner", success=True) is True
+            check.refresh(stored)
+            assert stored.status == "completed"
+            assert stored.owner_token is None
+        finally:
+            check.close()
+    finally:
+        db.close()

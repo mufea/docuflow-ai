@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import time
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import timedelta
 
@@ -11,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from docuflow.config import Settings
 from docuflow.jobs.clock import as_utc, utc_now
-from docuflow.jobs.leases import LEASE_NAME, acquire_lease, release_lease
+from docuflow.jobs.leases import LEASE_NAME, LeaseGuard, acquire_lease, release_lease
 from docuflow.jobs.refunds import fail_job_and_refund, refund_terminal_job
 from docuflow.models import Job
 from docuflow.services.documents import DocumentService
@@ -34,6 +35,7 @@ class CleanupStats:
     storage_retries: int = 0
     duration_ms: int = 0
     skipped: bool = False
+    aborted: bool = False
 
     def as_log_fields(self) -> dict[str, int | bool]:
         return {
@@ -45,6 +47,7 @@ class CleanupStats:
             "storage_retries": self.storage_retries,
             "duration_ms": self.duration_ms,
             "skipped": self.skipped,
+            "aborted": self.aborted,
         }
 
 
@@ -72,19 +75,29 @@ def run_runtime_cleanup(session: Session, storage: ObjectStorage, settings: Sett
         stats.duration_ms = int((time.monotonic() - started) * 1000)
         logger.info("cleanup_skipped reason=lease_held duration_ms=%s", stats.duration_ms)
         return stats
+    guard = LeaseGuard(session, token, name=LEASE_NAME, ttl=ttl)
     try:
         stale_minutes = effective_stale_minutes(settings)
-        abandoned = _fail_stale_jobs(session, stale_minutes=stale_minutes)
-        stats.abandoned_jobs = abandoned.abandoned_jobs
-        stats.refunded_credits = abandoned.refunded_credits
-        recovered = _refund_stranded_terminal_jobs(session)
-        stats.refunded_credits += recovered.refunded_credits
-        documents = DocumentService(session, storage, settings)
-        stats.expired_documents = documents.purge_expired()
-        deletion = documents.retry_storage_deletions()
-        stats.storage_deleted += deletion["deleted"]
-        stats.storage_failures += deletion["failures"]
-        stats.storage_retries += deletion["retries"]
+        if _hold(guard, stats):
+            abandoned = _fail_stale_jobs(session, stale_minutes=stale_minutes, heartbeat=guard.heartbeat)
+            stats.abandoned_jobs = abandoned.abandoned_jobs
+            stats.refunded_credits = abandoned.refunded_credits
+            stats.aborted = stats.aborted or abandoned.aborted
+        if _hold(guard, stats):
+            recovered = _refund_stranded_terminal_jobs(session, heartbeat=guard.heartbeat)
+            stats.refunded_credits += recovered.refunded_credits
+            stats.aborted = stats.aborted or recovered.aborted
+        documents: DocumentService | None = None
+        if _hold(guard, stats):
+            documents = DocumentService(session, storage, settings)
+            stats.expired_documents = documents.purge_expired()
+        if _hold(guard, stats) and documents is not None:
+            deletion = documents.retry_storage_deletions()
+            stats.storage_deleted += deletion["deleted"]
+            stats.storage_failures += deletion["failures"]
+            stats.storage_retries += deletion["retries"]
+        if stats.aborted:
+            logger.warning("cleanup_aborted reason=lease_lost duration_ms=%s", int((time.monotonic() - started) * 1000))
     except Exception:
         session.rollback()
         raise
@@ -97,7 +110,7 @@ def run_runtime_cleanup(session: Session, storage: ObjectStorage, settings: Sett
     stats.duration_ms = int((time.monotonic() - started) * 1000)
     logger.info(
         "cleanup_finished abandoned_jobs=%s refunded_credits=%s expired_documents=%s "
-        "storage_deleted=%s storage_failures=%s storage_retries=%s duration_ms=%s",
+        "storage_deleted=%s storage_failures=%s storage_retries=%s duration_ms=%s aborted=%s",
         stats.abandoned_jobs,
         stats.refunded_credits,
         stats.expired_documents,
@@ -105,11 +118,26 @@ def run_runtime_cleanup(session: Session, storage: ObjectStorage, settings: Sett
         stats.storage_failures,
         stats.storage_retries,
         stats.duration_ms,
+        stats.aborted,
     )
     return stats
 
 
-def _fail_stale_jobs(session: Session, *, stale_minutes: int) -> CleanupStats:
+def _hold(guard: LeaseGuard, stats: CleanupStats) -> bool:
+    if stats.aborted:
+        return False
+    if guard.heartbeat():
+        return True
+    stats.aborted = True
+    return False
+
+
+def _fail_stale_jobs(
+    session: Session,
+    *,
+    stale_minutes: int,
+    heartbeat: Callable[[], bool] | None = None,
+) -> CleanupStats:
     cutoff = utc_now() - timedelta(minutes=stale_minutes)
     candidates = list(
         session.scalars(
@@ -124,11 +152,14 @@ def _fail_stale_jobs(session: Session, *, stale_minutes: int) -> CleanupStats:
     )
     stats = CleanupStats()
     for job in candidates:
-        heartbeat = as_utc(job.heartbeat_at) if job.heartbeat_at is not None else None
+        if heartbeat is not None and not heartbeat():
+            stats.aborted = True
+            break
+        last_beat = as_utc(job.heartbeat_at) if job.heartbeat_at is not None else None
         started = as_utc(job.started_at) if job.started_at is not None else None
-        if heartbeat is not None and heartbeat >= cutoff:
+        if last_beat is not None and last_beat >= cutoff:
             continue
-        if heartbeat is None and started is not None and started >= cutoff:
+        if last_beat is None and started is not None and started >= cutoff:
             continue
         result = fail_job_and_refund(
             session,
@@ -151,7 +182,11 @@ def _fail_stale_jobs(session: Session, *, stale_minutes: int) -> CleanupStats:
     return stats
 
 
-def _refund_stranded_terminal_jobs(session: Session) -> CleanupStats:
+def _refund_stranded_terminal_jobs(
+    session: Session,
+    *,
+    heartbeat: Callable[[], bool] | None = None,
+) -> CleanupStats:
     """Recover reservations left behind if a historical fail committed without a refund."""
     stats = CleanupStats()
     rows = list(
@@ -164,6 +199,9 @@ def _refund_stranded_terminal_jobs(session: Session) -> CleanupStats:
         )
     )
     for job in rows:
+        if heartbeat is not None and not heartbeat():
+            stats.aborted = True
+            break
         result = refund_terminal_job(session, job, commit=True)
         if result.released:
             stats.refunded_credits += result.released

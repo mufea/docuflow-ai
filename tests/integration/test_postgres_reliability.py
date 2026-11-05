@@ -5,6 +5,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import pytest
+from sqlalchemy import update
 from sqlalchemy.orm import Session, sessionmaker
 
 from docuflow.billing.ledger import CreditService
@@ -225,3 +226,85 @@ def test_postgres_cleanup_recovers_stranded_failed_job(pg_session: Session, tmp_
     assert account.reserved == 0
     assert account.balance == 20
     assert stats.refunded_credits == 3
+
+
+def test_postgres_concurrent_cleanup_second_skips(
+    pg_session: Session, pg_session_factory: sessionmaker[Session], tmp_path: Path
+) -> None:
+    settings = Settings(
+        env="test",
+        secret_key="test-secret-key-please-change",
+        cleanup_interval_seconds=0,
+        cleanup_lease_minutes=5,
+        job_stale_minutes=90,
+        storage_local_path=str(tmp_path / "storage"),
+    )
+    storage = FilesystemStorage(tmp_path / "storage")
+    assert acquire_lease(pg_session, "holder") is True
+    other = pg_session_factory()
+    try:
+        stats = run_runtime_cleanup(other, storage, settings)
+        assert stats.skipped is True
+        assert stats.abandoned_jobs == 0
+        assert release_lease(other, "not-the-owner") is False
+        pg_session.expire_all()
+        row = pg_session.get(CleanupLease, LEASE_NAME)
+        assert row is not None
+        assert row.owner_token == "holder"
+        assert release_lease(pg_session, "holder") is True
+    finally:
+        other.close()
+
+
+def test_postgres_stale_deletion_finish_does_not_clobber_new_owner(
+    pg_session: Session, pg_session_factory: sessionmaker[Session], tmp_path: Path
+) -> None:
+    settings = Settings(
+        env="test",
+        secret_key="test-secret-key-please-change",
+        storage_delete_max_attempts=8,
+        storage_delete_lease_minutes=5,
+        cleanup_interval_seconds=0,
+    )
+    storage = FilesystemStorage(tmp_path / "objects")
+    key = "user/race.bin"
+    path = tmp_path / "objects" / key
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(b"pdf-bytes")
+    row = StorageDeletion(
+        storage_key=key,
+        status="in_progress",
+        attempts=1,
+        max_attempts=8,
+        owner_token="old-owner",
+        lease_until=utc_now() + timedelta(minutes=5),
+        next_attempt_at=utc_now(),
+    )
+    pg_session.add(row)
+    pg_session.commit()
+    deletion_id = row.id
+    other = pg_session_factory()
+    try:
+        newer = DocumentService(other, storage, settings)
+        claimed = other.execute(
+            update(StorageDeletion)
+            .where(StorageDeletion.id == deletion_id)
+            .values(owner_token="new-owner", status="in_progress", lease_until=utc_now() + timedelta(minutes=5))
+        )
+        other.commit()
+        assert int(getattr(claimed, "rowcount", 0) or 0) == 1
+        stale = DocumentService(pg_session, storage, settings)
+        assert stale._finish_owned_deletion(deletion_id, "old-owner", success=True) is False
+        other.expire_all()
+        stored = other.get(StorageDeletion, deletion_id)
+        assert stored is not None
+        assert stored.status == "in_progress"
+        assert stored.owner_token == "new-owner"
+        assert newer._finish_owned_deletion(deletion_id, "new-owner", success=True) is True
+        other.expire_all()
+        stored = other.get(StorageDeletion, deletion_id)
+        assert stored is not None
+        assert stored.status == "completed"
+        assert stored.owner_token is None
+    finally:
+        other.close()

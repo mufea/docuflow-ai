@@ -48,8 +48,10 @@ def acquire_lease(
             lease_until=until,
             updated_at=now,
         )
+        .execution_options(synchronize_session=False)
     )
     session.commit()
+    _expire_lease(session, name)
     won = int(getattr(claimed, "rowcount", 0) or 0) == 1
     if won:
         logger.info("cleanup_lease_acquired name=%s", name)
@@ -63,15 +65,25 @@ def renew_lease(
     name: str = LEASE_NAME,
     ttl: timedelta | None = None,
 ) -> bool:
+    """Extend the lease only while ``owner_token`` is still the owner.
+
+    A replaced owner cannot renew another process's lease. An expired lease
+    may be refreshed by the same owner if nobody else has claimed it.
+    """
     now = utc_now()
     until = now + (ttl if ttl is not None else timedelta(minutes=LEASE_MINUTES))
     renewed = session.execute(
         update(CleanupLease)
         .where(CleanupLease.name == name, CleanupLease.owner_token == owner_token)
         .values(lease_until=until, updated_at=now)
+        .execution_options(synchronize_session=False)
     )
     session.commit()
-    return int(getattr(renewed, "rowcount", 0) or 0) == 1
+    _expire_lease(session, name)
+    won = int(getattr(renewed, "rowcount", 0) or 0) == 1
+    if won:
+        logger.info("cleanup_lease_renewed name=%s", name)
+    return won
 
 
 def release_lease(session: Session, owner_token: str, *, name: str = LEASE_NAME) -> bool:
@@ -81,8 +93,10 @@ def release_lease(session: Session, owner_token: str, *, name: str = LEASE_NAME)
         update(CleanupLease)
         .where(CleanupLease.name == name, CleanupLease.owner_token == owner_token)
         .values(owner_token=None, lease_until=None, updated_at=now)
+        .execution_options(synchronize_session=False)
     )
     session.commit()
+    _expire_lease(session, name)
     won = int(getattr(released, "rowcount", 0) or 0) == 1
     if won:
         logger.info("cleanup_lease_released name=%s", name)
@@ -98,6 +112,39 @@ def lease_owner(session: Session, *, name: str = LEASE_NAME) -> str | None:
     if as_utc(row.lease_until) < utc_now():
         return None
     return row.owner_token
+
+
+def _expire_lease(session: Session, name: str) -> None:
+    row = session.get(CleanupLease, name)
+    if row is not None:
+        session.expire(row)
+
+
+class LeaseGuard:
+    """Heartbeat for a held cleanup lease. Stops work after ownership is lost."""
+
+    def __init__(
+        self,
+        session: Session,
+        owner_token: str,
+        *,
+        name: str = LEASE_NAME,
+        ttl: timedelta | None = None,
+    ) -> None:
+        self.session = session
+        self.owner_token = owner_token
+        self.name = name
+        self.ttl = ttl
+        self.lost = False
+
+    def heartbeat(self) -> bool:
+        if self.lost:
+            return False
+        if renew_lease(self.session, self.owner_token, name=self.name, ttl=self.ttl):
+            return True
+        self.lost = True
+        logger.warning("cleanup_lease_lost name=%s", self.name)
+        return False
 
 
 def _ensure_lease_row(session: Session, name: str) -> None:
