@@ -20,6 +20,15 @@ from docuflow.db import Base
 from docuflow.main import create_app
 
 
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    if os.environ.get("TEST_DATABASE_URL"):
+        return
+    skip = pytest.mark.skip(reason="TEST_DATABASE_URL is not set")
+    for item in items:
+        if "integration" in item.keywords:
+            item.add_marker(skip)
+
+
 @pytest.fixture
 def settings(tmp_path: Path) -> Settings:
     reset_settings()

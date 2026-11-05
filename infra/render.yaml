@@ -1,11 +1,20 @@
 # Render Blueprint for DocuFlow AI
 # This file describes services. It is not proof of a successful deployment.
 #
+# Cost-efficient default (Phase 9.2):
+#   web + API + Postgres + cleanup cron + optional Free Redis
+#   JOB_BROKER=inline  — jobs run inside the API process
+#   One Render Cron runs cleanup; the API in-process scheduler is disabled
+#
+# A paid background worker is NOT part of this default stack. Redis is kept
+# because existing workspaces already have it and RQ remains the documented
+# scaling path — it is unused while JOB_BROKER=inline. To add a queue worker
+# later, see infra/render.scaling.yaml. Do not apply this file blindly to a
+# live workspace that already has docuflow-worker; removing a service from a
+# Blueprint can delete it on the next sync. Owner approval is required.
+#
 # Compute plans: web, Postgres, and Key Value use Render's Free tier.
-# Background workers have no Free plan (see Render docs). The worker stays on
-# the cheapest paid plan, 0.5c-512mb. Syncing this Blueprint does not always
-# downgrade an existing paid service — change those in the Render dashboard
-# if the plan stays on Starter / Basic after a sync.
+# Syncing this Blueprint does not always downgrade an existing paid service.
 
 previewsEnabled: false
 
@@ -46,7 +55,8 @@ services:
           type: redis
           property: connectionString
       - key: JOB_BROKER
-        # Minimal-cost mode: API runs jobs. Set rq only when docuflow-worker is running.
+        # Cost-efficient mode: API runs jobs inline. Set rq only with a paid worker
+        # from infra/render.scaling.yaml.
         value: inline
       - key: RQ_QUEUE_NAME
         value: docuflow
@@ -103,9 +113,15 @@ services:
       - key: JOB_STALE_MINUTES
         value: "90"
       - key: CLEANUP_INTERVAL_SECONDS
-        value: "900"
+        # Cron is the single cleanup scheduler. Keep 0 so the Free API does not
+        # run a redundant in-process loop. Set 900 only if the cron is omitted.
+        value: "0"
+      - key: CLEANUP_LEASE_MINUTES
+        value: "5"
       - key: STORAGE_DELETE_MAX_ATTEMPTS
         value: "8"
+      - key: STORAGE_DELETE_LEASE_MINUTES
+        value: "5"
 
   - type: cron
     name: docuflow-cleanup
@@ -155,81 +171,14 @@ services:
         value: "90"
       - key: STORAGE_DELETE_MAX_ATTEMPTS
         value: "8"
+      - key: STORAGE_DELETE_LEASE_MINUTES
+        value: "5"
+      - key: CLEANUP_LEASE_MINUTES
+        value: "5"
       - key: WORKER_TIMEOUT_SECONDS
         value: "300"
 
-  - type: worker
-    name: docuflow-worker
-    runtime: python
-    # Render does not offer Free for background workers.
-    plan: 0.5c-512mb
-    buildCommand: pip install -r requirements.txt
-    startCommand: python -m docuflow.worker
-    envVars:
-      - key: DOCUFLOW_ENV
-        value: production
-      - key: PYTHONUNBUFFERED
-        value: "1"
-      - key: DATABASE_URL
-        fromDatabase:
-          name: docuflow-db
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          name: docuflow-redis
-          type: redis
-          property: connectionString
-      - key: JOB_BROKER
-        value: rq
-      - key: RQ_QUEUE_NAME
-        value: docuflow
-      - key: STORAGE_BACKEND
-        value: s3
-      - key: S3_FORCE_PATH_STYLE
-        value: "true"
-      - key: LOG_JSON
-        value: "true"
-      - key: DOCUFLOW_SECRET_KEY
-        fromService:
-          name: docuflow-api
-          type: web
-          envVarKey: DOCUFLOW_SECRET_KEY
-      - key: S3_BUCKET
-        fromService:
-          name: docuflow-api
-          type: web
-          envVarKey: S3_BUCKET
-      - key: S3_ACCESS_KEY_ID
-        fromService:
-          name: docuflow-api
-          type: web
-          envVarKey: S3_ACCESS_KEY_ID
-      - key: S3_SECRET_ACCESS_KEY
-        fromService:
-          name: docuflow-api
-          type: web
-          envVarKey: S3_SECRET_ACCESS_KEY
-      - key: S3_ENDPOINT_URL
-        fromService:
-          name: docuflow-api
-          type: web
-          envVarKey: S3_ENDPOINT_URL
-      - key: S3_REGION
-        value: auto
-      - key: AI_PROVIDER
-        value: mock
-      - key: OCR_ENABLED
-        value: "true"
-      - key: JOB_STALE_MINUTES
-        value: "90"
-      - key: CLEANUP_INTERVAL_SECONDS
-        value: "900"
-      - key: STORAGE_DELETE_MAX_ATTEMPTS
-        value: "8"
-      - key: WORKER_CONCURRENCY
-        value: "2"
-      - key: WORKER_TIMEOUT_SECONDS
-        value: "300"
+  # Paid RQ worker is intentionally omitted. See infra/render.scaling.yaml.
 
   - type: web
     name: docuflow-web

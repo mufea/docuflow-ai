@@ -6,11 +6,12 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from sqlalchemy import select, update
+from sqlalchemy import and_, or_, select, update
 from sqlalchemy.orm import Session
 
 from docuflow.config import Settings
-from docuflow.exceptions import AuthorizationError, FileTooLargeError, NotFoundError
+from docuflow.exceptions import AuthorizationError, FileTooLargeError, NotFoundError, TransientError
+from docuflow.jobs.clock import utc_now
 from docuflow.models import Document, StorageDeletion, User
 from docuflow.pdf.engine import PdfEngine
 from docuflow.pdf.sniff import sniff_file
@@ -21,6 +22,11 @@ logger = logging.getLogger("docuflow.documents")
 
 def deletion_backoff_minutes(attempt: int) -> int:
     return min(60, 2 ** max(attempt - 1, 0))
+
+
+def _format_storage_error(exc: BaseException) -> str:
+    text = f"{type(exc).__name__}: {exc}".strip()
+    return text[:80]
 
 
 class DocumentService:
@@ -99,52 +105,36 @@ class DocumentService:
         return row
 
     def retry_storage_deletions(self, *, limit: int = 50, document_id: str | None = None) -> dict[str, int]:
-        now = datetime.now(UTC)
-        query = (
-            select(StorageDeletion)
-            .where(
-                StorageDeletion.status.in_(("pending", "failed")),
-                StorageDeletion.next_attempt_at <= now,
-                StorageDeletion.attempts < StorageDeletion.max_attempts,
-            )
-            .order_by(StorageDeletion.next_attempt_at.asc())
-            .limit(limit)
-        )
-        if document_id:
-            query = query.where(StorageDeletion.document_id == document_id)
-        due = list(self.session.scalars(query))
+        now = utc_now()
+        lease_minutes = max(1, int(self.settings.storage_delete_lease_minutes))
+        owner_token = uuid.uuid4().hex
+        self._expire_stuck_deletions(now)
+        due = self._due_deletion_rows(now, limit=limit, document_id=document_id)
         deleted = 0
         failures = 0
         retries = 0
         for row in due:
-            claimed = self.session.execute(
-                update(StorageDeletion)
-                .where(
-                    StorageDeletion.id == row.id,
-                    StorageDeletion.status.in_(("pending", "failed")),
-                )
-                .values(status="in_progress", attempts=StorageDeletion.attempts + 1)
-            )
-            self.session.commit()
-            if int(getattr(claimed, "rowcount", 0) or 0) != 1:
+            if not self._claim_deletion(row.id, owner_token=owner_token, now=now, lease_minutes=lease_minutes):
                 continue
             current = self.session.get(StorageDeletion, row.id)
             if current is None:
                 continue
             retries += 1
             try:
-                self.storage.delete(current.storage_key)
-                if self.storage.exists(current.storage_key):
-                    raise RuntimeError("ObjectStillPresent")
+                self._delete_object_idempotent(current.storage_key)
                 current.status = "completed"
-                current.completed_at = datetime.now(UTC)
+                current.completed_at = utc_now()
                 current.last_error = None
+                current.lease_until = None
+                current.owner_token = None
                 deleted += 1
             except Exception as exc:
                 failures += 1
-                current.last_error = type(exc).__name__[:80]
+                current.last_error = _format_storage_error(exc)
+                current.owner_token = None
                 if current.attempts >= current.max_attempts:
                     current.status = "exhausted"
+                    current.lease_until = None
                     logger.warning(
                         "storage_delete_exhausted attempts=%s error=%s",
                         current.attempts,
@@ -153,7 +143,8 @@ class DocumentService:
                 else:
                     delay = deletion_backoff_minutes(current.attempts)
                     current.status = "failed"
-                    current.next_attempt_at = datetime.now(UTC) + timedelta(minutes=delay)
+                    current.lease_until = None
+                    current.next_attempt_at = utc_now() + timedelta(minutes=delay)
                     logger.warning(
                         "storage_delete_retry attempts=%s backoff_min=%s error=%s",
                         current.attempts,
@@ -162,6 +153,78 @@ class DocumentService:
                     )
             self.session.commit()
         return {"deleted": deleted, "failures": failures, "retries": retries}
+
+    def _due_deletion_rows(self, now: datetime, *, limit: int, document_id: str | None) -> list[StorageDeletion]:
+        query = (
+            select(StorageDeletion)
+            .where(
+                StorageDeletion.status.in_(("pending", "failed", "in_progress")),
+                StorageDeletion.attempts < StorageDeletion.max_attempts,
+                or_(
+                    and_(
+                        StorageDeletion.status.in_(("pending", "failed")),
+                        StorageDeletion.next_attempt_at <= now,
+                    ),
+                    and_(
+                        StorageDeletion.status == "in_progress",
+                        or_(StorageDeletion.lease_until.is_(None), StorageDeletion.lease_until < now),
+                    ),
+                ),
+            )
+            .order_by(StorageDeletion.next_attempt_at.asc())
+            .limit(limit)
+        )
+        if document_id:
+            query = query.where(StorageDeletion.document_id == document_id)
+        return list(self.session.scalars(query))
+
+    def _claim_deletion(self, deletion_id: str, *, owner_token: str, now: datetime, lease_minutes: int) -> bool:
+        claimed = self.session.execute(
+            update(StorageDeletion)
+            .where(
+                StorageDeletion.id == deletion_id,
+                StorageDeletion.status.in_(("pending", "failed", "in_progress")),
+                or_(
+                    StorageDeletion.status.in_(("pending", "failed")),
+                    StorageDeletion.lease_until.is_(None),
+                    StorageDeletion.lease_until < now,
+                ),
+            )
+            .values(
+                status="in_progress",
+                attempts=StorageDeletion.attempts + 1,
+                started_at=now,
+                lease_until=now + timedelta(minutes=lease_minutes),
+                owner_token=owner_token,
+            )
+        )
+        self.session.commit()
+        return int(getattr(claimed, "rowcount", 0) or 0) == 1
+
+    def _expire_stuck_deletions(self, now: datetime) -> None:
+        stuck = self.session.execute(
+            update(StorageDeletion)
+            .where(
+                StorageDeletion.status == "in_progress",
+                StorageDeletion.attempts >= StorageDeletion.max_attempts,
+                or_(StorageDeletion.lease_until.is_(None), StorageDeletion.lease_until < now),
+            )
+            .values(status="exhausted", lease_until=None, owner_token=None)
+        )
+        expired_count = int(getattr(stuck, "rowcount", 0) or 0)
+        if expired_count:
+            logger.warning("storage_delete_expired_exhausted count=%s", expired_count)
+            self.session.commit()
+
+    def _delete_object_idempotent(self, storage_key: str) -> None:
+        try:
+            self.storage.delete(storage_key)
+        except NotFoundError:
+            return
+        except TransientError:
+            raise
+        if self.storage.exists(storage_key):
+            raise RuntimeError("ObjectStillPresent")
 
     def _store(
         self,

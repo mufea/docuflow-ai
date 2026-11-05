@@ -1,13 +1,24 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import UTC, datetime
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from docuflow.billing.plans import PricingPolicy
 from docuflow.exceptions import ConflictError, InsufficientCreditsError
 from docuflow.models import CreditAccount, CreditLedger, Plan, User
+
+
+@dataclass(frozen=True, slots=True)
+class RefundResult:
+    released: int = 0
+    already_refunded: bool = False
+    missing_reservation: bool = False
+    skipped: bool = False
+    settled: bool = False
 
 
 class CreditService:
@@ -99,24 +110,44 @@ class CreditService:
                 idempotency_key=f"release-settle:{job_id}",
             )
 
-    def refund_reservation(self, user: User, amount: int, *, job_id: str) -> None:
+    def refund_reservation(self, user: User, amount: int, *, job_id: str) -> RefundResult:
+        """Release a job reservation without changing the available balance.
+
+        Idempotent on ``refund:{job_id}``. A concurrent duplicate hits the
+        unique ledger constraint and is treated as already refunded. A settled
+        job is never refunded. Missing or partial reserved balances release
+        only what is still reserved and never drive ``reserved`` negative.
+        """
         if not self.policy.refund_failed_jobs or amount <= 0:
-            return
+            return RefundResult(skipped=True)
         account = self.ensure_account(user)
         self._lock(account)
-        if self.session.scalar(select(CreditLedger).where(CreditLedger.idempotency_key == f"refund:{job_id}")):
-            return
-        release = min(account.reserved, amount)
-        account.reserved -= release
-        account.version += 1
-        self._write(
-            user_id=user.id,
-            amount=0,
-            entry_type="refund_reserve",
-            job_id=job_id,
-            description="Refund reservation for failed or cancelled job",
-            idempotency_key=f"refund:{job_id}",
-        )
+        if self._ledger_exists(f"settle:{job_id}"):
+            return RefundResult(skipped=True, settled=True)
+        if self._ledger_exists(f"refund:{job_id}"):
+            return RefundResult(already_refunded=True)
+        available_reserved = max(account.reserved, 0)
+        release = min(available_reserved, amount)
+        missing = available_reserved <= 0
+        try:
+            with self.session.begin_nested():
+                if self._ledger_exists(f"refund:{job_id}"):
+                    return RefundResult(already_refunded=True)
+                if release > 0:
+                    account.reserved -= release
+                    account.version += 1
+                self._write(
+                    user_id=user.id,
+                    amount=0,
+                    entry_type="refund_reserve",
+                    job_id=job_id,
+                    description="Refund reservation for failed or cancelled job",
+                    idempotency_key=f"refund:{job_id}",
+                )
+        except IntegrityError:
+            self.session.refresh(account)
+            return RefundResult(already_refunded=True)
+        return RefundResult(released=release, missing_reservation=missing)
 
     def grant(
         self, user: User, amount: int, *, reason: str, idempotency_key: str, payment_id: str | None = None

@@ -65,12 +65,21 @@ Open `http://127.0.0.1:43123`.
 ## 5. Tests
 
 ```bash
-uv run pytest
+uv run pytest -q -m "not integration"
 pnpm --filter web test
 pnpm --filter web lint
 uv run ruff check src tests
 uv run mypy src/docuflow
 ```
+
+PostgreSQL integration tests (isolated local database only):
+
+```bash
+export TEST_DATABASE_URL=postgresql+psycopg://USER:PASS@127.0.0.1:5432/docuflow_test
+uv run pytest -q -m integration
+```
+
+See `docs/TESTING.md`. Never point tests at production.
 
 ## Secrets
 

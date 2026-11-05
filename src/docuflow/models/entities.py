@@ -204,16 +204,28 @@ class StorageDeletion(Base):
     max_attempts: Mapped[int] = mapped_column(Integer, default=8)
     next_attempt_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     last_error: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    lease_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    owner_token: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class CleanupLease(Base):
+    """Database-backed cleanup lease.
+
+    Column names stay compatible with Alembic revision 0002:
+    ``name`` is the lease name, ``token`` is the owner token, and
+    ``locked_until`` is the exclusive lease expiry.
+    """
+
     __tablename__ = "cleanup_leases"
 
     name: Mapped[str] = mapped_column(String(32), primary_key=True)
-    locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    token: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    owner_token: Mapped[str | None] = mapped_column("token", String(64), nullable=True)
+    acquired_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    lease_until: Mapped[datetime | None] = mapped_column("locked_until", DateTime(timezone=True), nullable=True)
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class AuditLog(Base):

@@ -14,6 +14,7 @@ from docuflow.billing.ledger import CreditService
 from docuflow.config import Settings
 from docuflow.conversion.engines import ConversionService
 from docuflow.exceptions import DocuflowError, EncryptedPdfError, UnsupportedOperationError
+from docuflow.jobs.refunds import fail_job_and_refund
 from docuflow.models import Document, Job, User
 from docuflow.ocr.engine import OcrEngine
 from docuflow.pdf.engine import PdfEngine
@@ -90,17 +91,24 @@ class JobRunner:
             session.close()
 
     def _fail(self, session: Session, job_id: str, code: str, message: str, *, refund: bool) -> None:
-        job = session.get(Job, job_id)
-        if job is None:
+        if not refund:
+            job = session.get(Job, job_id)
+            if job is None:
+                return
+            job.status = "failed"
+            job.error_code = code
+            job.error_message = message
+            job.completed_at = datetime.now(UTC)
+            session.commit()
             return
-        user = session.get(User, job.user_id)
-        job.status = "failed"
-        job.error_code = code
-        job.error_message = message
-        job.completed_at = datetime.now(UTC)
-        if refund and user and job.credits_reserved:
-            CreditService(session).refund_reservation(user, job.credits_reserved, job_id=job.id)
-        session.commit()
+        fail_job_and_refund(
+            session,
+            job_id,
+            code=code,
+            message=message,
+            expected_statuses=("processing", "queued"),
+            commit=True,
+        )
 
     def _execute(self, session: Session, job: Job, user: User) -> dict[str, Any]:
         docs = [session.get(Document, item) for item in job.input_document_ids]

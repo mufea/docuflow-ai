@@ -7,14 +7,20 @@ Browser → Next.js (apps/web)
             │  /v1/* reverse proxy
             ▼
           FastAPI (src/docuflow)
-            │ enqueue job_id
+            │ JOB_BROKER=inline (default): thread pool
+            │ JOB_BROKER=rq (scaling): Redis delivery of job_id
             ▼
-          RQ worker  (or inline thread pool in development / minimal-cost Render)
+          JobRunner (same package as the API)
             │
      ┌──────┼──────────┐
      ▼      ▼          ▼
-  Postgres Redis   Object storage
+  Postgres  Cron    Object storage
+            cleanup
 ```
+
+Redis is optional. It is only a delivery mechanism when `JOB_BROKER=rq`. Job
+status, credits, cleanup leases, and the storage-deletion outbox live in
+Postgres.
 
 ## Python package layout
 
@@ -53,7 +59,7 @@ Cancellation is supported in `queued`. Jobs already `processing` finish or time 
 
 ## Credits
 
-Balances are integers. `available = balance - reserved`. Ledger idempotency keys prevent double charges on retries. Failed jobs refund reservations. Negative balances are rejected unless `ALLOW_NEGATIVE_CREDITS` is explicitly true (default false).
+Balances are integers. `available = balance - reserved`. Ledger idempotency keys prevent double charges on retries. Failed jobs refund reservations in the same database transaction as the `failed` status write. Duplicate refunds are no-ops (`refund:{job_id}`). Negative balances are rejected unless `ALLOW_NEGATIVE_CREDITS` is explicitly true (default false).
 
 ## AI
 

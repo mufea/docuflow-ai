@@ -277,10 +277,73 @@ GitHub Actions: **not observed from this environment**. The workflow in `.github
 
 Live deployment verification: **not performed**.
 
+## Phase 9.2 — Cost-efficient reliability — on `cursor/phase-9-2-cost-efficient-reliability-8f43`
+
+Base: GitHub `main` @ `85dfc4392dc89c4342c525457a942860fcc1306d`. `main` was not modified by this work.
+
+Implemented:
+
+- Job failure status and credit refund commit in one transaction (`fail_job_and_refund`). Ledger key `refund:{job_id}` remains the idempotency mechanism; concurrent duplicates hit the unique constraint and are treated as already refunded. Settled jobs are not refunded. Missing or partial reserved balances never drive `reserved` negative. Cleanup also refunds stranded `failed`/`cancelled` rows.
+- Cleanup coordination uses the `cleanup_leases` table on every database (atomic `UPDATE` of an expired or unowned row). Session-level PostgreSQL advisory locks were removed because they are unsafe with connection pooling. Owner-only release/renew; expired leases are reclaimable after a crash.
+- Storage deletion outbox reclaims `in_progress` rows whose lease expired. Object delete is idempotent. Completed rows are not processed again.
+- Render default stack: `JOB_BROKER=inline`, no paid worker service, one cleanup cron, API `CLEANUP_INTERVAL_SECONDS=0`. Redis remains listed for compatibility and is unused while jobs are inline. Queue scaling is documented in `infra/render.scaling.yaml`.
+- CI runs SQLite unit tests and PostgreSQL integration tests against an isolated `postgres:16` service. Tests never use production.
+
+Not implemented (explicit non-goals): live AI providers, payment/pricing changes, production RQ migration, production deploy, production migrations.
+
+Database: Alembic `0003_cost_efficient_reliability` (additive, backward compatible). **Not applied to production.**
+
+Live deployment verification: **NOT DEPLOYED — Awaiting owner approval.**
+
+Local verification (this branch):
+
+```
+uv run pytest -q -m "not integration"
+# 144 passed, 7 deselected
+
+TEST_DATABASE_URL=postgresql+psycopg://docuflow:docuflow@127.0.0.1:5432/docuflow_test \
+  uv run pytest -q -m integration
+# 7 passed, 144 deselected
+
+TEST_DATABASE_URL=... uv run pytest -q
+# 151 passed
+
+uv run ruff check src tests
+# All checks passed
+
+uv run ruff format --check src tests
+# Would reformat tests/test_database_url.py (pre-existing on main; not changed)
+
+uv run mypy src/docuflow
+# Success: no issues found in 70 source files
+
+uv run alembic heads
+# 0003_cost_efficient_reliability (head)
+
+pnpm --filter web lint
+# passed
+
+pnpm --filter web typecheck
+# passed
+
+pnpm --filter web test
+# 15 passed
+
+pnpm --filter web build
+# passed
+
+git diff --check
+# clean
+```
+
+GitHub Actions: **not observed from this environment**. The workflow now runs unit tests then PostgreSQL integration tests. Do not treat CI as green until a run exists on GitHub.
+
 ## Next recommended work
 
-1. Review Phase 9.1. Do not merge or deploy from this agent unless authorized.
-2. Push the branch to GitHub `mufea/docuflow-ai` so Actions can run, then authorize a Render deploy separately (includes the new cron and Alembic `0002`).
-3. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
-4. Provide sandbox Stripe/Midtrans keys only if billing should be exercised end-to-end. Live charges stay off.
-5. Provide an AI key only if live analysis should replace the mock provider.
+1. Review Phase 9.2. Do not merge or deploy from this agent unless authorized.
+2. Apply Alembic `0003` only after owner approval of a Render deploy. Do not run it from this environment.
+3. If an older workspace still has an idle paid `docuflow-worker`, stop or delete it in the dashboard only after confirming `JOB_BROKER=inline`.
+4. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
+5. Provide sandbox Stripe/Midtrans keys only if billing should be exercised end-to-end. Live charges stay off.
+6. Provide an AI key only if live analysis should replace the mock provider.
+7. Queue-based scaling remains a separate later phase (`JOB_BROKER=rq` + paid worker).

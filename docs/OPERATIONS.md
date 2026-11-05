@@ -8,13 +8,15 @@ JSON logs when `LOG_JSON=true` or `DOCUFLOW_ENV=production`. Application loggers
 
 Postgres is the source of truth for job status. Redis only delivers `job_id` when `JOB_BROKER=rq`.
 
-### Minimal cost (`JOB_BROKER=inline`)
+### Minimal cost (`JOB_BROKER=inline`) — default
 
 The API thread pool runs jobs. No separate worker is required. `WORKER_CONCURRENCY` is the pool size. Large PDFs can hit the Free web request/CPU budget; expect slower jobs and possible timeouts.
 
-### Worker deployment (`JOB_BROKER=rq`)
+Audited Redis consumers: RQ enqueue (`jobs/broker.py`), the RQ worker process, and `/ready` when `JOB_BROKER=rq`. Sessions, rate limits, and job state do **not** use Redis. With `JOB_BROKER=inline` the API never submits jobs to RQ, so a dedicated worker is idle.
 
-The API enqueues to Redis. `docuflow-worker` must be running with the same `DATABASE_URL`, `REDIS_URL`, `RQ_QUEUE_NAME`, and S3 credentials. If no worker has a fresh heartbeat, the API falls back to the inline pool so jobs are not lost. Duplicate `job_id` values do not double-process: the runner claims a row only when `status=queued`.
+### Worker deployment (`JOB_BROKER=rq`) — scaling option
+
+Do not enable this mode unless `docuflow-worker` is running. Copy the worker from `infra/render.scaling.yaml` and set `JOB_BROKER=rq` on the API. Redis is then required. If no worker has a fresh heartbeat, the API falls back to the inline pool so jobs are not lost. Duplicate `job_id` values do not double-process: the runner claims a row only when `status=queued`.
 
 `WORKER_TIMEOUT_SECONDS` is the RQ job timeout. `WORKER_CONCURRENCY` does not spawn extra RQ processes; each Render worker instance is one RQ worker.
 
@@ -33,15 +35,32 @@ The worker listens for SIGTERM and requests RQ stop. The API relies on Uvicorn S
 - Object storage: enable bucket versioning.
 - Redis is expendable. Free Key Value is in-memory and loses the queue on restart. Re-open a `queued` job or create a new job; the API re-enqueues from Postgres.
 
+## Credits
+
+Balances are integers. `available = balance - reserved`. Ledger keys:
+
+| Action | Idempotency key |
+| --- | --- |
+| Reserve | `reserve:{job_id}` |
+| Settle | `settle:{job_id}` |
+| Refund | `refund:{job_id}` |
+
+Failed and cancelled jobs refund the reservation without changing `balance`.
+Job failure status and the refund row are committed in the same database
+transaction. A second refund for the same job is a no-op. A settled job is
+never refunded. Missing or partial reserved balances release only what is
+still reserved. Cleanup also recovers terminal jobs whose fail commit landed
+historically without a refund.
+
 ## Retention
 
 Cleanup is scheduled. It does not run on HTTP requests.
 
-- Render Cron `docuflow-cleanup` runs `python -m docuflow.cleanup` every 15 minutes (billed only while running).
-- The API (inline) and the RQ worker also start an in-process interval thread (`CLEANUP_INTERVAL_SECONDS`, default 900). Set it to `0` to rely on cron only.
-- Overlapping runs take a lease (Postgres advisory lock, or `cleanup_leases` on SQLite) so the same reservation is not refunded twice. Ledger refund keys remain idempotent.
-- A job is abandoned only when `status=processing` and `heartbeat_at` (or `started_at` if no heartbeat) is older than `JOB_STALE_MINUTES`, which is never below the worker timeout plus grace.
-- Expired uploads/results (`FILE_RETENTION_HOURS` / `RESULT_RETENTION_HOURS`) are marked deleted, then object storage is removed through a durable outbox with bounded backoff. Failed object deletes never undelete the row.
+- Render Cron `docuflow-cleanup` is the production scheduler (`python -m docuflow.cleanup` every 15 minutes, billed only while running).
+- The API in-process interval is **off** in the default Blueprint (`CLEANUP_INTERVAL_SECONDS=0`) so cron is the single cleaner. Set `900` only if you omit the cron.
+- Overlapping runs take a PostgreSQL-backed `cleanup_leases` row (`name`, owner `token`, `locked_until` / `lease_until`, `acquired_at`, `updated_at`). Acquisition is an atomic `UPDATE` of an expired or unowned row. Session-level advisory locks are not used; they are unsafe with connection pooling. Only the owner token can release or renew. After a crash the lease expires and another process can reclaim it.
+- A job is abandoned only when `status=processing` and `heartbeat_at` (or `started_at` if no heartbeat) is older than `JOB_STALE_MINUTES`, which is never below the worker timeout plus grace. Fail + refund is one transaction.
+- Expired uploads/results (`FILE_RETENTION_HOURS` / `RESULT_RETENTION_HOURS`) are marked deleted, then object storage is removed through `storage_deletions`. Rows left `in_progress` past `STORAGE_DELETE_LEASE_MINUTES` are reclaimed. Object delete is idempotent (already-gone is success). Completed rows are not processed again. Failed object deletes never undelete the row.
 
 ```
 python -m docuflow.cleanup
