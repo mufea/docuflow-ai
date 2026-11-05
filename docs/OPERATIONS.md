@@ -35,13 +35,17 @@ The worker listens for SIGTERM and requests RQ stop. The API relies on Uvicorn S
 
 ## Retention
 
-Run periodically (cron or worker heartbeat):
+Cleanup is scheduled. It does not run on HTTP requests.
 
-```python
-from docuflow.jobs.retention import cleanup_abandoned_jobs, cleanup_expired_files
+- Render Cron `docuflow-cleanup` runs `python -m docuflow.cleanup` every 15 minutes (billed only while running).
+- The API (inline) and the RQ worker also start an in-process interval thread (`CLEANUP_INTERVAL_SECONDS`, default 900). Set it to `0` to rely on cron only.
+- Overlapping runs take a lease (Postgres advisory lock, or `cleanup_leases` on SQLite) so the same reservation is not refunded twice. Ledger refund keys remain idempotent.
+- A job is abandoned only when `status=processing` and `heartbeat_at` (or `started_at` if no heartbeat) is older than `JOB_STALE_MINUTES`, which is never below the worker timeout plus grace.
+- Expired uploads/results (`FILE_RETENTION_HOURS` / `RESULT_RETENTION_HOURS`) are marked deleted, then object storage is removed through a durable outbox with bounded backoff. Failed object deletes never undelete the row.
+
 ```
-
-Abandoned `processing` jobs older than 45 minutes are marked failed.
+python -m docuflow.cleanup
+```
 
 ## Incidents
 

@@ -42,6 +42,13 @@ limits. It must not write `User`, `CreditAccount`, or `CreditLedger` rows.
 Plan changes for an account go through billing webhooks or an explicit admin
 grant.
 
+## Scheduled cleanup, not request-path cleanup
+
+Abandoned jobs and expired files are processed by `python -m docuflow.cleanup`
+and an in-process interval thread. A Render Cron Job is the deployed path that
+still runs when the Free API is asleep. Storage deletes go through an outbox
+so a failed S3 call cannot resurrect a document the user already lost.
+
 ## Hatchling / uv for Python, pnpm for the web
 
 Lockfiles: `uv.lock` and `pnpm-lock.yaml`.
