@@ -34,7 +34,7 @@ existed on `main` after that merge.
 | --- | --- |
 | Phase 9.8 merge | `f098afe700a17fe3d20585d73d3ba5448d85367d` |
 | Phase 9.8 implementation | `9bb37e948bb2f6b052575f43df11a48d723931bb` |
-| Phase 9.9 implementation | recorded after commit |
+| Phase 9.9 implementation | `343a035fc92283efb979d376f77ccbda9aa31425` |
 
 ## C. Changes implemented
 
@@ -102,7 +102,7 @@ Loopback success is local verification, not staging verification.
 
 ## H. Local test results
 
-Date/time: 6 Nov 2026, 12:02 Asia/Jakarta. Layer: **local**. Environment identity: this Cloud Agent workspace (loopback + local PostgreSQL `docuflow_test`). Git commit SHA: recorded after the implementation commit.
+Date/time: 6 Nov 2026, 12:02 Asia/Jakarta. Layer: **local**. Environment identity: this Cloud Agent workspace (loopback + local PostgreSQL `docuflow_test`). Git commit SHA: `343a035fc92283efb979d376f77ccbda9aa31425`.
 
 ```
 uv run pytest tests/test_phase98_staging.py tests/test_phase99_staging.py -q

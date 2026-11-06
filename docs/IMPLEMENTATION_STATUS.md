@@ -778,7 +778,7 @@ Production deployment authorized: **NO.**
 
 ## Phase 9.9 — Staging environment execution and live verification — on `cursor/phase-9-9-staging-execution-verification`
 
-Base: GitHub `main` @ `f098afe700a17fe3d20585d73d3ba5448d85367d` (Phase 9.8 already merged via PR #11). This phase does not repeat Phases 9.1–9.8.
+Base: GitHub `main` @ `f098afe700a17fe3d20585d73d3ba5448d85367d` (Phase 9.8 already merged via PR #11). Implementation commit: `343a035fc92283efb979d376f77ccbda9aa31425`. This phase does not repeat Phases 9.1–9.8.
 
 Scope: record the Phase 9.8 merge accurately, harden staging smoke mutations, add disposable Postgres migrate-verify coverage, and document the owner-operated staging procedure. No product features, no paid worker, no Render apply, no production deploy.
 
