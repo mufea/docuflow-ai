@@ -44,7 +44,7 @@ jobs:
       - name: PostgreSQL integration tests
         run: uv run pytest -q -m integration
       - name: Lint
-        run: uv run ruff check src tests
+        run: uv run ruff check src tests scripts
       - name: Typecheck
         run: uv run mypy src/docuflow
 

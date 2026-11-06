@@ -40,6 +40,9 @@ def test_staging_blueprint_is_isolated_and_inline() -> None:
     assert "name: docuflow-db" not in active
     assert "type: worker" not in active
     assert "docuflow-worker" not in active
+    assert "type: redis" not in active
+    assert "docuflow-staging-redis" not in active
+    assert "REDIS_URL" not in active
     assert "JOB_BROKER" in active
     assert "value: inline" in active
     assert "healthCheckPath: /health" in text

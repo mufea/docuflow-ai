@@ -49,7 +49,7 @@ Default local demo admin (development only): create an account in the UI, or see
 | --- | --- |
 | Python unit tests | `uv run pytest -q -m "not integration"` |
 | PostgreSQL integration tests | `TEST_DATABASE_URL=... uv run pytest -q -m integration` |
-| Python lint | `uv run ruff check src tests` |
+| Python lint | `uv run ruff check src tests scripts` |
 | Python types | `uv run mypy src/docuflow` |
 | API | `uv run uvicorn docuflow.main:app --host 127.0.0.1 --port 43124` |
 | Worker | `JOB_BROKER=rq uv run python -m docuflow.worker` |
@@ -72,8 +72,9 @@ Default local demo admin (development only): create an account in the UI, or see
 ## Deployment
 
 See `docs/DEPLOYMENT.md` and `infra/render.yaml`. Isolated staging uses the
-template `infra/render.staging.yaml` (not applied). This repository is
-**not claimed as deployed** until a Render deploy is authorized and verified.
+template `infra/render.staging.yaml` (Redis omitted, `JOB_BROKER=inline`,
+not applied). This repository is **not claimed as deployed** until a Render
+deploy is authorized and verified.
 
 ## License
 

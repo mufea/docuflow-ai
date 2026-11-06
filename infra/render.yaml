@@ -17,8 +17,10 @@
 # Syncing this Blueprint does not always downgrade an existing paid service.
 #
 # Isolated staging uses infra/render.staging.yaml in a separate Render
-# workspace. Do not sync that file into a workspace that already has
+# workspace. Staging omits Redis because JOB_BROKER=inline does not use it.
+# Do not sync the staging file into a workspace that already has
 # docuflow-api / docuflow-db. Owner approval is required before applying it.
+# This production Blueprint is unchanged: optional Free Redis remains.
 
 previewsEnabled: false
 
