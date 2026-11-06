@@ -132,7 +132,7 @@ is **provider** only with dedicated `TEST_S3_*`. Render URLs are **staging**.
 | Cleanup | Cron configured | **IMPLEMENTED** in Blueprint; **NOT EXECUTED** as a live cron |
 | Environment | Required variables configured | Template only; secrets not in this environment |
 | Isolation | No production credentials/resources reused | Owner reported preflight **PASS** (6 Nov 2026, 18:33 Asia/Jakarta); agent-run **NOT EXECUTED** |
-| Blueprint apply | `infra/render.staging.yaml` | **NOT EXECUTED** — apply still not authorized |
+| Blueprint apply | `infra/render.staging.yaml` | Owner authorized 6 Nov 2026, 19:59 Asia/Jakarta; dashboard apply **not confirmed**; agent did not apply |
 
 ### Owner provisioning runbook
 

@@ -924,7 +924,7 @@ Owner attestations recorded 6 Nov 2026, 17:37 Asia/Jakarta. Owner reported prefl
 | R2 staging credentials | Must stay on the owner machine. Not present in this environment. **BLOCKED** for agent-run preflight. |
 | R2 provider testing | Owner-run `uv run pytest -q -m provider`: **1 passed, 246 deselected in 3.90s** (6 Nov 2026, 19:57 Asia/Jakarta). **Provider verified** (owner machine). Agent-run: **NOT EXECUTED**. |
 | Preflight isolation | Owner reported **PASS** (6 Nov 2026, 18:33 Asia/Jakarta). Agent-run preflight **NOT EXECUTED**. A preflight PASS is not live R2 connectivity and not Blueprint apply. |
-| Blueprint application | **NOT EXECUTED**. Still **not authorized**. |
+| Blueprint application | Owner authorized apply of `infra/render.staging.yaml` (6 Nov 2026, 19:59 Asia/Jakarta). Agent apply: **NOT EXECUTED**. Dashboard apply: awaiting owner confirmation of created services. |
 | Staging migration | **NOT EXECUTED** |
 | Staging health | **NOT EXECUTED** |
 | Staging smoke | **NOT EXECUTED** |
@@ -933,7 +933,7 @@ Free Postgres reminder: expires 30 days after creation; 14-day grace; then delet
 
 ## Next recommended work
 
-1. Explicitly authorize apply of `infra/render.staging.yaml` in the dedicated staging workspace (Free Postgres 30-day expiry still applies). Do not apply `infra/render.yaml`.
-2. Until that authorization, do **not** create Render services from this agent.
+1. Owner applies `infra/render.staging.yaml` in the dedicated staging workspace (Free Postgres 30-day expiry). Do not apply `infra/render.yaml`.
+2. After apply, report service names, API/web hostnames (not secrets), database **name** only, and whether Redis or a worker appeared.
 3. Keep `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `JOB_BROKER=inline`. No Redis, no paid worker.
 4. Production remains unauthorized.
