@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+import urllib.parse
+import urllib.request
 import uuid
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -11,6 +13,7 @@ from pydantic import SecretStr
 
 from docuflow.config import Settings
 from docuflow.exceptions import AuthorizationError, DocuflowError, NotFoundError, TransientError
+from docuflow.staging_checks import is_forbidden_live_test_bucket
 from docuflow.storage.s3 import S3Storage, classify_s3_client_error
 from tests.conftest import register_and_login
 from tests.pdf.conftest import write_text_pdf
@@ -21,9 +24,7 @@ from tests.test_phase94_storage import _client_error, _s3
 def test_ready_does_not_leak_dependency_errors(client: TestClient, app) -> None:
     class LeakyStorage:
         def ping(self) -> None:
-            raise RuntimeError(
-                "postgres://user:supersecret@db/docuflow signed?X-Amz-Signature=abc traceback"
-            )
+            raise RuntimeError("postgres://user:supersecret@db/docuflow signed?X-Amz-Signature=abc traceback")
 
     app.state.ctx.storage = LeakyStorage()
     response = client.get("/ready")
@@ -111,11 +112,14 @@ def test_optional_live_s3_provider_roundtrip(tmp_path: Path) -> None:
             "live S3-compatible credentials not configured "
             "(TEST_S3_BUCKET / TEST_S3_ACCESS_KEY_ID / TEST_S3_SECRET_ACCESS_KEY)"
         )
+    if is_forbidden_live_test_bucket(bucket, production_bucket=os.environ.get("PRODUCTION_S3_BUCKET", "")):
+        pytest.fail("TEST_S3_BUCKET looks like a production bucket. Use a dedicated test bucket.")
 
     prefix = f"docuflow-test/{uuid.uuid4().hex}/"
     key = f"{prefix}probe.bin"
     source = tmp_path / "probe.bin"
-    source.write_bytes(b"docuflow-test-probe")
+    payload = b"docuflow-test-probe"
+    source.write_bytes(payload)
     dest = tmp_path / "downloaded.bin"
     settings = Settings(
         env="test",
@@ -132,9 +136,19 @@ def test_optional_live_s3_provider_roundtrip(tmp_path: Path) -> None:
         storage.put(key, source, "application/octet-stream")
         assert storage.exists(key) is True
         storage.download(key, dest)
-        assert dest.read_bytes() == b"docuflow-test-probe"
+        assert dest.read_bytes() == payload
         signed = storage.signed_url(key, expires_seconds=60)
-        assert signed is None or signed.startswith("http")
+        assert signed is not None
+        assert signed.startswith("http")
+        parsed = urllib.parse.urlparse(signed)
+        assert parsed.scheme in {"http", "https"} and parsed.netloc
+        request = urllib.request.Request(signed, method="GET")  # noqa: S310
+        try:
+            with urllib.request.urlopen(request, timeout=30) as response:  # noqa: S310
+                downloaded = response.read()
+        except Exception:
+            raise AssertionError("presigned GET failed") from None
+        assert downloaded == payload
         storage.delete(key)
         assert storage.exists(key) is False
     finally:

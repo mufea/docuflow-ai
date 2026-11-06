@@ -648,9 +648,11 @@ Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 Production migration: **not performed.**
 Production deployment authorized: **NO.**
 
-## Phase 9.7 — Staging readiness and deployment verification — on `cursor/phase-9-7-staging-readiness`
+## Phase 9.7 — Staging readiness and deployment verification — merged
 
-Base: GitHub `main` @ `d65f087771f43e50780ea2ab87466b8a93f80dc5` (Phase 9.6 already merged via PR #9). This phase does not repeat Phases 9.1–9.6.
+Merged to `main` via PR #10. Merge commit: `e16956aaa09b446cf9f41ef2ecdd453a32e9a73e` (6 Nov 2026, 06:13 Asia/Jakarta). Feature branch was `cursor/phase-9-7-staging-readiness`. Implementation commit: `8e7eb329dea06bf0a7388b9079316306d31c981b`. `main` CI on the merge: [run 42127934723](https://github.com/mufea/docuflow-ai/actions/runs/42127934723), success.
+
+Base at the time: GitHub `main` @ `d65f087771f43e50780ea2ab87466b8a93f80dc5` (Phase 9.6 already merged via PR #9). This phase does not repeat Phases 9.1–9.6.
 
 Scope: documentation accuracy after the Phase 9.6 merge, isolated staging Blueprint template, migration/S3/smoke checklists, and regression coverage. No product features, no paid worker, no Render apply, no production deploy.
 
@@ -704,16 +706,80 @@ web 15 tests passed (lint/typecheck/build job succeeded).
 Staging deployment: **not performed / not verified.**
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 
+## Phase 9.8 — Staging provisioning and live infrastructure verification — on `cursor/phase-9-8-staging-live-verification`
+
+Base: GitHub `main` @ `e16956aaa09b446cf9f41ef2ecdd453a32e9a73e` (Phase 9.7 already merged via PR #10). This phase does not repeat Phases 9.1–9.7.
+
+Scope: staging Blueprint audit (remove unused Redis), staging preflight, PostgreSQL/S3/smoke operator scripts, end-to-end verification procedure. No product features, no paid worker, no Render apply, no production deploy.
+
+### Workstream results
+
+**A. Staging infrastructure audit — implemented, locally tested.** `infra/render.staging.yaml` keeps isolated names and `JOB_BROKER=inline`, and omits Redis because inline jobs do not use it. Production `infra/render.yaml` still lists optional Free Redis. Blueprint was not applied.
+
+**B. Staging environment safety — implemented, locally tested.** `scripts/staging_preflight.py` (opt-in `STAGING_PREFLIGHT=1`) checks fail-fast settings, dedicated PostgreSQL/S3, mock AI, console email, and production resource reuse. Secrets are not printed.
+
+**C. PostgreSQL live verification — procedure ready; staging verified: no.** `scripts/staging_migrate_verify.py` confirms identity, refuses production-looking DSNs, and applies `0003` only with `STAGING_MIGRATE=1`. No hosted staging database was contacted. Existing integration tests still cover disposable upgrade/downgrade.
+
+**D. Live S3 provider — implemented; provider verified: no.** Existing `pytest -m provider` roundtrip still requires dedicated `TEST_S3_*`. It now refuses production-looking bucket names and fetches a presigned URL without logging it. **NOT EXECUTED — missing dedicated test credentials.**
+
+**E. Staging smoke — implemented, locally tested against a loopback server; staging verified: no.** `scripts/staging_smoke.py` retains exit 2 / `NOT EXECUTED` without `STAGING_API_URL`, prints PASS/FAIL/SKIPPED, and optionally exercises auth/upload/job/download/cross-user/delete/frontend when env vars are set.
+
+**F. End-to-end procedure — implemented as documentation.** See `docs/DEPLOYMENT.md`. Queued-job recovery limit remains 100.
+
+**G. Tests — locally tested.** New `tests/test_phase98_staging.py`. CI ruff now includes `scripts`.
+
+**H. Readiness report —** `docs/PHASE_9_8_READINESS_REPORT.md`.
+
+Local verification (this branch):
+
+```
+uv run pytest -q -m "not integration"
+# 218 passed, 1 skipped, 10 deselected
+
+TEST_DATABASE_URL=postgresql+psycopg://docuflow:docuflow@127.0.0.1:5432/docuflow_test \
+  uv run pytest -q -m integration
+# 10 passed, 219 deselected
+
+uv run ruff check src tests scripts
+# All checks passed
+
+uv run mypy src/docuflow
+# Success: no issues found in 73 source files
+
+uv run python scripts/staging_smoke.py
+# NOT EXECUTED, exit 2
+uv run python scripts/staging_preflight.py
+# NOT EXECUTED, exit 2
+uv run python scripts/staging_migrate_verify.py
+# NOT EXECUTED, exit 2
+
+git diff --check
+# clean
+```
+
+The skipped test is the optional live S3 provider roundtrip (no `TEST_S3_*`).
+Web lint/typecheck/tests/build: **not run locally**. GitHub Actions will run
+them after push.
+
+Staging deployment: **not performed / not verified.**
+Live S3 provider verification: **NOT EXECUTED — missing dedicated test credentials.**
+PostgreSQL migration `0003` on staging: **not executed / not verified.**
+Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
+Production migration: **not performed.**
+Production deployment authorized: **NO.**
+
 ## Next recommended work
 
-1. Review Phase 9.7. Do not merge or deploy from this agent unless authorized.
-2. If staging should exist, apply `infra/render.staging.yaml` in a **dedicated** Render workspace after owner approval. Do not sync it into a workspace that already has `docuflow-api`.
-3. Apply Alembic `0003` only on an approved **staging** database, using the procedure in `docs/DEPLOYMENT.md`. Do not run it against production from this environment.
-4. Confirm the actual Render Postgres plan in the dashboard before relying on managed backups. Free Postgres has none; take `pg_dump` copies yourself.
-5. Provide dedicated non-production `TEST_S3_*` credentials if live object-storage compatibility should be recorded. Do not use the production bucket or production object prefixes.
-6. If an older workspace still has an idle paid `docuflow-worker`, stop or delete it in the dashboard only after confirming `JOB_BROKER=inline`.
-7. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
-8. Provide sandbox Stripe/Midtrans keys only if billing should be exercised end-to-end. Live charges stay off.
-9. Provide an AI key only if live analysis should replace the mock provider. Keep `AI_PROVIDER=mock` until then.
-10. Production email needs a non-console backend **and** a host that can reach SMTP (Render Free web services block outbound 25/465/587). Do not enable `EMAIL_BACKEND=smtp` on Free without verifying current Render network policy.
-11. Queue-based scaling remains a separate later phase (`JOB_BROKER=rq` + paid worker).
+1. Review Phase 9.8. Do not merge or deploy from this agent unless authorized.
+2. If staging should exist, apply `infra/render.staging.yaml` in a **dedicated** Render workspace after owner approval. Do not sync it into a workspace that already has `docuflow-api`. Confirm the workspace has no production resources first.
+3. Run `STAGING_PREFLIGHT=1 python scripts/staging_preflight.py` before applying secrets to Render.
+4. Apply Alembic `0003` only on an approved **staging** database, using `scripts/staging_migrate_verify.py`. Do not run it against production from this environment.
+5. Confirm the actual Render Postgres plan in the dashboard before relying on managed backups. Free Postgres has none; take `pg_dump` copies yourself.
+6. Provide dedicated non-production `TEST_S3_*` credentials if live object-storage compatibility should be recorded. Do not use the production bucket or production object prefixes.
+7. After staging exists, set `STAGING_API_URL` and run `scripts/staging_smoke.py`. Extended checks need a dedicated test account and test PDF.
+8. If an older workspace still has an idle paid `docuflow-worker`, stop or delete it in the dashboard only after confirming `JOB_BROKER=inline`.
+9. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
+10. Provide sandbox Stripe/Midtrans keys only if billing should be exercised end-to-end. Live charges stay off.
+11. Provide an AI key only if live analysis should replace the mock provider. Keep `AI_PROVIDER=mock` until then.
+12. Production email needs a non-console backend **and** a host that can reach SMTP (Render Free web services block outbound 25/465/587). Do not enable `EMAIL_BACKEND=smtp` on Free without verifying current Render network policy.
+13. Queue-based scaling remains a separate later phase (`JOB_BROKER=rq` + paid worker). Production Redis is unchanged for that path.

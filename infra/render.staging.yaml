@@ -9,14 +9,17 @@
 # Blueprint in the same workspace as production can create paid resources
 # or collide with production service names.
 #
-# Default architecture (same as production cost stack, isolated names):
+# Cost-efficient staging architecture:
 #   staging web + staging API + staging Postgres + staging cleanup cron
-#   JOB_BROKER=inline  — no paid worker
-#   Optional Free Redis is unused while jobs are inline
+#   JOB_BROKER=inline  — no paid worker, no Redis
+#   Redis is unused while jobs are inline, so it is omitted here.
+#   Production Redis in infra/render.yaml is unchanged.
 #
 # Fill S3_* with a dedicated STAGING bucket (not the production bucket).
 # The application has no global object-key prefix, so prefix isolation is
 # not enough. Do not reuse production secrets.
+#
+# Do not apply this file automatically from an agent environment.
 
 previewsEnabled: false
 
@@ -27,12 +30,6 @@ databases:
     ipAllowList: []
 
 services:
-  - type: redis
-    name: docuflow-staging-redis
-    plan: free
-    maxmemoryPolicy: noeviction
-    ipAllowList: []
-
   - type: web
     name: docuflow-staging-api
     runtime: python
@@ -49,15 +46,8 @@ services:
         fromDatabase:
           name: docuflow-staging-db
           property: connectionString
-      - key: REDIS_URL
-        fromService:
-          name: docuflow-staging-redis
-          type: redis
-          property: connectionString
       - key: JOB_BROKER
         value: inline
-      - key: RQ_QUEUE_NAME
-        value: docuflow-staging
       - key: WORKER_TIMEOUT_SECONDS
         value: "300"
       - key: WORKER_CONCURRENCY
