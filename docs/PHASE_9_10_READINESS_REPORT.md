@@ -39,7 +39,7 @@ Status vocabulary (never combined):
 | --- | --- |
 | Phase 9.9 merge | `ae3cc0b180107e39b76232cd203c27df69376055` |
 | Phase 9.9 implementation | `343a035fc92283efb979d376f77ccbda9aa31425` |
-| Phase 9.10 implementation | recorded after commit |
+| Phase 9.10 implementation | `fd2a35c61c0291c56ec8f8c4387443340f4f3d5e` |
 
 ## C. Changes implemented
 
@@ -101,7 +101,7 @@ pattern (`fromDatabase`, `fromService.envVarKey`, `generateValue`, `sync`).
 
 ## H. Local test results
 
-Date/time: 6 Nov 2026, 13:09 Asia/Jakarta. Layer: **local**. Environment identity: this Cloud Agent workspace. Git commit SHA: recorded after the implementation commit.
+Date/time: 6 Nov 2026, 13:09 Asia/Jakarta. Layer: **local**. Environment identity: this Cloud Agent workspace. Git commit SHA: `fd2a35c61c0291c56ec8f8c4387443340f4f3d5e`.
 
 ```
 uv run pytest tests/test_phase98_staging.py tests/test_phase99_staging.py tests/test_phase910_provisioning.py -q

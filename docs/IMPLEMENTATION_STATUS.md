@@ -848,7 +848,7 @@ Production deployment authorized: **NO.**
 
 ## Phase 9.10 — Staging infrastructure and provisioning — on `cursor/phase-9-10-staging-provisioning`
 
-Base: GitHub `main` @ `ae3cc0b180107e39b76232cd203c27df69376055` (Phase 9.9 already merged via PR #12). This phase does not repeat Phases 9.1–9.9.
+Base: GitHub `main` @ `ae3cc0b180107e39b76232cd203c27df69376055` (Phase 9.9 already merged via PR #12). Implementation commit: `fd2a35c61c0291c56ec8f8c4387443340f4f3d5e`. This phase does not repeat Phases 9.1–9.9.
 
 Scope: audit `infra/render.staging.yaml`, tighten preflight isolation checks, and document the owner-operated provisioning runbook. No product features, no Render apply, no production deploy.
 
