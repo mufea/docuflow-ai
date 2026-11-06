@@ -24,6 +24,7 @@ Status vocabulary (never combined):
 | Starting SHA | `e16956aaa09b446cf9f41ef2ecdd453a32e9a73e` (Merge PR #10, Phase 9.7) |
 | Working tree at start | Clean |
 | Feature branch | `cursor/phase-9-8-staging-live-verification` |
+| Implementation commit | `9bb37e948bb2f6b052575f43df11a48d723931bb` |
 
 `origin/main` matched the expected Phase 9.7 merge SHA. No extra commits
 existed on `main` after that merge.

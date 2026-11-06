@@ -708,7 +708,7 @@ Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 
 ## Phase 9.8 — Staging provisioning and live infrastructure verification — on `cursor/phase-9-8-staging-live-verification`
 
-Base: GitHub `main` @ `e16956aaa09b446cf9f41ef2ecdd453a32e9a73e` (Phase 9.7 already merged via PR #10). This phase does not repeat Phases 9.1–9.7.
+Base: GitHub `main` @ `e16956aaa09b446cf9f41ef2ecdd453a32e9a73e` (Phase 9.7 already merged via PR #10). Implementation commit: `9bb37e948bb2f6b052575f43df11a48d723931bb`. This phase does not repeat Phases 9.1–9.7.
 
 Scope: staging Blueprint audit (remove unused Redis), staging preflight, PostgreSQL/S3/smoke operator scripts, end-to-end verification procedure. No product features, no paid worker, no Render apply, no production deploy.
 
