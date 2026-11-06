@@ -140,7 +140,12 @@ uv run python scripts/staging_migrate_verify.py
 
 The skipped test is the optional live S3 provider roundtrip (no `TEST_S3_*`).
 Web lint/typecheck/tests/build were **not run locally** (no frontend source
-changes). GitHub Actions CI on this branch is recorded after push.
+changes). GitHub Actions for this feature branch: **CI verified** on
+`3f1d870` (workflow **CI**,
+[run 42148242619](https://github.com/mufea/docuflow-ai/actions/runs/42148242619),
+conclusion **success**, 6 Nov 2026, 09:08 Asia/Jakarta): unit 218 passed,
+1 skipped, 10 deselected; integration 10 passed; ruff passed; mypy 73 files;
+web 15 tests passed (lint/typecheck/build job succeeded).
 
 ## I. Outstanding issues and severity
 
@@ -149,7 +154,7 @@ changes). GitHub Actions CI on this branch is recorded after push.
 | P0 | None found |
 | P1 | No isolated staging workspace, staging database, or staging bucket exists. Owner approval is required before provisioning. Production deploy still unauthorized. |
 | P2 | Live S3 `TEST_S3_*` credentials absent. Actual Render Postgres plan unknown from the repo. In-flight `processing` jobs still die on Free API spin-down. |
-| P3 | Frontend checks were not run locally (CI runs them). |
+| P3 | Frontend checks were not run locally (CI ran them on `3f1d870`). |
 
 ## J. Production deployment status
 

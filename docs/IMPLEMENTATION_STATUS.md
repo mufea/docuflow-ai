@@ -758,8 +758,12 @@ git diff --check
 ```
 
 The skipped test is the optional live S3 provider roundtrip (no `TEST_S3_*`).
-Web lint/typecheck/tests/build: **not run locally**. GitHub Actions will run
-them after push.
+Web lint/typecheck/tests/build: **not run locally**. GitHub Actions for this
+feature branch: **CI verified** on `3f1d870` (workflow **CI**,
+[run 42148242619](https://github.com/mufea/docuflow-ai/actions/runs/42148242619),
+conclusion **success**, 6 Nov 2026, 09:08 Asia/Jakarta): unit 218 passed,
+1 skipped, 10 deselected; integration 10 passed; ruff passed; mypy 73 files;
+web 15 tests passed (lint/typecheck/build job succeeded).
 
 Staging deployment: **not performed / not verified.**
 Live S3 provider verification: **NOT EXECUTED — missing dedicated test credentials.**
