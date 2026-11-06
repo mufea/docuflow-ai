@@ -132,7 +132,18 @@ Web lint/typecheck/tests/build: **not run locally** (no frontend source changes)
 
 ## I. GitHub Actions CI results
 
-Pending until the feature-branch workflow completes on a named commit.
+**CI verified** on `7d9da7f` (workflow **CI**,
+[run 42172770416](https://github.com/mufea/docuflow-ai/actions/runs/42172770416),
+conclusion **success**, 6 Nov 2026, 13:12 Asia/Jakarta):
+
+- Unit tests: 233 passed, 1 skipped, 13 deselected
+- PostgreSQL integration: 13 passed, 234 deselected
+- ruff: passed
+- mypy: 73 files, no issues
+- Web: 15 tests passed (lint/typecheck/build job succeeded)
+
+This is **CI verified**, not provisioned, not staging verified, and not
+production verified.
 
 ## J. Outstanding issues
 
@@ -141,7 +152,7 @@ Pending until the feature-branch workflow completes on a named commit.
 | P0 | None found |
 | P1 | No dedicated Render workspace, staging database, or staging bucket. Provisioning is **BLOCKED** until the owner supplies workspace access, plan confirmation, and storage credentials. Production deploy unauthorized. |
 | P2 | Live `TEST_S3_*` absent. Actual Render Postgres plan unknown from the repo. Free Postgres expires in 30 days. |
-| P3 | Frontend checks not run locally (no frontend source changes). |
+| P3 | Frontend checks were not run locally (CI ran them on `7d9da7f`). |
 
 ## K. Infrastructure status
 
