@@ -706,9 +706,13 @@ web 15 tests passed (lint/typecheck/build job succeeded).
 Staging deployment: **not performed / not verified.**
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 
-## Phase 9.8 — Staging provisioning and live infrastructure verification — on `cursor/phase-9-8-staging-live-verification`
+## Phase 9.8 — Staging provisioning and live infrastructure verification — merged
 
-Base: GitHub `main` @ `e16956aaa09b446cf9f41ef2ecdd453a32e9a73e` (Phase 9.7 already merged via PR #10). Implementation commit: `9bb37e948bb2f6b052575f43df11a48d723931bb`. This phase does not repeat Phases 9.1–9.7.
+Merged to `main` via PR #11. Merge commit: `f098afe700a17fe3d20585d73d3ba5448d85367d` (6 Nov 2026, 09:59 Asia/Jakarta). Feature branch was `cursor/phase-9-8-staging-live-verification`. Implementation commit: `9bb37e948bb2f6b052575f43df11a48d723931bb`. `main` CI on the merge: [run 42153765764](https://github.com/mufea/docuflow-ai/actions/runs/42153765764), success (6 Nov 2026, 10:01 Asia/Jakarta).
+
+Implementation is complete as repository tooling. Staging deployment was **not verified**. Live S3 provider was **NOT EXECUTED**. Production remains **NOT DEPLOYED**.
+
+Base at the time: GitHub `main` @ `e16956aaa09b446cf9f41ef2ecdd453a32e9a73e` (Phase 9.7 already merged via PR #10). Implementation commit: `9bb37e948bb2f6b052575f43df11a48d723931bb`. This phase does not repeat Phases 9.1–9.7.
 
 Scope: staging Blueprint audit (remove unused Redis), staging preflight, PostgreSQL/S3/smoke operator scripts, end-to-end verification procedure. No product features, no paid worker, no Render apply, no production deploy.
 
@@ -772,18 +776,80 @@ Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 Production migration: **not performed.**
 Production deployment authorized: **NO.**
 
+## Phase 9.9 — Staging environment execution and live verification — on `cursor/phase-9-9-staging-execution-verification`
+
+Base: GitHub `main` @ `f098afe700a17fe3d20585d73d3ba5448d85367d` (Phase 9.8 already merged via PR #11). Implementation commit: `343a035fc92283efb979d376f77ccbda9aa31425`. This phase does not repeat Phases 9.1–9.8.
+
+Scope: record the Phase 9.8 merge accurately, harden staging smoke mutations, add disposable Postgres migrate-verify coverage, and document the owner-operated staging procedure. No product features, no paid worker, no Render apply, no production deploy.
+
+### Workstream results
+
+**A. Phase 9.8 documentation — implemented.** PR #11 is recorded as merged. Staging, provider, and production remain unverified.
+
+**B. Staging safety — implemented, locally tested.** Mutating smoke checks require `STAGING_SMOKE_MUTATIONS=1`. Registration also requires `STAGING_SMOKE_REGISTER=1`. Non-loopback targets require `STAGING_HOST_CONFIRM`. Production API hosts are refused. Uploaded smoke documents are deleted on failure paths.
+
+**C. PostgreSQL verification — locally tested on disposable databases; staging verified: no.** Incorrect confirmation is refused. Pending `0003` without `STAGING_MIGRATE=1` fails closed. Already-current and apply-on-disposable paths were exercised against isolated Postgres.
+
+**D. Live S3 — unchanged optional provider test; provider verified: no.** **NOT EXECUTED — missing dedicated test credentials.**
+
+**E. Staging smoke — locally tested (loopback); staging verified: no.** Loopback `/health`+`/ready` is local verification, not staging verification.
+
+**F. Operator procedure — implemented** in `docs/DEPLOYMENT.md`.
+
+**G. Readiness report —** `docs/PHASE_9_9_READINESS_REPORT.md`.
+
+Local verification (this branch, 6 Nov 2026, 12:02 Asia/Jakarta):
+
+```
+uv run pytest tests/test_phase98_staging.py tests/test_phase99_staging.py -q
+# 27 passed
+
+uv run pytest -q -m "not integration"
+# 228 passed, 1 skipped, 13 deselected
+
+TEST_DATABASE_URL=postgresql+psycopg://docuflow:docuflow@127.0.0.1:5432/docuflow_test \
+  uv run pytest -q -m integration
+# 13 passed, 229 deselected
+
+uv run ruff check src tests scripts
+# All checks passed
+
+uv run mypy src/docuflow
+# Success: no issues found in 73 source files
+
+uv run python scripts/staging_smoke.py
+# NOT EXECUTED, exit 2
+uv run python scripts/staging_preflight.py
+# NOT EXECUTED, exit 2
+uv run python scripts/staging_migrate_verify.py
+# NOT EXECUTED, exit 2
+
+git diff --check
+# clean
+```
+
+The skipped test is the optional live S3 provider roundtrip (no `TEST_S3_*`).
+Web lint/typecheck/tests/build: **not run locally**. GitHub Actions for this
+feature branch: **CI verified** on `e006b88` (workflow **CI**,
+[run 42166073297](https://github.com/mufea/docuflow-ai/actions/runs/42166073297),
+conclusion **success**, 6 Nov 2026, 12:04 Asia/Jakarta): unit 228 passed,
+1 skipped, 13 deselected; integration 13 passed; ruff passed; mypy 73 files;
+web 15 tests passed (lint/typecheck/build job succeeded).
+
+Staging deployment: **not performed / not verified.**
+Live S3 provider verification: **NOT EXECUTED — missing dedicated test credentials.**
+PostgreSQL migration `0003` on hosted staging: **NOT EXECUTED.**
+Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
+Production deployment authorized: **NO.**
+
 ## Next recommended work
 
-1. Review Phase 9.8. Do not merge or deploy from this agent unless authorized.
-2. If staging should exist, apply `infra/render.staging.yaml` in a **dedicated** Render workspace after owner approval. Do not sync it into a workspace that already has `docuflow-api`. Confirm the workspace has no production resources first.
+1. Review Phase 9.9. Do not merge or deploy from this agent unless authorized.
+2. If staging should exist, apply `infra/render.staging.yaml` in a **dedicated** Render workspace after owner approval. Do not sync it into a workspace that already has `docuflow-api`.
 3. Run `STAGING_PREFLIGHT=1 python scripts/staging_preflight.py` before applying secrets to Render.
-4. Apply Alembic `0003` only on an approved **staging** database, using `scripts/staging_migrate_verify.py`. Do not run it against production from this environment.
-5. Confirm the actual Render Postgres plan in the dashboard before relying on managed backups. Free Postgres has none; take `pg_dump` copies yourself.
-6. Provide dedicated non-production `TEST_S3_*` credentials if live object-storage compatibility should be recorded. Do not use the production bucket or production object prefixes.
-7. After staging exists, set `STAGING_API_URL` and run `scripts/staging_smoke.py`. Extended checks need a dedicated test account and test PDF.
-8. If an older workspace still has an idle paid `docuflow-worker`, stop or delete it in the dashboard only after confirming `JOB_BROKER=inline`.
-9. Optionally install LibreOffice (Word pagination) or Tesseract (OCR) in a custom image; neither is required.
-10. Provide sandbox Stripe/Midtrans keys only if billing should be exercised end-to-end. Live charges stay off.
-11. Provide an AI key only if live analysis should replace the mock provider. Keep `AI_PROVIDER=mock` until then.
-12. Production email needs a non-console backend **and** a host that can reach SMTP (Render Free web services block outbound 25/465/587). Do not enable `EMAIL_BACKEND=smtp` on Free without verifying current Render network policy.
-13. Queue-based scaling remains a separate later phase (`JOB_BROKER=rq` + paid worker). Production Redis is unchanged for that path.
+4. Apply Alembic `0003` only on an approved **staging** database (`scripts/staging_migrate_verify.py`). Do not run it against production.
+5. Confirm the actual Render Postgres plan in the dashboard. Free Postgres has no managed backups.
+6. Provide dedicated non-production `TEST_S3_*` credentials if live object-storage compatibility should be recorded.
+7. After staging exists, set `STAGING_API_URL`, `STAGING_HOST_CONFIRM`, and optionally `STAGING_SMOKE_MUTATIONS=1` with a dedicated test account and PDF.
+8. Keep `AI_PROVIDER=mock` and `EMAIL_BACKEND=console` on staging.
+9. Queue-based scaling remains a later phase (`JOB_BROKER=rq` + paid worker).

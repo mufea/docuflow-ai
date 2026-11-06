@@ -4,6 +4,21 @@ This report records staging-provisioning tooling and live-verification
 procedures. It is **not** a production go-live certificate and **not**
 evidence that a staging environment exists.
 
+## Post-merge record
+
+Recorded in Phase 9.9. The original Phase 9.8 evidence below is unchanged.
+
+| Item | Value |
+| --- | --- |
+| PR | https://github.com/mufea/docuflow-ai/pull/11 — **merged** |
+| Merge commit | `f098afe700a17fe3d20585d73d3ba5448d85367d` |
+| Merged | 6 Nov 2026, 09:59 Asia/Jakarta |
+| Implementation complete | yes (tooling and docs) |
+| CI verified | `main` merge [run 42153765764](https://github.com/mufea/docuflow-ai/actions/runs/42153765764) success (6 Nov 2026, 10:01 Asia/Jakarta); branch CI on `3f1d870` [run 42148242619](https://github.com/mufea/docuflow-ai/actions/runs/42148242619) |
+| Staging deployment | **not verified** |
+| Live S3 provider | **NOT EXECUTED — missing dedicated test credentials** |
+| Production | **NOT DEPLOYED — AWAITING OWNER APPROVAL** |
+
 Status vocabulary (never combined):
 
 | Label | Meaning |

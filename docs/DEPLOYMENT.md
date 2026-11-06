@@ -55,7 +55,7 @@ and are **not** a billing quote:
 | --- | --- | --- |
 | Local development | SQLite or local Postgres, filesystem storage, `JOB_BROKER=inline` | Supported. See `README.md` |
 | Local verification | pytest / ruff / mypy / web lint-typecheck-test-build | See `docs/IMPLEMENTATION_STATUS.md` |
-| CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.7 merge is `e16956a` (PR #10). Phase 9.8 branch CI succeeded on `3f1d870` ([run 42148242619](https://github.com/mufea/docuflow-ai/actions/runs/42148242619), 6 Nov 2026, 09:08 Asia/Jakarta) |
+| CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.8 merge is `f098afe` (PR #11, [run 42153765764](https://github.com/mufea/docuflow-ai/actions/runs/42153765764), 6 Nov 2026, 10:01 Asia/Jakarta). Phase 9.9 branch CI on `e006b88` succeeded ([run 42166073297](https://github.com/mufea/docuflow-ai/actions/runs/42166073297), 6 Nov 2026, 12:04 Asia/Jakarta) |
 | Provider verification | Dedicated test bucket + `TEST_S3_*` credentials | **Pending** — mocked S3 tests are not provider verification |
 | Staging deployment | Isolated non-production Render workspace + staging DB + staging bucket | **Not performed / not verified** — Blueprint is a template only |
 | Production deployment | Live Render workspace serving users | **NOT DEPLOYED — Awaiting owner approval** |
@@ -91,6 +91,105 @@ This workflow is for an owner. It has **not** been executed from this environmen
 10. Optionally: `uv run pytest -q -m provider` with dedicated `TEST_S3_*` (not production).
 
 Until those steps run against a real staging workspace, staging remains **not verified**.
+
+## Staging operator procedure
+
+Owner-operated. This environment has **not** applied the Blueprint or
+contacted a hosted staging database. Do not invent URLs, bucket names, or
+credentials.
+
+### Evidence row
+
+For every live check, record (never secrets, DSNs, or signed URLs):
+
+| Field | Example |
+| --- | --- |
+| Date/time | Asia/Jakarta |
+| Git commit SHA | `git rev-parse HEAD` of the deployed revision |
+| Environment identity | staging API hostname, database **name** (not password), bucket **name** |
+| Command | exact command |
+| Result | PASS / FAIL / SKIPPED / NOT EXECUTED |
+| Layer | local / CI / provider / staging |
+
+A loopback smoke pass is **local**. GitHub Actions is **CI**. `pytest -m provider`
+is **provider** only with dedicated `TEST_S3_*`. Render URLs are **staging**.
+
+### Pre-provisioning
+
+1. Confirm a **separate** Render workspace that does not contain `docuflow-api`,
+   `docuflow-db`, or `docuflow-web`.
+2. Confirm you will not reuse production `DATABASE_URL`, `S3_BUCKET`, or keys.
+3. Create a dedicated staging S3-compatible bucket (not a prefix in production).
+4. Generate a unique `DOCUFLOW_SECRET_KEY` (≥32 characters).
+5. Read the dashboard Postgres plan. Render Free: 1 GB, no managed backups,
+   one database per workspace, 30-day expiry. Do not assume paid backups.
+6. Copy `docs/staging.env.example`. Run:
+
+```bash
+export STAGING_PREFLIGHT=1
+# export the intended staging values, never production secrets
+python scripts/staging_preflight.py
+```
+
+Stop on FAIL. Unset `STAGING_PREFLIGHT` is **NOT EXECUTED**.
+
+### Provisioning
+
+Do **not** apply this from an agent.
+
+1. Sign in to the dedicated staging Render workspace.
+2. **New → Blueprint**. Set the Blueprint file to `infra/render.staging.yaml`
+   (not `infra/render.yaml`).
+3. Confirm service names are `docuflow-staging-*`. There is no Redis and no
+   worker. `JOB_BROKER=inline`.
+4. Fill `S3_*` with the staging bucket only. Leave `DOCUFLOW_SECRET_KEY` to
+   generate, or paste the unique staging secret.
+5. Apply only after owner approval. Record the evidence row.
+
+### Post-provisioning
+
+1. Note the public API and web URLs. They must contain `staging` or otherwise
+   not match `docuflow-api` / `docuflow-web`.
+2. Confirm env: `DOCUFLOW_ENV=production`, `JOB_BROKER=inline`,
+   `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `STORAGE_BACKEND=s3`.
+3. Migration inspect, then apply only if pending:
+
+```bash
+export STAGING_MIGRATE_VERIFY=1
+export DATABASE_URL=...          # staging only
+export STAGING_DATABASE_CONFIRM=...  # database name or host/name
+python scripts/staging_migrate_verify.py
+# if pending and identity matched:
+export STAGING_MIGRATE=1
+python scripts/staging_migrate_verify.py
+```
+
+4. Optional provider roundtrip against a **test** bucket, not staging user data:
+
+```bash
+uv run pytest -q -m provider
+```
+
+5. Health / ready / optional mutations:
+
+```bash
+export STAGING_API_URL=https://<staging-api-host>
+export STAGING_HOST_CONFIRM=<staging-api-hostname>
+export STAGING_WEB_URL=https://<staging-web-host>
+python scripts/staging_smoke.py
+# mutating checks stay SKIPPED until:
+export STAGING_SMOKE_MUTATIONS=1
+export STAGING_SMOKE_EMAIL=...
+export STAGING_SMOKE_PASSWORD=...
+# optional: STAGING_SMOKE_REGISTER=1
+export STAGING_SMOKE_PDF=./path/to/tiny-test.pdf
+python scripts/staging_smoke.py
+```
+
+6. Cleanup cron should remain `*/15 * * * *` with `CLEANUP_INTERVAL_SECONDS=0`
+   on the API.
+
+`GET /health` HTTP 200 alone is **not** staging verification.
 
 ## First deploy on Render
 
@@ -376,10 +475,16 @@ python scripts/staging_smoke.py
 STAGING_API_URL=https://docuflow-staging-api.onrender.com python scripts/staging_smoke.py
 ```
 
-Optional extended checks (dedicated staging test account and test PDF only):
+Optional extended checks (dedicated staging test account and test PDF only).
+These **modify staging data** and stay SKIPPED without `STAGING_SMOKE_MUTATIONS=1`.
+Registration also needs `STAGING_SMOKE_REGISTER=1`. Non-loopback URLs need
+`STAGING_HOST_CONFIRM` equal to the API hostname. Production hosts are refused.
 
 ```bash
+export STAGING_API_URL=https://docuflow-staging-api.onrender.com
+export STAGING_HOST_CONFIRM=docuflow-staging-api.onrender.com
 export STAGING_WEB_URL=https://docuflow-staging-web.onrender.com
+export STAGING_SMOKE_MUTATIONS=1
 export STAGING_SMOKE_EMAIL=staging-probe@example.com
 export STAGING_SMOKE_PASSWORD=...   # do not commit
 export STAGING_SMOKE_REGISTER=1

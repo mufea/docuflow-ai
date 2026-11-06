@@ -99,10 +99,14 @@ production-looking identities, and applies Alembic `0003` only when
 `STAGING_MIGRATE=1` and `STAGING_DATABASE_CONFIRM` matches. It never
 downgrades.
 
-`staging_smoke.py` always checks `/health` and `/ready`. Extended
-authentication, upload, `extract_text`, download, cross-user 403, delete,
-and frontend checks stay `SKIPPED` until their dedicated env vars are set.
-Skipped checks are never reported as `PASS`.
+`staging_smoke.py` always checks `/health` and `/ready` when the URL is
+set. It refuses production API hostnames. Non-loopback targets require
+`STAGING_HOST_CONFIRM` equal to the API hostname. Extended mutating
+checks (login, register, upload, job, download, cross-user, delete)
+require `STAGING_SMOKE_MUTATIONS=1`. Registration also requires
+`STAGING_SMOKE_REGISTER=1`. Frontend GET remains non-mutating.
+Skipped checks are never reported as `PASS`. A loopback `/health` pass
+is local verification, not staging verification.
 
 Without `STAGING_API_URL` the smoke script prints `NOT EXECUTED` and exits
 2. It is not a substitute for the full checklist in `docs/DEPLOYMENT.md`.
@@ -115,6 +119,6 @@ Passing local or CI tests is not a production deploy.
 | --- | --- |
 | Local | Commands in this file, run on a laptop or cloud agent |
 | CI | GitHub Actions on the commit (`postgres:16` service for `-m integration`) |
-| Provider | Dedicated `TEST_S3_*` bucket; **NOT EXECUTED** in Phase 9.8 |
-| Staging deploy | Separate Render workspace; template only; **not performed** in Phase 9.8 |
+| Provider | Dedicated `TEST_S3_*` bucket; **NOT EXECUTED** in Phase 9.9 |
+| Staging deploy | Separate Render workspace; **not performed** in Phase 9.9 |
 | Production deploy | Owner-approved live workspace; **not performed** |
