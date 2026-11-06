@@ -55,7 +55,7 @@ and are **not** a billing quote:
 | --- | --- | --- |
 | Local development | SQLite or local Postgres, filesystem storage, `JOB_BROKER=inline` | Supported. See `README.md` |
 | Local verification | pytest / ruff / mypy / web lint-typecheck-test-build | See `docs/IMPLEMENTATION_STATUS.md` |
-| CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.8 merge is `f098afe` (PR #11, [run 42153765764](https://github.com/mufea/docuflow-ai/actions/runs/42153765764), 6 Nov 2026, 10:01 Asia/Jakarta). Phase 9.9 branch CI is recorded after push |
+| CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.8 merge is `f098afe` (PR #11, [run 42153765764](https://github.com/mufea/docuflow-ai/actions/runs/42153765764), 6 Nov 2026, 10:01 Asia/Jakarta). Phase 9.9 branch CI on `e006b88` succeeded ([run 42166073297](https://github.com/mufea/docuflow-ai/actions/runs/42166073297), 6 Nov 2026, 12:04 Asia/Jakarta) |
 | Provider verification | Dedicated test bucket + `TEST_S3_*` credentials | **Pending** — mocked S3 tests are not provider verification |
 | Staging deployment | Isolated non-production Render workspace + staging DB + staging bucket | **Not performed / not verified** — Blueprint is a template only |
 | Production deployment | Live Render workspace serving users | **NOT DEPLOYED — Awaiting owner approval** |
