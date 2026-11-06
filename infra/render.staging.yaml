@@ -15,6 +15,15 @@
 #   Redis is unused while jobs are inline, so it is omitted here.
 #   Production Redis in infra/render.yaml is unchanged.
 #
+# Cost is not zero. Confirm the live Render price list before applying:
+#   - Free web services: spin-down, 750 instance hours/workspace/month.
+#   - Free PostgreSQL: 1 GB, no managed backups, one per workspace,
+#     expires 30 days after creation (then a paid plan is required).
+#   - Cleanup cron is billed for the seconds it runs.
+#   - External S3-compatible storage is billed by that provider.
+# ipAllowList: [] keeps Postgres on the Render private network. Laptop
+# migrate-verify needs an owner-added IP or a Render shell.
+#
 # Fill S3_* with a dedicated STAGING bucket (not the production bucket).
 # The application has no global object-key prefix, so prefix isolation is
 # not enough. Do not reuse production secrets.

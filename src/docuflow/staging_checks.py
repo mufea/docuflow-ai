@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Literal
+from typing import Any, Literal
 from urllib.parse import urlparse
+
+import yaml  # type: ignore[import-untyped]
 
 from docuflow.config import Settings
 from docuflow.dsn import normalize_database_url
@@ -241,8 +243,77 @@ def blueprint_declared_names(text: str) -> set[str]:
     return names
 
 
+def _service_env_item(service: dict[str, Any], key: str) -> dict[str, Any] | None:
+    for item in service.get("envVars") or []:
+        if isinstance(item, dict) and item.get("key") == key:
+            return item
+    return None
+
+
+def _service_env_value(service: dict[str, Any], key: str) -> Any:
+    item = _service_env_item(service, key)
+    if item is None:
+        return None
+    return item.get("value")
+
+
 def audit_staging_blueprint(text: str) -> StagingIssues:
     issues = StagingIssues()
+    try:
+        parsed = yaml.safe_load(text)
+    except yaml.YAMLError:
+        issues.errors.append("Staging Blueprint YAML is invalid.")
+        return issues
+    if not isinstance(parsed, dict):
+        issues.errors.append("Staging Blueprint YAML did not parse to a mapping.")
+        return issues
+
+    databases = [item for item in (parsed.get("databases") or []) if isinstance(item, dict)]
+    staging_db = next((item for item in databases if item.get("name") == "docuflow-staging-db"), None)
+    if staging_db is None:
+        issues.errors.append("Staging Blueprint is missing database docuflow-staging-db.")
+    else:
+        version = staging_db.get("postgresMajorVersion")
+        if version not in {16, "16"}:
+            issues.errors.append("Staging PostgreSQL must declare postgresMajorVersion 16.")
+        if str(staging_db.get("plan", "")).lower() != "free":
+            issues.errors.append("Staging PostgreSQL plan must remain free in the default Blueprint.")
+
+    services = [item for item in (parsed.get("services") or []) if isinstance(item, dict)]
+    by_name = {str(item.get("name")): item for item in services}
+    api = by_name.get("docuflow-staging-api") or {}
+    web = by_name.get("docuflow-staging-web") or {}
+    cleanup = by_name.get("docuflow-staging-cleanup") or {}
+    if api:
+        if str(api.get("plan", "")).lower() != "free":
+            issues.errors.append("Staging API plan must remain free.")
+        if _service_env_value(api, "JOB_BROKER") != "inline":
+            issues.errors.append("Staging API JOB_BROKER must be inline.")
+        if str(_service_env_value(api, "CLEANUP_INTERVAL_SECONDS")) != "0":
+            issues.errors.append("Staging API must set CLEANUP_INTERVAL_SECONDS=0.")
+        secret = _service_env_item(api, "DOCUFLOW_SECRET_KEY") or {}
+        if secret.get("generateValue") is not True:
+            issues.errors.append("Staging DOCUFLOW_SECRET_KEY must use generateValue so it is unique.")
+        database = (_service_env_item(api, "DATABASE_URL") or {}).get("fromDatabase") or {}
+        if database.get("name") != "docuflow-staging-db":
+            issues.errors.append("DATABASE_URL must reference docuflow-staging-db only.")
+        for key in ("S3_BUCKET", "S3_ACCESS_KEY_ID", "S3_SECRET_ACCESS_KEY", "S3_ENDPOINT_URL"):
+            item = _service_env_item(api, key) or {}
+            if item.get("sync") is not False:
+                issues.errors.append(f"{key} must remain owner-supplied (sync: false).")
+    if web and str(web.get("plan", "")).lower() != "free":
+        issues.errors.append("Staging web plan must remain free.")
+    if cleanup:
+        if cleanup.get("schedule") != "*/15 * * * *":
+            issues.errors.append("Staging cleanup cron must stay on */15 * * * *.")
+        for key in ("S3_BUCKET", "S3_ACCESS_KEY_ID", "S3_SECRET_ACCESS_KEY", "S3_ENDPOINT_URL"):
+            source = ((_service_env_item(cleanup, key) or {}).get("fromService") or {})
+            if source.get("name") != "docuflow-staging-api":
+                issues.errors.append(f"Cleanup {key} must copy from docuflow-staging-api, not production.")
+        cleanup_db = (_service_env_item(cleanup, "DATABASE_URL") or {}).get("fromDatabase") or {}
+        if cleanup_db.get("name") != "docuflow-staging-db":
+            issues.errors.append("Cleanup DATABASE_URL must reference docuflow-staging-db only.")
+
     active = active_yaml(text)
     names = blueprint_declared_names(text)
     missing = sorted(STAGING_SERVICE_NAMES - names)
@@ -280,6 +351,8 @@ def validate_staging_configuration(
     production_s3_bucket: str = "",
     production_database_host: str = "",
     production_database_name: str = "",
+    production_secret: str = "",
+    production_s3_access_key_id: str = "",
 ) -> StagingIssues:
     issues = StagingIssues()
     if settings.env != "production":
@@ -293,6 +366,22 @@ def validate_staging_configuration(
         issues.errors.append("EMAIL_BACKEND must remain console in cost-efficient staging.")
     if not settings.cookie_secure:
         issues.errors.append("COOKIE_SECURE must be true for staging.")
+    if settings.cleanup_interval_seconds != 0:
+        issues.errors.append("CLEANUP_INTERVAL_SECONDS must be 0 so the staging cron is the only cleaner.")
+    staging_secret = settings.secret_key.get_secret_value()
+    if production_secret and staging_secret == production_secret:
+        issues.errors.append("DOCUFLOW_SECRET_KEY matches the production secret. Staging requires a unique secret.")
+    staging_access = settings.reveal_secret(settings.s3_access_key_id) or ""
+    if production_s3_access_key_id and staging_access and staging_access == production_s3_access_key_id:
+        issues.errors.append(
+            "S3_ACCESS_KEY_ID matches a production access key. Staging requires dedicated credentials."
+        )
+    if settings.reveal_secret(settings.ai_api_key):
+        issues.errors.append("AI_API_KEY must be unset in staging while AI_PROVIDER=mock.")
+    if settings.reveal_secret(settings.stripe_secret_key) or settings.reveal_secret(settings.stripe_webhook_secret):
+        issues.errors.append("Stripe credentials must be unset in staging.")
+    if settings.reveal_secret(settings.midtrans_server_key):
+        issues.errors.append("Midtrans credentials must be unset in staging.")
     host, name = database_identity(settings.database_url)
     if settings.database_url.startswith("sqlite"):
         issues.errors.append("Staging DATABASE_URL must be PostgreSQL.")
