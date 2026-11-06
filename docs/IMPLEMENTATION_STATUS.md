@@ -914,7 +914,7 @@ Production deployment authorized: **NO.**
 
 Attestation docs merged via PR #14 (`87dccbc`, 6 Nov 2026, 17:53 Asia/Jakarta). Base remains Phase 9.10 merge `8084f07`. This phase does not add application features and does not apply the Blueprint until the owner authorizes it.
 
-Owner attestations recorded 6 Nov 2026, 17:37 Asia/Jakarta. Owner reported preflight **PASS** at 18:33 Asia/Jakarta. This agent did **not** open Cloudflare or Render dashboards, did **not** receive secrets, and did **not** run preflight in this environment.
+Owner attestations recorded 6 Nov 2026, 17:37 Asia/Jakarta. Owner reported preflight **PASS** at 18:33 Asia/Jakarta. Owner ran `uv run pytest -q -m provider` at 19:57 Asia/Jakarta: **1 passed, 246 deselected in 3.90s**. This agent did **not** receive secrets and did **not** run those commands in this environment.
 
 | Evidence | Status |
 | --- | --- |
@@ -922,7 +922,7 @@ Owner attestations recorded 6 Nov 2026, 17:37 Asia/Jakarta. Owner reported prefl
 | PostgreSQL provisioning | Plan selected: **Free** (owner accepts 30-day expiry, 1 GB, no managed backups). Database not created. **NOT EXECUTED**. |
 | R2 staging bucket | Owner attested exists (intended name `docuflow-staging`). Independent API check: **NOT EXECUTED**. Not marked PROVISIONED. |
 | R2 staging credentials | Must stay on the owner machine. Not present in this environment. **BLOCKED** for agent-run preflight. |
-| R2 provider testing | Owner attested `docuflow-provider-test` exists. `TEST_S3_*` unset here. **NOT EXECUTED**. |
+| R2 provider testing | Owner-run `uv run pytest -q -m provider`: **1 passed, 246 deselected in 3.90s** (6 Nov 2026, 19:57 Asia/Jakarta). **Provider verified** (owner machine). Agent-run: **NOT EXECUTED**. |
 | Preflight isolation | Owner reported **PASS** (6 Nov 2026, 18:33 Asia/Jakarta). Agent-run preflight **NOT EXECUTED**. A preflight PASS is not live R2 connectivity and not Blueprint apply. |
 | Blueprint application | **NOT EXECUTED**. Still **not authorized**. |
 | Staging migration | **NOT EXECUTED** |
@@ -933,8 +933,7 @@ Free Postgres reminder: expires 30 days after creation; 14-day grace; then delet
 
 ## Next recommended work
 
-1. Optional: `uv run pytest -q -m provider` with dedicated `TEST_S3_*` against `docuflow-provider-test` only. Do not paste credentials into chat.
-2. Explicitly authorize apply of `infra/render.staging.yaml` in the dedicated staging workspace (Free Postgres 30-day expiry still applies). Do not apply `infra/render.yaml`.
-3. Until that authorization, do **not** create Render services from this agent.
-4. Keep `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `JOB_BROKER=inline`. No Redis, no paid worker.
-5. Production remains unauthorized.
+1. Explicitly authorize apply of `infra/render.staging.yaml` in the dedicated staging workspace (Free Postgres 30-day expiry still applies). Do not apply `infra/render.yaml`.
+2. Until that authorization, do **not** create Render services from this agent.
+3. Keep `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `JOB_BROKER=inline`. No Redis, no paid worker.
+4. Production remains unauthorized.
