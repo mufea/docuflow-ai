@@ -124,14 +124,15 @@ is **provider** only with dedicated `TEST_S3_*`. Render URLs are **staging**.
 
 | Component | Verification | Status |
 | --- | --- | --- |
-| Render workspace | Dedicated workspace confirmed | **NOT EXECUTED** / **BLOCKED** — no owner workspace access |
-| PostgreSQL | Staging database created | **NOT EXECUTED** |
-| S3 | Dedicated staging bucket confirmed | **NOT EXECUTED** |
+| Render workspace | Owner attested dedicated workspace (6 Nov 2026, 17:37 Asia/Jakarta); no production service names | Owner-attested; independent check **NOT EXECUTED**; not PROVISIONED |
+| PostgreSQL | Free plan selected; owner accepts 30-day expiry | **NOT EXECUTED** (database not created until Blueprint apply) |
+| S3 / R2 | Owner attested staging and provider-test buckets exist | Owner-attested; independent check **NOT EXECUTED**; not PROVISIONED |
 | API | Service deployed | **NOT EXECUTED** |
 | Web | Service deployed | **NOT EXECUTED** |
 | Cleanup | Cron configured | **IMPLEMENTED** in Blueprint; **NOT EXECUTED** as a live cron |
-| Environment | Required variables configured | Template only |
-| Isolation | No production credentials/resources reused | **LOCALLY TESTED** (preflight); live isolation **NOT EXECUTED** |
+| Environment | Required variables configured | Template only; secrets not in this environment |
+| Isolation | No production credentials/resources reused | Script **LOCALLY TESTED**; live preflight **NOT EXECUTED** |
+| Blueprint apply | `infra/render.staging.yaml` | **NOT EXECUTED** — owner has not authorized apply |
 
 ### Owner provisioning runbook
 

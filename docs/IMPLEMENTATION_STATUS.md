@@ -846,9 +846,13 @@ PostgreSQL migration `0003` on hosted staging: **NOT EXECUTED.**
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 Production deployment authorized: **NO.**
 
-## Phase 9.10 — Staging infrastructure and provisioning — on `cursor/phase-9-10-staging-provisioning`
+## Phase 9.10 — Staging infrastructure and provisioning — merged
 
-Base: GitHub `main` @ `ae3cc0b180107e39b76232cd203c27df69376055` (Phase 9.9 already merged via PR #12). Implementation commit: `fd2a35c61c0291c56ec8f8c4387443340f4f3d5e`. This phase does not repeat Phases 9.1–9.9.
+Merged to `main` via PR #13. Merge commit: `8084f07835b15000203a737255fd77e0604d3cc6` (6 Nov 2026, 14:10 Asia/Jakarta). Feature branch was `cursor/phase-9-10-staging-provisioning`. Implementation commit: `fd2a35c61c0291c56ec8f8c4387443340f4f3d5e`. `main` CI on the merge: [run 42179131971](https://github.com/mufea/docuflow-ai/actions/runs/42179131971), success (6 Nov 2026, 14:12 Asia/Jakarta).
+
+Implementation is complete as repository tooling. Staging infrastructure was **not provisioned** in Phase 9.10. Production remains **NOT DEPLOYED**.
+
+Base at the time: GitHub `main` @ `ae3cc0b180107e39b76232cd203c27df69376055` (Phase 9.9 already merged via PR #12). Implementation commit: `fd2a35c61c0291c56ec8f8c4387443340f4f3d5e`. This phase does not repeat Phases 9.1–9.9.
 
 Scope: audit `infra/render.staging.yaml`, tighten preflight isolation checks, and document the owner-operated provisioning runbook. No product features, no Render apply, no production deploy.
 
@@ -906,14 +910,32 @@ Live S3 provider verification: **NOT EXECUTED**.
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 Production deployment authorized: **NO.**
 
+## Phase 9.10A — Owner provisioning execution and verification — on `cursor/phase-9-10a-owner-provisioning`
+
+Base: GitHub `main` @ `8084f07835b15000203a737255fd77e0604d3cc6` (Phase 9.10 already merged via PR #13). This phase does not add application features and does not apply the Blueprint until the owner authorizes it.
+
+Owner attestations recorded 6 Nov 2026, 17:37 Asia/Jakarta. This agent did **not** open Cloudflare or Render dashboards and did **not** receive secrets.
+
+| Evidence | Status |
+| --- | --- |
+| Render workspace | Owner attested dedicated workspace with no `docuflow-api` / `docuflow-db` / `docuflow-web`. Independent dashboard check: **NOT EXECUTED**. Not marked PROVISIONED. |
+| PostgreSQL provisioning | Plan selected: **Free** (owner accepts 30-day expiry, 1 GB, no managed backups). Database not created. **NOT EXECUTED**. |
+| R2 staging bucket | Owner attested exists (intended name `docuflow-staging`). Independent API check: **NOT EXECUTED**. Not marked PROVISIONED. |
+| R2 staging credentials | Must stay on the owner machine. Not present in this environment. **BLOCKED** for agent-run preflight. |
+| R2 provider testing | Owner attested `docuflow-provider-test` exists. `TEST_S3_*` unset here. **NOT EXECUTED**. |
+| Preflight isolation | **NOT EXECUTED** (no staging env in this environment). Next owner action. |
+| Blueprint application | **NOT EXECUTED**. Owner confirmed apply of `infra/render.staging.yaml` is **not authorized yet**. |
+| Staging migration | **NOT EXECUTED** |
+| Staging health | **NOT EXECUTED** |
+| Staging smoke | **NOT EXECUTED** |
+
+Free Postgres reminder: expires 30 days after creation; 14-day grace; then deletion. No backups. One Free database per workspace.
+
 ## Next recommended work
 
-1. Review Phase 9.10. Do not merge or deploy from this agent unless authorized.
-2. Confirm a dedicated Render workspace and the actual Postgres plan before applying `infra/render.staging.yaml`.
-3. Create a dedicated staging S3-compatible bucket and unique keys. Do not assume R2 or AWS until the owner names the provider.
-4. Run `STAGING_PREFLIGHT=1 python scripts/staging_preflight.py` against intended staging values.
-5. Apply the Blueprint only after explicit owner approval. Do not sync it into a workspace that already has `docuflow-api`.
-6. If staging must outlive 30 days, upgrade Postgres off Free before relying on it.
-7. After provisioning, run `scripts/staging_migrate_verify.py` and `scripts/staging_smoke.py` with `STAGING_HOST_CONFIRM`.
-8. Keep `AI_PROVIDER=mock` and `EMAIL_BACKEND=console` on staging.
-9. Queue-based scaling remains a later phase (`JOB_BROKER=rq` + paid worker).
+1. On the **owner machine**, copy `docs/staging.env.example` to a local untracked file. Fill staging R2 values and a unique `DOCUFLOW_SECRET_KEY`. Do not paste secrets into chat or git.
+2. Run `STAGING_PREFLIGHT=1 python scripts/staging_preflight.py`. Report only PASS/FAIL lines, never keys or DSNs.
+3. Optional: `uv run pytest -q -m provider` with dedicated `TEST_S3_*` against `docuflow-provider-test` only.
+4. Do **not** apply `infra/render.staging.yaml` until the owner explicitly authorizes it after a preflight PASS.
+5. Keep `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `JOB_BROKER=inline`. No Redis, no paid worker.
+6. Production remains unauthorized.
