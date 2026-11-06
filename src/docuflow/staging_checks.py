@@ -32,6 +32,7 @@ PRODUCTION_SERVICE_NAMES = {
 STAGING_FORBIDDEN_SERVICE_NAMES = PRODUCTION_SERVICE_NAMES | {"docuflow-staging-redis"}
 DEFAULT_PRODUCTION_BUCKETS = {"docuflow-documents"}
 PRODUCTION_PUBLIC_HOSTS = {"docuflow-api", "docuflow-web"}
+LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
 
 FORBIDDEN_FRAGMENTS = (
     "postgres://",
@@ -156,6 +157,48 @@ def is_forbidden_live_test_bucket(bucket: str, *, production_bucket: str = "") -
 
 def hostname_from_url(url: str) -> str:
     return (urlparse(url.strip()).hostname or "").lower()
+
+
+def is_loopback_host(host: str) -> bool:
+    value = host.lower().strip().rstrip(".")
+    return value in LOOPBACK_HOSTS
+
+
+def opt_in_flag(name: str, raw: str | None) -> tuple[bool, str | None]:
+    """Parse an explicit opt-in flag. Empty/unset/0 is off; 1 is on; anything else is invalid."""
+    if raw is None:
+        return False, None
+    value = raw.strip()
+    if value == "":
+        return False, None
+    if value == "0":
+        return False, None
+    if value == "1":
+        return True, None
+    return False, f"{name} must be unset, 0, or 1."
+
+
+def smoke_target_errors(api_url: str, confirm: str = "") -> list[str]:
+    """Refuse production and unconfirmed non-loopback smoke targets."""
+    url = api_url.strip().rstrip("/")
+    if not http_url_is_valid(url):
+        return ["STAGING_API_URL must be an http:// or https:// URL."]
+    parsed = urlparse(url)
+    if parsed.path not in {"", "/"}:
+        return ["STAGING_API_URL must be the API origin without an extra path."]
+    host = hostname_from_url(url)
+    if not host:
+        return ["STAGING_API_URL has no hostname."]
+    if is_production_public_host(host):
+        return ["STAGING_API_URL points at a production API host."]
+    if is_loopback_host(host):
+        return []
+    expected = confirm.strip().lower()
+    if not expected:
+        return ["STAGING_HOST_CONFIRM is required for non-loopback targets (API hostname)."]
+    if expected != host:
+        return ["STAGING_HOST_CONFIRM does not match the API hostname."]
+    return []
 
 
 def is_production_public_host(host: str) -> bool:

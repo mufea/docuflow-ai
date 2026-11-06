@@ -25,9 +25,20 @@ from docuflow.staging_checks import (
     emit,
     exit_code,
     http_url_is_valid,
+    is_production_public_host,
+    opt_in_flag,
+    smoke_target_errors,
 )
 
 DEFAULT_TIMEOUT_SECONDS = 30
+
+
+def _mutations_enabled() -> bool:
+    return os.environ.get("STAGING_SMOKE_MUTATIONS", "").strip() == "1"
+
+
+def _register_enabled() -> bool:
+    return os.environ.get("STAGING_SMOKE_REGISTER", "").strip() == "1"
 
 
 def _timeout() -> float:
@@ -124,7 +135,7 @@ def _extended_auth(client: httpx.Client, base: str, statuses: list[str]) -> bool
         statuses.append("SKIPPED")
         return False
     login = client.post(f"{base}/v1/auth/login", json={"email": email, "password": password})
-    if login.status_code != 200 and os.environ.get("STAGING_SMOKE_REGISTER", "").strip() == "1":
+    if login.status_code != 200 and _register_enabled():
         name = os.environ.get("STAGING_SMOKE_NAME", "Staging Probe").strip() or "Staging Probe"
         register = client.post(
             f"{base}/v1/auth/register",
@@ -269,14 +280,15 @@ def _extended_cross_user(base: str, doc_id: str, statuses: list[str]) -> None:
         statuses.append("FAIL")
 
 
-def _extended_delete(client: httpx.Client, base: str, origin: str, doc_id: str, statuses: list[str]) -> None:
+def _extended_delete(client: httpx.Client, base: str, origin: str, doc_id: str, statuses: list[str]) -> bool:
     deleted = client.delete(f"{base}/v1/documents/{doc_id}", headers=_csrf_headers(client, origin))
     if deleted.status_code in {200, 204}:
         emit("PASS", "storage_deletion", f"HTTP {deleted.status_code}")
         statuses.append("PASS")
-    else:
-        emit("FAIL", "storage_deletion", f"HTTP {deleted.status_code}")
-        statuses.append("FAIL")
+        return True
+    emit("FAIL", "storage_deletion", f"HTTP {deleted.status_code}")
+    statuses.append("FAIL")
+    return False
 
 
 def _frontend_check(statuses: list[str]) -> None:
@@ -287,6 +299,11 @@ def _frontend_check(statuses: list[str]) -> None:
         return
     if not http_url_is_valid(web):
         emit("FAIL", "frontend", "STAGING_WEB_URL must be http:// or https://")
+        statuses.append("FAIL")
+        return
+    web_host = urlparse(web).hostname or ""
+    if is_production_public_host(web_host):
+        emit("FAIL", "frontend", "STAGING_WEB_URL points at a production web host")
         statuses.append("FAIL")
         return
     try:
@@ -307,43 +324,77 @@ def _frontend_check(statuses: list[str]) -> None:
         statuses.append("FAIL")
 
 
+def _skip_extended(statuses: list[str], reason: str) -> None:
+    for name in (
+        "authentication",
+        "document_upload",
+        "document_processing",
+        "document_download",
+        "cross_user_access",
+        "storage_deletion",
+    ):
+        emit("SKIPPED", name, reason)
+        statuses.append("SKIPPED")
+
+
+def _best_effort_delete(client: httpx.Client, base: str, origin: str, doc_id: str) -> None:
+    try:
+        client.delete(f"{base}/v1/documents/{doc_id}", headers=_csrf_headers(client, origin))
+    except httpx.HTTPError:
+        return
+
+
 def main() -> int:
     base = os.environ.get("STAGING_API_URL", "").strip().rstrip("/")
     if not base:
         emit("NOT EXECUTED", "staging_smoke", "STAGING_API_URL is not set. No staging environment was contacted.")
         return 2
-    if not http_url_is_valid(base):
-        emit("FAIL", "staging_api_url", "STAGING_API_URL must be an http:// or https:// URL.")
+    host_errors = smoke_target_errors(base, os.environ.get("STAGING_HOST_CONFIRM", ""))
+    if host_errors:
+        for item in host_errors:
+            emit("FAIL", "staging_api_url", item)
         return 1
-    if urlparse(base).path not in {"", "/"}:
-        emit("FAIL", "staging_api_url", "STAGING_API_URL must be the API origin without an extra path.")
-        return 1
+    for flag in ("STAGING_SMOKE_MUTATIONS", "STAGING_SMOKE_REGISTER"):
+        _enabled, flag_error = opt_in_flag(flag, os.environ.get(flag))
+        if flag_error:
+            emit("FAIL", "staging_smoke_config", flag_error)
+            return 1
 
     statuses: list[str] = []
     origin = os.environ.get("STAGING_WEB_URL", "").strip()
     with httpx.Client(timeout=_timeout(), follow_redirects=False) as client:
         _basic_checks(client, base, statuses)
-        if "FAIL" not in statuses:
-            authenticated = _extended_auth(client, base, statuses)
-            doc_id = _extended_documents(client, base, origin, statuses) if authenticated else None
-            if not authenticated:
-                emit("SKIPPED", "document_upload", "authentication did not run")
-                emit("SKIPPED", "document_processing", "authentication did not run")
-                emit("SKIPPED", "document_download", "authentication did not run")
-                emit("SKIPPED", "cross_user_access", "authentication did not run")
-                emit("SKIPPED", "storage_deletion", "authentication did not run")
-                statuses.extend(["SKIPPED"] * 5)
-            elif doc_id:
-                _extended_job(client, base, origin, doc_id, statuses)
-                _extended_download(client, base, doc_id, statuses)
-                _extended_cross_user(base, doc_id, statuses)
-                _extended_delete(client, base, origin, doc_id, statuses)
+        doc_id: str | None = None
+        deleted = False
+        try:
+            if "FAIL" in statuses:
+                _skip_extended(statuses, "basic checks failed")
+            elif not _mutations_enabled():
+                _skip_extended(statuses, "STAGING_SMOKE_MUTATIONS is not 1")
             else:
-                emit("SKIPPED", "document_processing", "no uploaded document")
-                emit("SKIPPED", "document_download", "no uploaded document")
-                emit("SKIPPED", "cross_user_access", "no uploaded document")
-                emit("SKIPPED", "storage_deletion", "no uploaded document")
-                statuses.extend(["SKIPPED"] * 4)
+                authenticated = _extended_auth(client, base, statuses)
+                doc_id = _extended_documents(client, base, origin, statuses) if authenticated else None
+                if not authenticated:
+                    emit("SKIPPED", "document_upload", "authentication did not run")
+                    emit("SKIPPED", "document_processing", "authentication did not run")
+                    emit("SKIPPED", "document_download", "authentication did not run")
+                    emit("SKIPPED", "cross_user_access", "authentication did not run")
+                    emit("SKIPPED", "storage_deletion", "authentication did not run")
+                    statuses.extend(["SKIPPED"] * 5)
+                elif doc_id:
+                    _extended_job(client, base, origin, doc_id, statuses)
+                    _extended_download(client, base, doc_id, statuses)
+                    _extended_cross_user(base, doc_id, statuses)
+                    deleted = _extended_delete(client, base, origin, doc_id, statuses)
+                else:
+                    emit("SKIPPED", "document_processing", "no uploaded document")
+                    emit("SKIPPED", "document_download", "no uploaded document")
+                    emit("SKIPPED", "cross_user_access", "no uploaded document")
+                    emit("SKIPPED", "storage_deletion", "no uploaded document")
+                    statuses.extend(["SKIPPED"] * 4)
+        finally:
+            if doc_id and not deleted:
+                _best_effort_delete(client, base, origin, doc_id)
     _frontend_check(statuses)
     return exit_code(statuses)  # type: ignore[arg-type]
 
