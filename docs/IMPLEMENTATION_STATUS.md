@@ -776,9 +776,13 @@ Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 Production migration: **not performed.**
 Production deployment authorized: **NO.**
 
-## Phase 9.9 — Staging environment execution and live verification — on `cursor/phase-9-9-staging-execution-verification`
+## Phase 9.9 — Staging environment execution and live verification — merged
 
-Base: GitHub `main` @ `f098afe700a17fe3d20585d73d3ba5448d85367d` (Phase 9.8 already merged via PR #11). Implementation commit: `343a035fc92283efb979d376f77ccbda9aa31425`. This phase does not repeat Phases 9.1–9.8.
+Merged to `main` via PR #12. Merge commit: `ae3cc0b180107e39b76232cd203c27df69376055` (6 Nov 2026, 12:20 Asia/Jakarta). Feature branch was `cursor/phase-9-9-staging-execution-verification`. Implementation commit: `343a035fc92283efb979d376f77ccbda9aa31425`. `main` CI on the merge: [run 42167872331](https://github.com/mufea/docuflow-ai/actions/runs/42167872331), success (6 Nov 2026, 12:22 Asia/Jakarta).
+
+Implementation is complete as repository tooling. Staging deployment was **not verified**. Live S3 provider was **NOT EXECUTED**. Production remains **NOT DEPLOYED**.
+
+Base at the time: GitHub `main` @ `f098afe700a17fe3d20585d73d3ba5448d85367d` (Phase 9.8 already merged via PR #11). Implementation commit: `343a035fc92283efb979d376f77ccbda9aa31425`. This phase does not repeat Phases 9.1–9.8.
 
 Scope: record the Phase 9.8 merge accurately, harden staging smoke mutations, add disposable Postgres migrate-verify coverage, and document the owner-operated staging procedure. No product features, no paid worker, no Render apply, no production deploy.
 
@@ -842,14 +846,74 @@ PostgreSQL migration `0003` on hosted staging: **NOT EXECUTED.**
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 Production deployment authorized: **NO.**
 
+## Phase 9.10 — Staging infrastructure and provisioning — on `cursor/phase-9-10-staging-provisioning`
+
+Base: GitHub `main` @ `ae3cc0b180107e39b76232cd203c27df69376055` (Phase 9.9 already merged via PR #12). Implementation commit: `fd2a35c61c0291c56ec8f8c4387443340f4f3d5e`. This phase does not repeat Phases 9.1–9.9.
+
+Scope: audit `infra/render.staging.yaml`, tighten preflight isolation checks, and document the owner-operated provisioning runbook. No product features, no Render apply, no production deploy.
+
+### Workstream results
+
+**A. Blueprint audit — implemented, locally tested.** YAML parses. Isolated `docuflow-staging-*` names, Postgres 16, Free plans, `JOB_BROKER=inline`, `CLEANUP_INTERVAL_SECONDS=0`, generateValue secret, owner-supplied S3 (`sync: false`), cleanup copies S3 from the staging API. No Redis, no paid worker. Production `infra/render.yaml` unchanged.
+
+**B. Provisioning readiness — implemented as documentation.** Dedicated workspace, Free Postgres 30-day expiry, S3 checklist, environment-variable classification. Live workspace access is **BLOCKED / NOT EXECUTED**.
+
+**C. Preflight safety — implemented, locally tested.** Existing opt-in preserved. New refusals: nonzero cleanup interval, production secret reuse, production S3 access-key reuse, live AI/Stripe/Midtrans keys.
+
+**D. Provisioning verification — procedure ready; PROVISIONED: no.** Evidence table uses IMPLEMENTED / LOCALLY TESTED / CI VERIFIED / PROVISIONED / STAGING VERIFIED / NOT EXECUTED / BLOCKED.
+
+**E. Runbook — implemented** in `docs/DEPLOYMENT.md` (Steps 1–14). Steps 7–12 are owner-only.
+
+**F. Cost — documented.** Staging is not zero-cost. Free web hours, Free Postgres limits, cron runtime, and external storage are owner-reviewed.
+
+Local verification (this branch, 6 Nov 2026, 13:09 Asia/Jakarta):
+
+```
+uv run pytest tests/test_phase98_staging.py tests/test_phase99_staging.py tests/test_phase910_provisioning.py -q
+# 32 passed
+
+uv run pytest -q -m "not integration"
+# 233 passed, 1 skipped, 13 deselected
+
+TEST_DATABASE_URL=postgresql+psycopg://docuflow:docuflow@127.0.0.1:5432/docuflow_test \
+  uv run pytest -q -m integration
+# 13 passed, 234 deselected
+
+uv run ruff check src tests scripts
+# All checks passed
+
+uv run mypy src/docuflow
+# Success: no issues found in 73 source files
+
+uv run python scripts/staging_preflight.py
+# NOT EXECUTED, exit 2
+
+git diff --check
+# clean
+```
+
+The skipped test is the optional live S3 provider roundtrip (no `TEST_S3_*`).
+Web lint/typecheck/tests/build: **not run locally**. GitHub Actions for this
+feature branch: **CI verified** on `7d9da7f` (workflow **CI**,
+[run 42172770416](https://github.com/mufea/docuflow-ai/actions/runs/42172770416),
+conclusion **success**, 6 Nov 2026, 13:12 Asia/Jakarta): unit 233 passed,
+1 skipped, 13 deselected; integration 13 passed; ruff passed; mypy 73 files;
+web 15 tests passed (lint/typecheck/build job succeeded).
+
+Staging infrastructure: **NOT PROVISIONED**.
+Staging verified: **NO**.
+Live S3 provider verification: **NOT EXECUTED**.
+Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
+Production deployment authorized: **NO.**
+
 ## Next recommended work
 
-1. Review Phase 9.9. Do not merge or deploy from this agent unless authorized.
-2. If staging should exist, apply `infra/render.staging.yaml` in a **dedicated** Render workspace after owner approval. Do not sync it into a workspace that already has `docuflow-api`.
-3. Run `STAGING_PREFLIGHT=1 python scripts/staging_preflight.py` before applying secrets to Render.
-4. Apply Alembic `0003` only on an approved **staging** database (`scripts/staging_migrate_verify.py`). Do not run it against production.
-5. Confirm the actual Render Postgres plan in the dashboard. Free Postgres has no managed backups.
-6. Provide dedicated non-production `TEST_S3_*` credentials if live object-storage compatibility should be recorded.
-7. After staging exists, set `STAGING_API_URL`, `STAGING_HOST_CONFIRM`, and optionally `STAGING_SMOKE_MUTATIONS=1` with a dedicated test account and PDF.
+1. Review Phase 9.10. Do not merge or deploy from this agent unless authorized.
+2. Confirm a dedicated Render workspace and the actual Postgres plan before applying `infra/render.staging.yaml`.
+3. Create a dedicated staging S3-compatible bucket and unique keys. Do not assume R2 or AWS until the owner names the provider.
+4. Run `STAGING_PREFLIGHT=1 python scripts/staging_preflight.py` against intended staging values.
+5. Apply the Blueprint only after explicit owner approval. Do not sync it into a workspace that already has `docuflow-api`.
+6. If staging must outlive 30 days, upgrade Postgres off Free before relying on it.
+7. After provisioning, run `scripts/staging_migrate_verify.py` and `scripts/staging_smoke.py` with `STAGING_HOST_CONFIRM`.
 8. Keep `AI_PROVIDER=mock` and `EMAIL_BACKEND=console` on staging.
 9. Queue-based scaling remains a later phase (`JOB_BROKER=rq` + paid worker).

@@ -54,6 +54,8 @@ def main() -> int:
         production_s3_bucket=os.environ.get("PRODUCTION_S3_BUCKET", ""),
         production_database_host=os.environ.get("PRODUCTION_DATABASE_HOST", ""),
         production_database_name=os.environ.get("PRODUCTION_DATABASE_NAME", ""),
+        production_secret=os.environ.get("PRODUCTION_SECRET_KEY", ""),
+        production_s3_access_key_id=os.environ.get("PRODUCTION_S3_ACCESS_KEY_ID", ""),
     )
     host, name = database_identity(settings.database_url)
     db_status = "FAIL" if settings.database_url.startswith("sqlite") else "PASS"

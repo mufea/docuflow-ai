@@ -73,6 +73,7 @@ def _staging_settings(**overrides: object) -> Settings:
         "public_web_url": "https://docuflow-staging-web.onrender.com",
         "cors_origins": "https://docuflow-staging-web.onrender.com",
         "trusted_hosts": ".onrender.com",
+        "cleanup_interval_seconds": 0,
     }
     values.update(overrides)
     return Settings(**values)  # type: ignore[arg-type]

@@ -55,7 +55,7 @@ and are **not** a billing quote:
 | --- | --- | --- |
 | Local development | SQLite or local Postgres, filesystem storage, `JOB_BROKER=inline` | Supported. See `README.md` |
 | Local verification | pytest / ruff / mypy / web lint-typecheck-test-build | See `docs/IMPLEMENTATION_STATUS.md` |
-| CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.8 merge is `f098afe` (PR #11, [run 42153765764](https://github.com/mufea/docuflow-ai/actions/runs/42153765764), 6 Nov 2026, 10:01 Asia/Jakarta). Phase 9.9 branch CI on `e006b88` succeeded ([run 42166073297](https://github.com/mufea/docuflow-ai/actions/runs/42166073297), 6 Nov 2026, 12:04 Asia/Jakarta) |
+| CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.9 merge is `ae3cc0b` (PR #12, [run 42167872331](https://github.com/mufea/docuflow-ai/actions/runs/42167872331), 6 Nov 2026, 12:22 Asia/Jakarta). Phase 9.10 branch CI on `7d9da7f` succeeded ([run 42172770416](https://github.com/mufea/docuflow-ai/actions/runs/42172770416), 6 Nov 2026, 13:12 Asia/Jakarta) |
 | Provider verification | Dedicated test bucket + `TEST_S3_*` credentials | **Pending** — mocked S3 tests are not provider verification |
 | Staging deployment | Isolated non-production Render workspace + staging DB + staging bucket | **Not performed / not verified** — Blueprint is a template only |
 | Production deployment | Live Render workspace serving users | **NOT DEPLOYED — Awaiting owner approval** |
@@ -98,6 +98,9 @@ Owner-operated. This environment has **not** applied the Blueprint or
 contacted a hosted staging database. Do not invent URLs, bucket names, or
 credentials.
 
+A valid Blueprint is **IMPLEMENTED**, not **PROVISIONED**. A local preflight
+PASS is **LOCALLY TESTED**, not Render success.
+
 ### Evidence row
 
 For every live check, record (never secrets, DSNs, or signed URLs):
@@ -108,22 +111,45 @@ For every live check, record (never secrets, DSNs, or signed URLs):
 | Git commit SHA | `git rev-parse HEAD` of the deployed revision |
 | Environment identity | staging API hostname, database **name** (not password), bucket **name** |
 | Command | exact command |
-| Result | PASS / FAIL / SKIPPED / NOT EXECUTED |
+| Result | PASS / FAIL / SKIPPED / NOT EXECUTED / BLOCKED |
 | Layer | local / CI / provider / staging |
+
+Statuses: **IMPLEMENTED**, **LOCALLY TESTED**, **CI VERIFIED**, **PROVISIONED**,
+**STAGING VERIFIED**, **NOT EXECUTED**, **BLOCKED**. Do not combine them.
 
 A loopback smoke pass is **local**. GitHub Actions is **CI**. `pytest -m provider`
 is **provider** only with dedicated `TEST_S3_*`. Render URLs are **staging**.
 
-### Pre-provisioning
+### Provisioning status (this repository)
 
-1. Confirm a **separate** Render workspace that does not contain `docuflow-api`,
-   `docuflow-db`, or `docuflow-web`.
-2. Confirm you will not reuse production `DATABASE_URL`, `S3_BUCKET`, or keys.
-3. Create a dedicated staging S3-compatible bucket (not a prefix in production).
-4. Generate a unique `DOCUFLOW_SECRET_KEY` (≥32 characters).
-5. Read the dashboard Postgres plan. Render Free: 1 GB, no managed backups,
-   one database per workspace, 30-day expiry. Do not assume paid backups.
-6. Copy `docs/staging.env.example`. Run:
+| Component | Verification | Status |
+| --- | --- | --- |
+| Render workspace | Dedicated workspace confirmed | **NOT EXECUTED** / **BLOCKED** — no owner workspace access |
+| PostgreSQL | Staging database created | **NOT EXECUTED** |
+| S3 | Dedicated staging bucket confirmed | **NOT EXECUTED** |
+| API | Service deployed | **NOT EXECUTED** |
+| Web | Service deployed | **NOT EXECUTED** |
+| Cleanup | Cron configured | **IMPLEMENTED** in Blueprint; **NOT EXECUTED** as a live cron |
+| Environment | Required variables configured | Template only |
+| Isolation | No production credentials/resources reused | **LOCALLY TESTED** (preflight); live isolation **NOT EXECUTED** |
+
+### Owner provisioning runbook
+
+Do **not** execute Steps 7–12 from an agent.
+
+1. Confirm the target Render workspace is dedicated staging. It must not contain
+   `docuflow-api`, `docuflow-db`, or `docuflow-web`.
+2. Confirm workspace plan and PostgreSQL availability. Render Free: one Postgres
+   per workspace, 1 GB, **no managed backups**, **expires 30 days** after
+   creation. If staging must outlive 30 days, stop and choose a paid Postgres
+   plan before applying. Record the actual dashboard plan.
+3. Prepare a dedicated S3-compatible bucket (owner-chosen provider: R2, AWS S3,
+   or MinIO). Unique access key, unique secret, correct endpoint, region,
+   upload/download/delete on that bucket only. Not a prefix in production.
+4. Prepare staging environment variables from `docs/staging.env.example`. Never
+   copy production `DATABASE_URL`, `S3_*`, `DOCUFLOW_SECRET_KEY`, Stripe,
+   Midtrans, `AI_API_KEY`, or SMTP values.
+5. Run staging preflight:
 
 ```bash
 export STAGING_PREFLIGHT=1
@@ -131,65 +157,57 @@ export STAGING_PREFLIGHT=1
 python scripts/staging_preflight.py
 ```
 
-Stop on FAIL. Unset `STAGING_PREFLIGHT` is **NOT EXECUTED**.
-
-### Provisioning
-
-Do **not** apply this from an agent.
-
-1. Sign in to the dedicated staging Render workspace.
-2. **New → Blueprint**. Set the Blueprint file to `infra/render.staging.yaml`
-   (not `infra/render.yaml`).
-3. Confirm service names are `docuflow-staging-*`. There is no Redis and no
-   worker. `JOB_BROKER=inline`.
-4. Fill `S3_*` with the staging bucket only. Leave `DOCUFLOW_SECRET_KEY` to
-   generate, or paste the unique staging secret.
-5. Apply only after owner approval. Record the evidence row.
-
-### Post-provisioning
-
-1. Note the public API and web URLs. They must contain `staging` or otherwise
-   not match `docuflow-api` / `docuflow-web`.
-2. Confirm env: `DOCUFLOW_ENV=production`, `JOB_BROKER=inline`,
-   `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `STORAGE_BACKEND=s3`.
-3. Migration inspect, then apply only if pending:
+6. Review every preflight line. Stop on FAIL. Unset `STAGING_PREFLIGHT` is
+   **NOT EXECUTED**.
+7. Owner manually opens the dedicated Render workspace.
+8. Select **New → Blueprint**. Connect the GitHub repo if prompted.
+9. Set the Blueprint file to `infra/render.staging.yaml` (not
+   `infra/render.yaml`).
+10. Review resource names (`docuflow-staging-*`), Free plans, no Redis, no
+    worker, `JOB_BROKER=inline`, and estimated costs (web hours, Postgres
+    expiry, cron runtime, external storage). Staging is not zero-cost.
+11. Require explicit owner approval before applying. Fill `S3_*` with the
+    staging bucket only. Leave `DOCUFLOW_SECRET_KEY` on generateValue unless
+    pasting a unique staging secret.
+12. Record provisioning evidence (date/time Asia/Jakarta, git SHA, workspace
+    identity, command/UI action, result). Do not record secrets.
+13. Verify generated API and web URLs. They must not match `docuflow-api` /
+    `docuflow-web`. Confirm env: `DOCUFLOW_ENV=production`,
+    `JOB_BROKER=inline`, `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`,
+    `STORAGE_BACKEND=s3`, `CLEANUP_INTERVAL_SECONDS=0`. `ipAllowList: []`
+    keeps Postgres private; laptop migrate-verify needs an owner-added IP or a
+    Render shell.
+14. Run existing migration verification and staging smoke. Mutating smoke
+    still needs `STAGING_SMOKE_MUTATIONS=1` and `STAGING_HOST_CONFIRM`.
 
 ```bash
 export STAGING_MIGRATE_VERIFY=1
-export DATABASE_URL=...          # staging only
+export DATABASE_URL=...              # staging only
 export STAGING_DATABASE_CONFIRM=...  # database name or host/name
 python scripts/staging_migrate_verify.py
 # if pending and identity matched:
 export STAGING_MIGRATE=1
 python scripts/staging_migrate_verify.py
-```
 
-4. Optional provider roundtrip against a **test** bucket, not staging user data:
-
-```bash
-uv run pytest -q -m provider
-```
-
-5. Health / ready / optional mutations:
-
-```bash
 export STAGING_API_URL=https://<staging-api-host>
 export STAGING_HOST_CONFIRM=<staging-api-hostname>
 export STAGING_WEB_URL=https://<staging-web-host>
 python scripts/staging_smoke.py
-# mutating checks stay SKIPPED until:
-export STAGING_SMOKE_MUTATIONS=1
-export STAGING_SMOKE_EMAIL=...
-export STAGING_SMOKE_PASSWORD=...
-# optional: STAGING_SMOKE_REGISTER=1
-export STAGING_SMOKE_PDF=./path/to/tiny-test.pdf
-python scripts/staging_smoke.py
 ```
 
-6. Cleanup cron should remain `*/15 * * * *` with `CLEANUP_INTERVAL_SECONDS=0`
-   on the API.
-
 `GET /health` HTTP 200 alone is **not** staging verification.
+
+### S3 bucket checklist
+
+Owner confirms the provider. Do not assume Cloudflare R2 or AWS S3.
+
+- Dedicated staging bucket name (not `docuflow-documents`, not production)
+- Unique access key and secret (not production keys)
+- Endpoint URL for R2/MinIO; AWS may use the default endpoint
+- Region (`auto` in the Blueprint; change in the dashboard if the provider needs it)
+- Permissions: PutObject, GetObject, DeleteObject, HeadBucket/HeadObject
+- Prefix isolation inside the production bucket is **not** sufficient
+- Optional live roundtrip: dedicated `TEST_S3_*` with `uv run pytest -q -m provider`
 
 ## First deploy on Render
 
