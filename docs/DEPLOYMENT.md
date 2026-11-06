@@ -131,8 +131,8 @@ is **provider** only with dedicated `TEST_S3_*`. Render URLs are **staging**.
 | Web | Service deployed | **NOT EXECUTED** |
 | Cleanup | Cron configured | **IMPLEMENTED** in Blueprint; **NOT EXECUTED** as a live cron |
 | Environment | Required variables configured | Template only; secrets not in this environment |
-| Isolation | No production credentials/resources reused | Script **LOCALLY TESTED**; live preflight **NOT EXECUTED** |
-| Blueprint apply | `infra/render.staging.yaml` | **NOT EXECUTED** — owner has not authorized apply |
+| Isolation | No production credentials/resources reused | Owner reported preflight **PASS** (6 Nov 2026, 18:33 Asia/Jakarta); agent-run **NOT EXECUTED** |
+| Blueprint apply | `infra/render.staging.yaml` | **NOT EXECUTED** — apply still not authorized |
 
 ### Owner provisioning runbook
 
