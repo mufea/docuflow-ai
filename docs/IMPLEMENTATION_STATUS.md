@@ -1006,3 +1006,16 @@ PRODUCTION DEPLOYED: **NO**. PRODUCTION VERIFIED: **NO**. PRODUCTION AUTHORIZED:
 1. Production remains unauthorized. Do not apply `infra/render.yaml` or production env changes.
 2. Keep staging `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `JOB_BROKER=inline`. No Redis, no paid worker.
 3. Free Postgres still expires 30 days after creation; no managed backups.
+
+## Phase 9.11 — Production readiness audit — authorized, not deployed
+
+Owner (7 Nov 2026, 17:42 Asia/Jakarta): `Authorize production deploy, keep inline`. Agent **did not** apply `infra/render.yaml` (still `plan: free`; no Render credentials here). No Redis/worker. Mock AI and console email unchanged.
+
+Owner (17:11–17:37): `docuflow-db` Basic, backups yes, no staging services; bucket `docuflowai-documents`; S3 keys unique (not staging).
+
+Owner must create `docuflow-api` / `web` / `cleanup` in that workspace, linking `DATABASE_URL` to existing `docuflow-db`. Procedure: `docs/reports/PHASE_9_11_PRODUCTION_READINESS_AUDIT.md` §19.
+
+STAGING VERIFIED: **YES**.
+PRODUCTION AUTHORIZED: **YES** (inline only).
+PRODUCTION DEPLOYED: **NO**.
+PRODUCTION VERIFIED: **NO**.
