@@ -211,8 +211,8 @@ GET https://docuflowai.site/v1/auth/me (no cookie) → 401 unauthenticated
 | PRODUCTION AUTHORIZED | YES (inline) |
 | PRODUCTION DEPLOYED | YES |
 | HEALTH VERIFIED | YES (public) |
-| FUNCTIONALLY VERIFIED | NO |
-| SECURITY VERIFIED | NO |
-| PRODUCTION VERIFIED | NO |
+| FUNCTIONALLY VERIFIED | **YES** (owner smoke 20:33 Asia/Jakarta) |
+| SECURITY VERIFIED | **YES** (required isolation/authz) |
+| PRODUCTION VERIFIED | **YES** |
 
 Application code changed this phase: **NO**.

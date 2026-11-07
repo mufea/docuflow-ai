@@ -1032,6 +1032,16 @@ Owner (18:53 Asia/Jakarta): authorized Gates 1–3; two dedicated test accounts;
 
 This agent has **no** production passwords and did **not** log in. Runbook: `docs/reports/PHASE_9_12B_OWNER_RUNBOOK.md`. Script: `scripts/production_smoke.py` (host-locked to `docuflowai.site`).
 
-FUNCTIONALLY VERIFIED: **NO** (no owner output yet).
-SECURITY VERIFIED: **NO**.
-PRODUCTION VERIFIED: **NO**.
+## Phase 9.12 — Production functional verification — complete
+
+Owner (20:33 Asia/Jakarta) pasted `scripts/production_smoke.py` status labels. All six mandatory areas **PASS**: auth (401/200/logout), upload 200, spoof 415, `extract_text` completed with text, download 302, B isolation 403 + list has no A doc, unauth 401, A delete 200 then GET 404.
+
+Report: `docs/reports/PHASE_9_12_PRODUCTION_FUNCTIONAL_VERIFICATION.md`.
+
+STAGING VERIFIED: **YES**.
+PRODUCTION AUTHORIZED: **YES** (inline only).
+PRODUCTION DEPLOYED: **YES**.
+HEALTH VERIFIED: **YES**.
+FUNCTIONALLY VERIFIED: **YES**.
+SECURITY VERIFIED: **YES** (required isolation/authz; not a pentest).
+PRODUCTION VERIFIED: **YES**.
