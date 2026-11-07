@@ -11,8 +11,8 @@ No login, upload, delete, migrate, or Blueprint apply. No secrets recorded.
 | CMS / web | `docuflowai.online` | `https://docuflowai.online` | 7 Nov 2026, 18:00 |
 
 These are **not** staging hosts (`docuflow-staging-api.onrender.com` /
-`docuflow-staging-web.onrender.com`). Redis / worker appearance was **not**
-stated by the owner.
+`docuflow-staging-web.onrender.com`). Owner (18:05 Asia/Jakarta): **no
+Redis / worker**.
 
 ## 2. Read-only probes
 
@@ -44,7 +44,6 @@ is consistent with no RQ worker.
 - Login, upload, extract, download, or delete on production
 - Cross-user isolation on production
 - Cleanup cron exists or runs
-- Redis / worker were not created
 - Hosted Alembic head on production Postgres
 - Restore drill / backups actually restorable
 - Live AI or real email (still expected mock/console)
