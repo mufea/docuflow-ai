@@ -5,19 +5,28 @@ This application is designed for Render, not a single serverless function. The
 
 1. Next.js web service (Free)
 2. FastAPI web service (Free) with `JOB_BROKER=inline`
-3. PostgreSQL (Free)
+3. PostgreSQL — git Blueprint `docuflow-db` `plan: 0.1c-256mb` (Basic).
+   Live production is owner-reported Basic with backups enabled (retention,
+   frequency, PITR, last backup: **NOT VERIFIED**). Staging Postgres remains
+   Free in `infra/render.staging.yaml`.
 4. Render Cron for cleanup (billed only while running)
 5. External S3-compatible bucket (Cloudflare R2, AWS S3, or MinIO)
-6. Optional Free Redis / Key Value on **production** (unused while jobs are
-   inline; kept for a future RQ worker). Staging omits Redis.
+6. Optional Free Redis / Key Value on the **production Blueprint** (unused
+   while jobs are inline). Live production has **no** Redis. Staging omits Redis.
 
 A paid background worker is **not** in `infra/render.yaml`. Jobs run inside the
 API process. Redis is not required for that mode. To add a queue later, see
 `infra/render.scaling.yaml` — that path needs Redis and a paid worker.
 
 The Blueprint is `infra/render.yaml` (not the repo root). Do not treat a
-Blueprint sync as a completed production deploy. This repository is **NOT
-DEPLOYED**.
+Blueprint sync as a completed production deploy by itself.
+
+**Current production (Phase 9.12, 7 Nov 2026):** deployed and owner-verified
+for the mandatory functional/isolation smoke. API
+`https://docuflowai.site`. CMS `https://docuflowai.online`.
+`JOB_BROKER=inline`. No Redis, no worker. Cleanup cron owner-reported
+running. Recovery drill and production `alembic_version` remain
+**NOT VERIFIED**.
 
 ## Required vs optional services
 
@@ -58,7 +67,7 @@ and are **not** a billing quote:
 | CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.9 merge is `ae3cc0b` (PR #12, [run 42167872331](https://github.com/mufea/docuflow-ai/actions/runs/42167872331), 6 Nov 2026, 12:22 Asia/Jakarta). Phase 9.10 branch CI on `7d9da7f` succeeded ([run 42172770416](https://github.com/mufea/docuflow-ai/actions/runs/42172770416), 6 Nov 2026, 13:12 Asia/Jakarta) |
 | Provider verification | Dedicated test bucket + `TEST_S3_*` credentials | Owner-run `pytest -q -m provider`: 1 passed, 246 deselected (6 Nov 2026, 19:57 Asia/Jakarta). Mocked S3 tests are not this result |
 | Staging deployment | Isolated non-production Render workspace + staging DB + staging bucket | **STAGING VERIFIED** (9.10D). Hosted Alembic `0003` PASS. Live cross-user 403/401 PASS. Not production. |
-| Production deployment | Live Render workspace serving users | **NOT DEPLOYED — Awaiting owner approval** |
+| Production deployment | Live Render workspace serving users | **PRODUCTION VERIFIED** (9.12 owner-run smoke). API `https://docuflowai.site`, CMS `https://docuflowai.online`. Recovery drill **NOT VERIFIED**. Production Alembic **NOT VERIFIED**. |
 
 ## Local vs staging vs production
 
@@ -71,7 +80,7 @@ and are **not** a billing quote:
 | Object storage | filesystem | Dedicated staging bucket | Dedicated production bucket |
 | Redis | unused | **Omitted** from the staging Blueprint | Optional Free Key Value (unused while inline) |
 | Job broker | `inline` | `inline` | `inline` (default) |
-| Exists today? | Yes | **Yes** (owner-applied Blueprint; non-mutating smoke PASS) | **NOT DEPLOYED** |
+| Exists today? | Yes | **Yes** (owner-applied Blueprint; 9.10D verified) | **Yes** — API `https://docuflowai.site`, CMS `https://docuflowai.online` (9.12) |
 
 Do not treat a Git merge or GitHub Actions success as staging or production.
 
@@ -115,7 +124,8 @@ For every live check, record (never secrets, DSNs, or signed URLs):
 | Layer | local / CI / provider / staging |
 
 Statuses: **IMPLEMENTED**, **LOCALLY TESTED**, **CI VERIFIED**, **PROVISIONED**,
-**STAGING VERIFIED**, **NOT EXECUTED**, **BLOCKED**. Do not combine them.
+**STAGING VERIFIED**, **PRODUCTION VERIFIED**, **NOT EXECUTED**, **BLOCKED**.
+Do not combine them. **PRODUCTION VERIFIED** (9.12) is not a restore drill.
 
 A loopback smoke pass is **local**. GitHub Actions is **CI**. `pytest -m provider`
 is **provider** only with dedicated `TEST_S3_*`. Render URLs are **staging**.
@@ -312,6 +322,10 @@ Sync the existing Blueprint, or change each service’s instance type in
 Free Key Value in the same workspace — Render allows only one of each.
 
 ## Changing existing Render services to Free
+
+Do **not** set live production `docuflow-db` back to Free. It is paid Basic
+(`0.1c-256mb` in git) with owner-reported backups. Downgrading to Free
+removes that backup posture and reintroduces 30-day expiry.
 
 Editing this repo does not move live services by itself. After you pull and
 push to the repo Render deploys from:
@@ -578,7 +592,7 @@ mock providers to live providers and does not add keys.
 
 ### A. Minimal cost (default Blueprint)
 
-- `docuflow-web` Free, `docuflow-api` Free, `docuflow-db` Free, optional Free Redis
+- `docuflow-web` Free, `docuflow-api` Free, `docuflow-db` `0.1c-256mb` (Basic in git), optional Free Redis in YAML (live production has **no** Redis)
 - No `docuflow-worker`
 - `JOB_BROKER=inline` on the API
 - One cleanup cron every 15 minutes; API `CLEANUP_INTERVAL_SECONDS=0`
@@ -605,11 +619,11 @@ that still has `JOB_BROKER=rq` from an older Blueprint should be changed to
 | Local development | Supported |
 | Automated tests | See `docs/IMPLEMENTATION_STATUS.md` |
 | Render configuration | Blueprint present; validate in the Render dashboard |
-| Successful Render deployment | **NOT DEPLOYED** — not verified from this environment |
-| Staging Blueprint | Template `infra/render.staging.yaml` — Redis omitted, inline broker — **not applied** |
-| Staging migration `0003` | Procedure ready (`scripts/staging_migrate_verify.py`) — **not performed** |
-| Production migration `0003` | **Not performed** |
-| Live provider verification | **NOT EXECUTED — missing dedicated test credentials** |
+| Successful Render deployment | **PRODUCTION VERIFIED** (9.12). Health + functional + isolation owner-run. Recovery drill **NOT VERIFIED** |
+| Staging Blueprint | `infra/render.staging.yaml` applied in a dedicated workspace (9.10) |
+| Staging migration `0003` | Owner Shell **PASS** (9.10D) on `docuflow_staging_db` |
+| Production migration `0003` | API boot runs `python -m docuflow.migrate`. Live `alembic_version` **NOT VERIFIED** |
+| Live provider verification | Dedicated `TEST_S3_*` owner-run (6 Nov 2026). Production bucket `docuflowai-documents` (owner-reported) |
 
 ## Health
 

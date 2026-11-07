@@ -81,18 +81,65 @@ For a **drill** or a **safe** restore:
 
 This agent must not click Create/Restore.
 
+### 5.1 Drill identity gate (STOP if any check fails)
+
+A name containing `staging` is **not** isolation. Staging is a **live**
+environment. A drill target must be a **new** database the owner named for
+restore, not `docuflow-db` and not `docuflow-staging-db`.
+
+**Known production identity (names only; do not print DSNs):**
+
+| Field | Value | Evidence |
+| --- | --- | --- |
+| Render service | `docuflow-db` | Phase 9.11 owner |
+| Instance id | `dpg-dbiqe70ae00c73cdif7g-a` | Phase 9.11 owner |
+| Postgres database name | **NOT VERIFIED** | Never guessed |
+| Staging service | `docuflow-staging-db` | 9.10D |
+| Staging instance | `dpg-dbn71tec6qcc73cric9g-a` | 9.10D |
+| Staging database name | `docuflow_staging_db` | 9.10D |
+
+**Owner-approved recovery target** must be recorded **before** Restore:
+
+- Example service name: `docuflow-db-restore-drill` (date suffix allowed).
+- Must contain `restore` or `drill`.
+- Must **not** be `docuflow-db` or `docuflow-staging-db`.
+
+Print **host and database name only**, then classify:
+
+| Classification | When |
+| --- | --- |
+| `production` | Service is `docuflow-db` **or** host contains `dpg-dbiqe70ae00c73cdif7g-a` |
+| `staging` | Service/host/name contains `staging` **or** host contains `dpg-dbn71tec6qcc73cric9g-a` |
+| `isolated-restore` | Owner-approved name matches; contains `restore` or `drill`; **not** production; **not** staging |
+| `ambiguous` | Anything else, including unknown database name vs production name |
+
+**STOP — do not restore — if:**
+
+- Owner approval line is missing.
+- Approved target is empty or equals `docuflow-db`.
+- Classification is `production`, `staging`, or `ambiguous`.
+- Actual host equals the production instance id.
+- You cannot name the Render **service** for the DSN you are holding.
+- Production API/CMS `DATABASE_URL` would be changed by this restore.
+
+Failed identity check **stops the drill before** dashboard Restore or
+`pg_restore`. Do not continue “to see what happens”.
+
 ## 6. Restore procedure
 
 ### 6.1 Non-production drill (required before calling recovery verified)
 
-1. Owner approval in chat: authorize isolated restore (new DB only).
-2. Render → `docuflow-db` → backup/restore → **new** instance (not in-place).
-3. Wait until the new DB is available.
-4. Open a shell **on a service that uses the drill DSN only**, or the
-   dashboard shell for that new database — **not** the production API if
-   its `DATABASE_URL` still points at `docuflow-db` (see §8 for inspect
-   SQL; point it at the drill URL).
-5. Run §7–§9. Then §12 cleanup.
+1. Owner approval in chat: `Authorize isolated restore drill into a new database, not production` plus the **approved service name**.
+2. Record that name per §5.1. If it is `docuflow-db`, contains `staging`,
+   or lacks `restore`/`drill`, **STOP**. Do not click Restore.
+3. Render → `docuflow-db` → backup/restore → **new** instance named the
+   approved target (not in-place, not `docuflow-db`).
+4. Wait until the new DB is available.
+5. Re-run §5.1 against the **new** host. If classification is not
+   `isolated-restore`, **STOP** (do not run §8–§9 on it as a drill).
+6. Open a shell on the **drill** instance only — **not** the production API
+   shell (`docuflow-api` still uses `docuflow-db`).
+7. Run §7–§9. Then §12 cleanup.
 
 ### 6.2 Production cutover (separate authorization)
 
@@ -118,6 +165,8 @@ pg_restore --no-owner --no-acl --dbname DB --host HOST --port 5432 --username US
   docuflow-YYYYMMDDThhmmssZ.dump
 ```
 
+Do **not** run `pg_restore` unless §5.1 is `isolated-restore`.
+
 ## 7. Database connectivity verification
 
 On the **target** (drill or new prod), print **host and database name only**:
@@ -129,8 +178,9 @@ SELECT current_database();
 SELECT inet_server_addr();  -- optional; skip if noisy
 ```
 
-Abort if the name/host contains `staging` when you intended production
-recovery, or equals production `docuflow-db` when you intended a drill.
+Then apply §5.1. For a **drill**, abort unless classification is
+`isolated-restore`. For **production inspect**, abort if classification is
+`staging` or `ambiguous`. Never use a production DSN as a drill target.
 
 ## 8. Schema and migration verification (read-only)
 
@@ -138,7 +188,12 @@ Expected: one row `0003_cost_efficient_reliability`. Repo command
 (no DSN): `uv run python -m alembic heads`.
 
 **Owner snippet** (Render Shell). Does not import `docuflow`. Does not
-upgrade. Prints host, database, revision only:
+upgrade. Prints host, database, classification, revision only.
+
+Default `RECOVERY_MODE=inspect` (production API shell only). For a drill:
+`RECOVERY_MODE=drill` and `OWNER_APPROVED_RECOVERY_TARGET=<service-name>`.
+Confirm the Render **service name** in the dashboard matches the approved
+target; the DSN has no service name.
 
 ```python
 import os
@@ -151,8 +206,27 @@ host = parsed.hostname or ""
 name = (parsed.path or "/").lstrip("/")
 print("host=", host)
 print("database=", name)
-if "staging" in host.lower() or "staging" in name.lower():
-    raise SystemExit("stop: identity looks like staging")
+host_l, name_l = host.lower(), name.lower()
+prod_instance = "dpg-dbiqe70ae00c73cdif7g-a"
+staging_instance = "dpg-dbn71tec6qcc73cric9g-a"
+approved = (os.environ.get("OWNER_APPROVED_RECOVERY_TARGET") or "").strip().lower()
+mode = (os.environ.get("RECOVERY_MODE") or "inspect").strip().lower()
+if prod_instance in host_l:
+    cls = "production"
+elif staging_instance in host_l or "staging" in host_l or "staging" in name_l:
+    cls = "staging"
+elif approved and ("restore" in approved or "drill" in approved) and approved not in {"docuflow-db", "docuflow-staging-db"}:
+    cls = "isolated-restore"
+else:
+    cls = "ambiguous"
+print("classification=", cls)
+print("approved_target_set=", "yes" if approved else "no")
+if mode == "drill" and cls != "isolated-restore":
+    raise SystemExit("stop: drill target is not isolated-restore")
+if mode == "inspect" and cls != "production":
+    raise SystemExit("stop: inspect DSN is not classified production")
+if cls == "ambiguous":
+    raise SystemExit("stop: ambiguous database identity")
 with psycopg.connect(raw, connect_timeout=10) as conn:
     conn.execute("SET statement_timeout = '5s'")
     conn.execute("SELECT 1")
@@ -211,6 +285,7 @@ Do not expect R2 objects to exist for every restored `storage_key`.
 
 Drill (non-production) **PASS** when all are true:
 
+- §5.1 classification is `isolated-restore` (not production, not staging, not ambiguous).
 - Target is **not** the production API `DATABASE_URL`.
 - `SELECT 1` succeeds.
 - `alembic_version` is exactly `0003_cost_efficient_reliability`.
@@ -264,7 +339,7 @@ Production cutover **PASS** additionally:
 | Action | Approval text (example) |
 | --- | --- |
 | Read-only prod Alembic inspect | `Authorize read-only alembic inspect on production API shell` |
-| Isolated restore drill | `Authorize isolated restore drill into a new database, not production` |
+| Isolated restore drill | `Authorize isolated restore drill into a new database, not production` **and** name the service (must contain `restore` or `drill`) |
 | Production cutover | `Authorize production DATABASE_URL cutover to restored instance <name>` |
 | Delete drill DB | `Delete docuflow-db-restore-drill` |
 
