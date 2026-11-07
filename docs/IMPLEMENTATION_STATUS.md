@@ -941,28 +941,46 @@ exit 0
 | Blueprint application | **PROVISIONED** (owner applied `infra/render.staging.yaml`; four staging services live; no Redis; no worker). |
 | Staging migration | Startup `python -m docuflow.migrate` is in the Blueprint. Independent `staging_migrate_verify.py`: **NOT EXECUTED** (no staging DSN in this environment; `ipAllowList: []`). |
 | Staging health | **PASS** (agent-run `/health` and `/ready`). |
-| Staging smoke | Non-mutating **PASS**. Mutating checks **SKIPPED**. Not full staging verification. |
+| Staging smoke | Non-mutating **PASS**. Owner mutating smoke **PASS** (7 Nov 2026, 09:35 Asia/Jakarta). Cross-user **SKIPPED**. Hosted migrate-verify outstanding. |
 
 Free Postgres reminder: expires 30 days after creation; 14-day grace; then deletion. No backups. One Free database per workspace.
 
-Staging provisioned: **YES**. Staging verified: **NO** (mutating smoke and migrate-verify outstanding).
+Staging provisioned: **YES**. Staging functional verified: **YES** (smoke lifecycle). Staging verified: **NO** (migrate-verify outstanding).
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 Production deployment authorized: **NO.**
 
-## Phase 9.10B — Staging functional verification — blocked on mutation gate
+## Phase 9.10B — Staging functional verification — owner mutating smoke PASS
 
 Audit used existing `scripts/staging_smoke.py`. No application-code changes.
 
-Non-mutating baseline re-run 7 Nov 2026, 08:20 Asia/Jakarta: `/health` PASS, `/ready` PASS (`broker=inline`, database/storage true), frontend HTTP 200 PASS.
+Non-mutating baseline (this environment, 7 Nov 2026, 08:20 Asia/Jakarta): `/health` PASS, `/ready` PASS (`broker=inline`, database/storage true), frontend HTTP 200 PASS.
 
-Mutating lifecycle **not started**. In this environment `STAGING_SMOKE_MUTATIONS` is UNSET (agent did not set it). `STAGING_SMOKE_EMAIL`, `STAGING_SMOKE_PASSWORD`, and `STAGING_SMOKE_PDF` are UNSET. Report: `docs/reports/PHASE_9_10B_STAGING_VERIFICATION.md`.
+Owner-run mutating smoke (7 Nov 2026, 09:35 Asia/Jakarta) with `STAGING_SMOKE_MUTATIONS=1` on the owner machine. Agent did **not** receive a usable credential store and did **not** re-run mutations. Email/password/PDF path are **not** recorded here.
 
-STAGING FUNCTIONAL VERIFIED: **NO**. STAGING VERIFIED: **NO**.
+```
+PASS: GET /health — HTTP 200 status=ok
+PASS: GET /health service — service=docuflow-api
+PASS: GET /ready — HTTP 200 broker=inline checks={'database': True, 'redis': True, 'storage': True}
+PASS: GET /ready broker — inline
+PASS: authentication — login and /v1/auth/me succeeded
+PASS: document_upload — upload accepted
+PASS: document_processing — extract_text completed
+PASS: document_download — HTTP 302
+SKIPPED: cross_user_access — STAGING_SMOKE_SECOND_EMAIL / STAGING_SMOKE_SECOND_PASSWORD unset
+PASS: storage_deletion — HTTP 200
+PASS: frontend — HTTP 200
+```
+
+Report: `docs/reports/PHASE_9_10B_STAGING_VERIFICATION.md`.
+
+STAGING FUNCTIONAL VERIFIED: **YES** (existing smoke lifecycle; optional cross-user SKIPPED; download is HTTP 302 without a content checksum).
+STAGING VERIFIED: **NO** (hosted migrate-verify outstanding).
 PRODUCTION DEPLOYED: **NO**. PRODUCTION AUTHORIZED: **NO**.
 
 ## Next recommended work
 
-1. Owner enables mutating smoke **in the execution environment** (not in chat): `STAGING_SMOKE_MUTATIONS=1`, dedicated staging `STAGING_SMOKE_EMAIL` / `STAGING_SMOKE_PASSWORD`, and `STAGING_SMOKE_PDF`. Then re-run `scripts/staging_smoke.py`. Do not paste passwords into chat.
+1. Optional: second dedicated staging account for `cross_user_access` (403 on another user's download). Do not paste passwords into chat.
 2. Optional migrate-verify from a host allowed to reach staging Postgres (Render shell or an owner-added IP). Never against production.
 3. Keep `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `JOB_BROKER=inline`. No Redis, no paid worker.
 4. Production remains unauthorized.
+5. Rotate the staging account password that was pasted into chat. Do not reuse it.

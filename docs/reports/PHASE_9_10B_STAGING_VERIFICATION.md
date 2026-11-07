@@ -1,8 +1,8 @@
 # Phase 9.10B — Staging functional verification
 
-This report records a **read-first audit**, a **safety preflight**, and a
-**non-mutating baseline** against Render staging. Mutating lifecycle tests
-were **not executed**.
+This report records a **read-first audit**, a **safety preflight**, a
+**non-mutating baseline**, and an **owner-run mutating smoke** against
+Render staging. Credentials are not recorded here.
 
 Status vocabulary (never combined):
 
@@ -23,10 +23,11 @@ Status vocabulary (never combined):
 | Repository URL | https://github.com/mufea/docuflow-ai |
 | Inspected default branch | `origin/main` `b15115889d88919e8b5ac1c1cc29ed8a6e8d31c3` (PR #15 merge). Not switched. |
 | Working branch | `cursor/phase-9-10b-staging-functional-8f43` (from Phase 9.10A evidence `a2a61ee`) |
-| Previous evidence | Phase 9.10A, [PR #16](https://github.com/mufea/docuflow-ai/pull/16) (open at report time) |
+| Previous evidence | Phase 9.10A PR #16 and 9.10B gate-stop PR #17, both merged to `main` |
 | Staging API URL | `https://docuflow-staging-api.onrender.com` |
 | Staging frontend URL | `https://docuflow-staging-web.onrender.com` |
-| Test execution timestamp | 7 Nov 2026, 08:20 Asia/Jakarta (WIB) |
+| Non-mutating timestamp | 7 Nov 2026, 08:20 Asia/Jakarta (WIB), this environment |
+| Owner mutating timestamp | 7 Nov 2026, 09:35 Asia/Jakarta (WIB), owner machine |
 | Broker mode | `inline` (`GET /ready`) |
 | Database readiness | `/ready` `checks.database=true` |
 | Storage readiness | `/ready` `checks.storage=true` |
@@ -46,10 +47,10 @@ staging `S3_*` on Render.
 | Area | Existing implementation | Verification requirement | Risk |
 | --- | --- | --- | --- |
 | Isolation | `smoke_target_errors` + `STAGING_HOST_CONFIRM`; production hosts refused | Confirm hostname is `docuflow-staging-api.onrender.com` | LOW — hostname matches; production hosts rejected |
-| Mutation gate | `STAGING_SMOKE_MUTATIONS` must equal `1` (`true` is FAIL) | Owner sets the flag in the execution environment | **BLOCKER** — unset in this environment |
-| Auth credentials | `STAGING_SMOKE_EMAIL` / `STAGING_SMOKE_PASSWORD` | Dedicated staging account, not production/admin unless approved | **BLOCKER** — unset; values must not be pasted in chat |
+| Mutation gate | `STAGING_SMOKE_MUTATIONS` must equal `1` (`true` is FAIL) | Owner sets the flag in the execution environment | Owner set `1` on the owner machine. Still UNSET in this Cloud Agent environment. |
+| Auth credentials | `STAGING_SMOKE_EMAIL` / `STAGING_SMOKE_PASSWORD` | Dedicated staging account, not production/admin unless approved | Owner-run. Values must not be pasted into chat and are not stored here. |
 | Registration | Second opt-in `STAGING_SMOKE_REGISTER=1` | Do not auto-create accounts | LOW if login-only; HIGH if register is enabled without a dedicated mailbox |
-| Upload | `POST /v1/documents` multipart PDF from `STAGING_SMOKE_PDF` | Harmless unique test PDF | **BLOCKER** — path unset; no PDF fixture in the repo |
+| Upload | `POST /v1/documents` multipart PDF from `STAGING_SMOKE_PDF` | Harmless unique test PDF | Owner supplied a local PDF path. Path is not recorded here. |
 | Job processing | `POST /v1/jobs` `extract_text`; poll until terminal | Inline broker; no worker | MEDIUM — Free spin-down can kill in-flight inline jobs |
 | Download | `GET /v1/documents/{id}/download` accepts 200 or 302 | HTTP status only; signed URL not logged | MEDIUM — content checksum is **not** in the existing smoke |
 | Unauthenticated access | `GET /v1/auth/me` requires session | 9.10B asked for unauthenticated rejection | LOW gap — existing smoke does not call `/me` without cookies |
@@ -85,29 +86,25 @@ export STAGING_SMOKE_PDF=./path/to/tiny-test.pdf
 uv run python scripts/staging_smoke.py
 ```
 
-No mutating operations were executed during the audit.
+Audit mutations were not executed from this Cloud Agent. The owner later ran
+the mutating command on a dedicated machine.
 
 ## C. Safety preflight (Phase B)
 
 | Check | Result |
 | --- | --- |
-| API URL is staging hostname | PASS — `docuflow-staging-api.onrender.com` (contains isolation token; not `docuflow-api`) |
+| API URL is staging hostname | PASS — `docuflow-staging-api.onrender.com` |
 | Frontend URL is staging | PASS — `docuflow-staging-web.onrender.com` |
-| `STAGING_SMOKE_MUTATIONS=1` | **FAIL / absent** — UNSET. Agent did not set it. |
-| Staging auth credentials present | **UNSET** (`STAGING_SMOKE_EMAIL`, `STAGING_SMOKE_PASSWORD`) |
-| Dedicated staging account | **NOT VERIFIED** — no account in this environment |
-| Account is not production/admin | **NOT VERIFIED** |
-| Storage is staging | Owner-reported staging bucket. `/ready` storage true. Render `S3_*` not in this environment. |
-| Database is staging | Owner-reported `docuflow_staging_db`. `/ready` database true. `DATABASE_URL` UNSET here. |
-| Production DSN / production S3 in this env | PASS — `DATABASE_URL` and `S3_*` UNSET; smoke used only the staging origin |
-| `TEST_S3_*` unused for this run | PASS — UNSET; not used |
+| `STAGING_SMOKE_MUTATIONS=1` | Owner-run: set. This Cloud Agent environment: still UNSET (not set by the agent). |
+| Staging auth credentials present | Owner-run: used. Not stored in this repository. |
+| Dedicated staging account | Owner-reported. Role (admin vs user) **not independently verified**. |
+| Storage is staging | Owner-reported staging bucket. `/ready` storage true. |
+| Database is staging | Owner-reported `docuflow_staging_db`. `/ready` database true. |
+| Production DSN / production S3 in this env | PASS — unused here. Owner command targeted the staging origin only. |
 | Cleanup strategy understood | Yes — smoke deletes only the document it uploaded; cron is separate |
-| Unique test data | Not created — mutations did not run |
 | Production API contacted | No |
 
-Mandatory safety gate: mutating smoke stayed disabled.
-
-**MUTATING STAGING SMOKE: NOT AUTHORIZED**
+**MUTATING STAGING SMOKE: OWNER-AUTHORIZED AND OWNER-EXECUTED**
 
 ## D. Non-mutating baseline (Phase C)
 
@@ -125,34 +122,33 @@ Re-ran the existing script with mutations **not** enabled (7 Nov 2026, 08:20 Asi
 
 ## E. Functional test results (Phase D)
 
-Mutations were not started. No documents, jobs, or users were created by this run.
+Owner-run `uv run python scripts/staging_smoke.py` with mutations enabled
+(7 Nov 2026, 09:35 Asia/Jakarta). Sanitized transcript only. No FAIL lines.
 
 | Test | Result | Evidence |
 | --- | --- | --- |
-| Authentication | SKIPPED | `STAGING_SMOKE_MUTATIONS` is not `1`; credentials UNSET |
-| Protected endpoint | SKIPPED | `/v1/auth/me` not called |
-| Unauthenticated rejection | SKIPPED | Not in this run |
-| Upload | SKIPPED | Gate + `STAGING_SMOKE_PDF` UNSET |
-| Job creation | SKIPPED | Gate absent |
-| Job processing | SKIPPED | Gate absent |
-| Download | SKIPPED | Gate absent |
-| Content integrity | SKIPPED | Existing smoke does not checksum bodies; not run |
-| Delete | SKIPPED | Gate absent |
-| Cleanup | SKIPPED | No smoke document created; cron not independently verified |
-| Cross-user access | SKIPPED | Gate absent |
-
-No FAIL rows. No leftover smoke documents from this agent.
+| Authentication | PASS | `login and /v1/auth/me succeeded` |
+| Protected endpoint | PASS | included in authentication (`/v1/auth/me`) |
+| Unauthenticated rejection | SKIPPED | not implemented in existing smoke |
+| Upload | PASS | `upload accepted` |
+| Job creation | PASS | implied by `extract_text completed` |
+| Job processing | PASS | `extract_text completed` |
+| Download | PASS | `HTTP 302` (signed URL not followed, not logged) |
+| Content integrity | SKIPPED | existing smoke does not checksum the 302 body |
+| Delete | PASS | `storage_deletion HTTP 200` |
+| Cleanup | PASS | API delete of the smoke document. Cron **NOT EXECUTED** as a separate check |
+| Cross-user access | SKIPPED | second staging account unset |
 
 ## F. Safety verification
 
 | Item | Status |
 | --- | --- |
 | Staging isolation verified | Yes for HTTP origin (hostname + confirm). |
-| Dedicated account verified | No — credentials absent. |
-| Mutation authorization verified | **No** — `STAGING_SMOKE_MUTATIONS` UNSET. |
-| No production access performed | Yes. |
+| Dedicated account verified | Owner-reported. Admin role not independently verified. |
+| Mutation authorization verified | **Yes** — owner set `STAGING_SMOKE_MUTATIONS=1` on the owner machine. |
+| No production access performed | Yes — staging origin only. |
 | No production resources modified | Yes. |
-| No credentials exposed | Yes — names inspected, values never printed. |
+| No credentials stored in git | Yes. A password was pasted into chat; it is **not** copied into this repo. Rotate that staging password. |
 | Application code changed | No. |
 | Hosted migration verification | **Not verified** (separate workstream). |
 
@@ -163,22 +159,21 @@ No FAIL rows. No leftover smoke documents from this agent.
 | Staging services exist | Owner-reported (9.10A) plus `/health` `/ready` frontend PASS |
 | Provider connectivity | Owner-reported `pytest -m provider` PASS (6 Nov 2026) |
 | Non-mutating HTTP baseline | Locally tested PASS (this report) |
-| Authentication / upload / job / download / delete | Skipped |
-| Content integrity checksum | Not verified by existing smoke even after a future mutating PASS |
+| Authentication / upload / job / download / delete | Owner-reported PASS |
+| Content integrity checksum | Not verified (smoke accepts HTTP 302 without hashing) |
 | Unauthenticated `/v1/auth/me` | Not in existing smoke |
-| Object-store object gone after delete | Not independently verified by existing smoke |
+| Cross-user download 403 | SKIPPED |
+| Object-store object gone after delete | Not independently listed; API delete PASS |
 | Hosted `staging_migrate_verify.py` | Not verified |
 | Production | Not deployed, not authorized |
 
-Existing smoke is sufficient to start the mutating lifecycle once the owner
-enables the gate and injects credentials **outside chat**. No application-code
-change is proposed. A later smoke improvement (unauthenticated 401 + download
-checksum without logging signed URLs) is optional and was **not** made here.
+No application-code change. Optional later smoke improvements (unauthenticated
+401, download checksum without logging signed URLs, second-user 403) were
+**not** added.
 
 ## H. Git
 
-Documentation-only commit on `cursor/phase-9-10b-staging-functional-8f43`.
-No `.env`, no PDFs, no secrets.
+Documentation-only. No `.env`, no PDFs, no secrets, no passwords.
 
 ## I. Final status
 
@@ -186,9 +181,9 @@ No `.env`, no PDFs, no secrets.
 | --- | --- |
 | STAGING PROVISIONED | YES |
 | PROVIDER VERIFIED | YES (owner-run provider test) |
-| STAGING FUNCTIONAL VERIFIED | **NO** |
-| STAGING VERIFIED | **NO** |
+| STAGING FUNCTIONAL VERIFIED | **YES** (existing smoke lifecycle; see limitations) |
+| STAGING VERIFIED | **NO** (hosted migrate-verify outstanding) |
 | PRODUCTION DEPLOYED | **NO** |
 | PRODUCTION AUTHORIZED | **NO** |
 
-**MUTATING STAGING SMOKE: NOT AUTHORIZED**
+**MUTATING STAGING SMOKE: OWNER PASS**
