@@ -1019,3 +1019,19 @@ STAGING VERIFIED: **YES**.
 PRODUCTION AUTHORIZED: **YES** (inline only).
 PRODUCTION DEPLOYED: **YES** (public API + CMS respond).
 PRODUCTION VERIFIED: **NO**.
+
+## Phase 9.12A — Production functional verification audit — waiting on owner
+
+Read-only audit (7 Nov 2026, 18:39 Asia/Jakarta). Gate 0 repeated: `/health` 200, `/ready` `broker=inline`, CMS 200, unauth `/v1/auth/me` 401. No login/upload/delete.
+
+`scripts/staging_smoke.py` refuses production hosts. Functional Gates 1–3 **BLOCKED** until owner approval. Report: `docs/reports/PHASE_9_12A_PRODUCTION_READINESS_AUDIT.md`.
+
+## Phase 9.12B — Gates 1–3 authorized, waiting on owner-run evidence
+
+Owner (18:53 Asia/Jakarta): authorized Gates 1–3; two dedicated test accounts; synthetic PDF; delete only those test documents; owner will paste HTTP status codes only.
+
+This agent has **no** production passwords and did **not** log in. Runbook: `docs/reports/PHASE_9_12B_OWNER_RUNBOOK.md`. Script: `scripts/production_smoke.py` (host-locked to `docuflowai.site`).
+
+FUNCTIONALLY VERIFIED: **NO** (no owner output yet).
+SECURITY VERIFIED: **NO**.
+PRODUCTION VERIFIED: **NO**.
