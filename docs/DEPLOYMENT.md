@@ -57,7 +57,7 @@ and are **not** a billing quote:
 | Local verification | pytest / ruff / mypy / web lint-typecheck-test-build | See `docs/IMPLEMENTATION_STATUS.md` |
 | CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.9 merge is `ae3cc0b` (PR #12, [run 42167872331](https://github.com/mufea/docuflow-ai/actions/runs/42167872331), 6 Nov 2026, 12:22 Asia/Jakarta). Phase 9.10 branch CI on `7d9da7f` succeeded ([run 42172770416](https://github.com/mufea/docuflow-ai/actions/runs/42172770416), 6 Nov 2026, 13:12 Asia/Jakarta) |
 | Provider verification | Dedicated test bucket + `TEST_S3_*` credentials | Owner-run `pytest -q -m provider`: 1 passed, 246 deselected (6 Nov 2026, 19:57 Asia/Jakarta). Mocked S3 tests are not this result |
-| Staging deployment | Isolated non-production Render workspace + staging DB + staging bucket | **Provisioned**. Non-mutating HTTP **PASS**. Owner mutating smoke **PASS** (auth/upload/job/download/delete). Cross-user SKIPPED. Hosted migrate-verify not done. Not production. |
+| Staging deployment | Isolated non-production Render workspace + staging DB + staging bucket | **Provisioned**. Lifecycle smoke **PASS**. Live cross-user **BLOCKED**. Hosted migrate-verify **BLOCKED**. Not STAGING VERIFIED. Not production. |
 | Production deployment | Live Render workspace serving users | **NOT DEPLOYED — Awaiting owner approval** |
 
 ## Local vs staging vs production
