@@ -949,9 +949,20 @@ Staging provisioned: **YES**. Staging verified: **NO** (mutating smoke and migra
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 Production deployment authorized: **NO.**
 
+## Phase 9.10B — Staging functional verification — blocked on mutation gate
+
+Audit used existing `scripts/staging_smoke.py`. No application-code changes.
+
+Non-mutating baseline re-run 7 Nov 2026, 08:20 Asia/Jakarta: `/health` PASS, `/ready` PASS (`broker=inline`, database/storage true), frontend HTTP 200 PASS.
+
+Mutating lifecycle **not started**. In this environment `STAGING_SMOKE_MUTATIONS` is UNSET (agent did not set it). `STAGING_SMOKE_EMAIL`, `STAGING_SMOKE_PASSWORD`, and `STAGING_SMOKE_PDF` are UNSET. Report: `docs/reports/PHASE_9_10B_STAGING_VERIFICATION.md`.
+
+STAGING FUNCTIONAL VERIFIED: **NO**. STAGING VERIFIED: **NO**.
+PRODUCTION DEPLOYED: **NO**. PRODUCTION AUTHORIZED: **NO**.
+
 ## Next recommended work
 
-1. Optional mutating smoke with dedicated staging accounts only: `STAGING_SMOKE_MUTATIONS=1`, `STAGING_HOST_CONFIRM=docuflow-staging-api.onrender.com`. Do not paste passwords into chat.
+1. Owner enables mutating smoke **in the execution environment** (not in chat): `STAGING_SMOKE_MUTATIONS=1`, dedicated staging `STAGING_SMOKE_EMAIL` / `STAGING_SMOKE_PASSWORD`, and `STAGING_SMOKE_PDF`. Then re-run `scripts/staging_smoke.py`. Do not paste passwords into chat.
 2. Optional migrate-verify from a host allowed to reach staging Postgres (Render shell or an owner-added IP). Never against production.
 3. Keep `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `JOB_BROKER=inline`. No Redis, no paid worker.
 4. Production remains unauthorized.
