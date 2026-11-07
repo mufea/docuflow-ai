@@ -640,7 +640,10 @@ that still has `JOB_BROKER=rq` from an older Blueprint should be changed to
 
 Production-specific restore, Alembic inspect, and isolated drill:
 `docs/operations/PRODUCTION_DATABASE_RECOVERY_RUNBOOK.md` (Phase 9.13).
-The drill has **not** been executed.
+Owner restored into isolated `docuflow-db-restore-drill-20261107`
+(`dpg-dbnk595g1s2s73cuafl0-a` / `docuflow_db_q32a_d7gs`). Identity gate
+**isolated-restore**. Schema/integrity SQL **not** yet run, so the drill is
+still **NOT VERIFIED**.
 
 This section is a general runbook. It was **not** executed against staging or
 production from this environment. The Blueprint lists Postgres `0.1c-256mb`;
