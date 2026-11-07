@@ -80,8 +80,12 @@ def test_opt_in_flag_rejects_ambiguous_values() -> None:
 def test_smoke_target_rejects_production_and_requires_confirm() -> None:
     assert is_loopback_host("127.0.0.1") is True
     assert is_production_public_host("docuflow-api.onrender.com") is True
+    assert is_production_public_host("docuflowai.site") is True
+    assert is_production_public_host("www.docuflowai.online") is True
+    assert is_production_public_host("docuflow-staging-api.onrender.com") is False
     assert smoke_target_errors("https://docuflow-api.onrender.com") != []
     assert any("production" in item for item in smoke_target_errors("https://docuflow-api.onrender.com"))
+    assert any("production" in item for item in smoke_target_errors("https://docuflowai.site"))
     staging = "https://docuflow-staging-api.onrender.com"
     assert any("STAGING_HOST_CONFIRM" in item for item in smoke_target_errors(staging))
     assert smoke_target_errors(staging, "docuflow-staging-api.onrender.com") == []
@@ -101,6 +105,18 @@ def test_staging_smoke_refuses_production_hostname() -> None:
     assert "FAIL" in result.stdout
     assert "production" in result.stdout.lower()
     assert "postgres://" not in result.stdout.lower()
+
+
+def test_staging_smoke_refuses_production_custom_domain() -> None:
+    result = _run(
+        "scripts/staging_smoke.py",
+        {
+            "STAGING_API_URL": "https://docuflowai.site",
+            "STAGING_HOST_CONFIRM": "docuflowai.site",
+        },
+    )
+    assert result.returncode == 1
+    assert "production" in result.stdout.lower()
 
 
 def test_staging_smoke_requires_host_confirm_for_non_loopback() -> None:

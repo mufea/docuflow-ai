@@ -1007,15 +1007,15 @@ PRODUCTION DEPLOYED: **NO**. PRODUCTION VERIFIED: **NO**. PRODUCTION AUTHORIZED:
 2. Keep staging `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `JOB_BROKER=inline`. No Redis, no paid worker.
 3. Free Postgres still expires 30 days after creation; no managed backups.
 
-## Phase 9.11 — Production readiness audit — authorized, not deployed
+## Phase 9.11 — Production readiness audit — live hosts, not verified
 
-Owner (7 Nov 2026, 17:42 Asia/Jakarta): `Authorize production deploy, keep inline`. Agent **did not** apply the Blueprint. Owner commit `4f1f07e` set `infra/render.yaml` `docuflow-db` to `plan: 0.1c-256mb` (17:53 Asia/Jakarta). Redis is still in that YAML; do not create it. Mock AI and console email unchanged.
+Owner (7 Nov 2026, 17:42 Asia/Jakarta): `Authorize production deploy, keep inline`. Agent **did not** apply the Blueprint. Owner commit `4f1f07e` set `infra/render.yaml` `docuflow-db` to `plan: 0.1c-256mb`.
 
-Owner (17:11–17:37): `docuflow-db` Basic, backups yes, no staging services; bucket `docuflowai-documents`; S3 keys unique (not staging).
+Owner (18:00 Asia/Jakarta): API `https://docuflowai.site`, CMS `https://docuflowai.online`. Read-only probes **PASS**: `/health` `docuflow-api`, `/ready` `broker=inline` `rq_workers=0` database+storage true, CMS Next.js 200, unauthenticated `/v1/auth/me` 401, CORS allows the CMS origin. Evidence: `docs/reports/PHASE_9_11_PRODUCTION_LIVE_EVIDENCE.md`.
 
-Owner must create `docuflow-api` / `web` / `cleanup` in that workspace, linking `DATABASE_URL` to existing `docuflow-db`. Procedure: `docs/reports/PHASE_9_11_PRODUCTION_READINESS_AUDIT.md` §19.
+Do **not** point `STAGING_*` at these hosts. Staging smoke refuses both custom domains. No login/upload. Cleanup cron and Redis/worker presence **NOT VERIFIED** (`ready.redis=true` is the inline default).
 
 STAGING VERIFIED: **YES**.
 PRODUCTION AUTHORIZED: **YES** (inline only).
-PRODUCTION DEPLOYED: **NO**.
+PRODUCTION DEPLOYED: **YES** (public API + CMS respond).
 PRODUCTION VERIFIED: **NO**.

@@ -34,6 +34,10 @@ PRODUCTION_SERVICE_NAMES = {
 STAGING_FORBIDDEN_SERVICE_NAMES = PRODUCTION_SERVICE_NAMES | {"docuflow-staging-redis"}
 DEFAULT_PRODUCTION_BUCKETS = {"docuflow-documents"}
 PRODUCTION_PUBLIC_HOSTS = {"docuflow-api", "docuflow-web"}
+PRODUCTION_PUBLIC_CUSTOM_DOMAINS = (
+    "docuflowai.site",
+    "docuflowai.online",
+)
 LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
 
 FORBIDDEN_FRAGMENTS = (
@@ -211,7 +215,12 @@ def is_production_public_host(host: str) -> bool:
         return False
     if value in PRODUCTION_PUBLIC_HOSTS:
         return True
-    return value.startswith("docuflow-api.") or value.startswith("docuflow-web.")
+    if value.startswith("docuflow-api.") or value.startswith("docuflow-web."):
+        return True
+    for domain in PRODUCTION_PUBLIC_CUSTOM_DOMAINS:
+        if value == domain or value.endswith("." + domain):
+            return True
+    return False
 
 
 def confirm_matches(host: str, name: str, confirm: str) -> bool:

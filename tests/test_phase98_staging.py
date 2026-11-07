@@ -190,6 +190,8 @@ def test_production_resource_reuse_is_detected() -> None:
     assert is_forbidden_live_test_bucket("docuflow-test") is False
     assert is_production_public_host("docuflow-api.onrender.com") is True
     assert is_production_public_host("docuflow-staging-api.onrender.com") is False
+    assert is_production_public_host("docuflowai.site") is True
+    assert is_production_public_host("docuflowai.online") is True
     assert confirm_matches("dbhost", "stagingdb", "stagingdb") is True
     assert confirm_matches("dbhost", "stagingdb", "dbhost/stagingdb") is True
     assert confirm_matches("dbhost", "stagingdb", "other") is False
