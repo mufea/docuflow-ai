@@ -57,7 +57,7 @@ and are **not** a billing quote:
 | Local verification | pytest / ruff / mypy / web lint-typecheck-test-build | See `docs/IMPLEMENTATION_STATUS.md` |
 | CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.9 merge is `ae3cc0b` (PR #12, [run 42167872331](https://github.com/mufea/docuflow-ai/actions/runs/42167872331), 6 Nov 2026, 12:22 Asia/Jakarta). Phase 9.10 branch CI on `7d9da7f` succeeded ([run 42172770416](https://github.com/mufea/docuflow-ai/actions/runs/42172770416), 6 Nov 2026, 13:12 Asia/Jakarta) |
 | Provider verification | Dedicated test bucket + `TEST_S3_*` credentials | Owner-run `pytest -q -m provider`: 1 passed, 246 deselected (6 Nov 2026, 19:57 Asia/Jakarta). Mocked S3 tests are not this result |
-| Staging deployment | Isolated non-production Render workspace + staging DB + staging bucket | **Provisioned**. Lifecycle smoke **PASS**. Live cross-user **BLOCKED**. Hosted migrate-verify **BLOCKED**. Not STAGING VERIFIED. Not production. |
+| Staging deployment | Isolated non-production Render workspace + staging DB + staging bucket | **STAGING VERIFIED** (9.10D). Hosted Alembic `0003` PASS. Live cross-user 403/401 PASS. Not production. |
 | Production deployment | Live Render workspace serving users | **NOT DEPLOYED — Awaiting owner approval** |
 
 ## Local vs staging vs production
@@ -522,11 +522,11 @@ Owner manual checks after a real staging API exists:
 | 2. `GET /health` | HTTP 200, `status=ok` | **PASS** (agent + owner) |
 | 3. `GET /ready` | HTTP 200 if DB+storage up; HTTP 503 if not | **PASS** |
 | 4. PostgreSQL | `/ready` checks.database true | **PASS** |
-| 5. Migration | `alembic current` is `0003_cost_efficient_reliability` | **NOT EXECUTED** (hosted migrate-verify) |
+| 5. Migration | `alembic current` is `0003_cost_efficient_reliability` | Owner Shell **PASS** (9.10D) |
 | 6. Authentication | register/login on staging, CSRF cookie set | Owner login + `/v1/auth/me` **PASS** |
 | 7. Document upload | PDF upload 200 for the staging user | Owner **PASS** |
 | 8. Document processing | `extract_text` (or similar) job completes | Owner **PASS** |
-| 9. File download | Owner can download; other user gets 403 | Owner download HTTP 302 **PASS**. Cross-user **SKIPPED** |
+| 9. File download | Owner can download; other user gets 403 | Owner download HTTP 302 **PASS**. Live B GET/download/DELETE **403** |
 | 10. Background jobs | `JOB_BROKER=inline`; job leaves `queued` | **PASS** (`broker=inline`, job completed) |
 | 11. Credit ledger | reserve then settle or refund once | **NOT EXECUTED** as a separate check |
 | 12. Error handling | `/ready` 503 body has no DSN/signature | **NOT EXECUTED** (ready was 200) |
@@ -535,9 +535,9 @@ Owner manual checks after a real staging API exists:
 
 ## End-to-end staging verification procedure
 
-This is an owner runbook. Hosted staging now exists. Non-mutating and
-mutating smoke have owner/agent evidence below. Hosted migrate-verify is
-still **NOT EXECUTED**.
+This is an owner runbook. Hosted staging exists. Lifecycle smoke, hosted
+Alembic inspect, and live cross-user isolation have owner evidence. This is
+not production.
 
 Free Render limitations to expect: web services spin down after about 15
 minutes idle; the first request can take about a minute to wake; spin-down
@@ -547,8 +547,8 @@ Free web services; Free Postgres has no managed backups.
 | Step | How | Status here |
 | --- | --- | --- |
 | 1. Render staging startup | Apply `infra/render.staging.yaml` in a dedicated workspace after owner approval. Confirm no `docuflow-api` / `docuflow-db` in that workspace. | **PROVISIONED** (owner) |
-| 2. Database connectivity | `/ready` `checks.database=true` and `scripts/staging_migrate_verify.py` `SELECT 1` | `/ready` **PASS**. migrate-verify **NOT EXECUTED** |
-| 3. Migration completion | Alembic current = `0003_cost_efficient_reliability` | **NOT EXECUTED** (startup migrate is in Blueprint) |
+| 2. Database connectivity | `/ready` `checks.database=true` and `scripts/staging_migrate_verify.py` `SELECT 1` | `/ready` **PASS**. Owner Shell `SELECT 1` **PASS** |
+| 3. Migration completion | Alembic current = `0003_cost_efficient_reliability` | Owner Shell **PASS** (`0003`, one head, no upgrade) |
 | 4. S3 connectivity | `/ready` `checks.storage=true` plus optional `pytest -m provider` | `/ready` **PASS**. Provider test owner **PASS** |
 | 5. API health | `GET /health` HTTP 200 | **PASS** |
 | 6. API readiness | `GET /ready` HTTP 200 | **PASS** |
@@ -556,7 +556,7 @@ Free web services; Free Postgres has no managed backups.
 | 8. User authentication | smoke `STAGING_SMOKE_EMAIL` login / register | Owner login **PASS** |
 | 9. Document upload | smoke `STAGING_SMOKE_PDF` `POST /v1/documents` | Owner **PASS** |
 | 10. Document processing | smoke `extract_text` job completes (`JOB_BROKER=inline`) | Owner **PASS** |
-| 11. Document download | owner `GET /v1/documents/{id}/download` | Owner HTTP 302 **PASS**. Cross-user **SKIPPED** |
+| 11. Document download | owner `GET /v1/documents/{id}/download` | Owner HTTP 302 **PASS**. Live other-user **403**. Unauth **401** |
 | 12. Cleanup execution | staging cron `python -m docuflow.cleanup` every 15 minutes; API `CLEANUP_INTERVAL_SECONDS=0` | Smoke `DELETE` **PASS**. Cron run **NOT EXECUTED** |
 | 13. Queued-job recovery | existing Phase 9.6 `recover_queued_jobs` on API boot; limit remains 100. Free spin-down still kills `processing` rows until stale cleanup. | Implemented in code; **not staging verified** |
 
