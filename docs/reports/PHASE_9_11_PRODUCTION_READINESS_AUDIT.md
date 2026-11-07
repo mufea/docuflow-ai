@@ -3,19 +3,21 @@
 This started as an **audit and plan**. On 7 Nov 2026, 17:42 Asia/Jakarta the
 owner sent `Authorize production deploy, keep inline`.
 
-This agent **did not** apply `infra/render.yaml` (it still lists Postgres
-`plan: free`; this environment has no Render credentials). Application
-services are **not** deployed from here. Keep `JOB_BROKER=inline`. Do **not**
-add Redis or a worker.
+This agent **did not** apply `infra/render.yaml`. Owner commit `4f1f07e`
+(7 Nov 2026, 17:53 Asia/Jakarta) set `docuflow-db` `plan: 0.1c-256mb`.
+This agent did not create Render services. Owner public hosts are **live**
+(read-only evidence). Keep `JOB_BROKER=inline`. Do **not** add Redis or a
+worker.
 
 ## 1. Executive summary
 
-Staging is **STAGING VERIFIED** (Phase 9.10D). Production is **not** ready to
-deploy.
+Staging is **STAGING VERIFIED** (Phase 9.10D). Production API and CMS
+**respond** on owner custom domains. Production is **not** functionally
+verified (no login/upload/isolation on production).
 
 The application can run with `DOCUFLOW_ENV=production` (fail-fast for SQLite,
-filesystem storage, weak secrets). That is **code** readiness, not a live
-production system.
+filesystem storage, weak secrets). Live hosts are **not** the same as
+production functional verification.
 
 **Owner updates (names only):**
 
@@ -29,26 +31,30 @@ production system.
 | Production bucket name | `docuflowai-documents` | 17:33 |
 | Production S3 keys unique (not staging) | **yes** | 17:37 |
 | Production deploy authorization | **yes**, keep **inline** | 17:42 |
+| Production API URL | `https://docuflowai.site` | 18:00 |
+| Production CMS / web URL | `https://docuflowai.online` | 18:00 |
+| Redis / worker appeared? | **no** | 18:05 |
+| Cleanup cron running? | **yes** | 18:14 |
 
 Staging inspect used a **different** instance (`dpg-dbn71tec6qcc73cric9g-a`).
-Exact Render Blueprint plan slug (for example `basic-256mb`) is still **not**
-in git. `infra/render.yaml` still lists `plan: free` and was **not** applied.
+Git Blueprint Postgres plan is now `0.1c-256mb` (`origin/main` `4f1f07e`).
+That matches the owner-reported **Basic** dashboard plan. The file was **not**
+applied from this agent.
 
 Bucket name isolation (names only): `docuflowai-documents` is **not**
 `docuflow-staging`, **not** `docuflow-provider-test`, and **not** the code
 default `docuflow-documents`. Owner reports production S3 keys are **unique**
 (not staging). Values were not received.
 
-**Remaining blockers (post-authorization):**
+**Remaining blockers (post-live-hosts):**
 
-1. Application services (`docuflow-api` / `web` / `cleanup`) not deployed from this agent.
-2. `infra/render.yaml` still `plan: free` — **do not Blueprint-sync** over Basic `docuflow-db`.
-3. Mock AI + console email; Free web SMTP egress blocked (accepted unless owner changes it).
-4. Free web spin-down still kills in-flight inline jobs.
+1. Production mutating smoke / cross-user isolation **not** run.
+2. Mock AI + console email; Free web SMTP egress blocked (accepted unless owner changes it).
+3. Free web spin-down still kills in-flight inline jobs.
 
-**Recommendation:** deploy is **authorized** (inline only). **Do not apply**
-the git Blueprint. Owner creates API/web/cron in the existing production
-workspace, linking `DATABASE_URL` to `docuflow-db`. See §19.
+**Recommendation:** public hosts are **live** (inline). Do **not** Blueprint-sync
+Redis. Do **not** point `STAGING_*` at production. Functional production
+verification still **NO**.
 
 ## 2. Verified baseline (staging, not production)
 
@@ -161,7 +167,7 @@ SPF/DKIM/DMARC: **owner DNS, NOT VERIFIED**.
 | --- | --- | --- |
 | `docuflow-web` | web, Free | Limited (spin-down, 750 h/mo) |
 | `docuflow-api` | web, Free | Limited (spin-down kills inline jobs) |
-| `docuflow-db` | Postgres 16, YAML `plan: free` | YAML still Free. Owner reports a **paid** dashboard plan (**NOT VERIFIED**: which instance, backups on?) |
+| `docuflow-db` | Postgres 16, YAML `0.1c-256mb` | Matches owner Basic. Backups owner-reported yes. **Not applied** from this agent |
 | `docuflow-redis` | Free Key Value | Unused while inline; data lost on restart |
 | `docuflow-cleanup` | cron `*/15` | Acceptable scheduler |
 | Worker | omitted | Correct for inline |
@@ -181,7 +187,7 @@ Static review only. **Not a penetration test.**
 
 | ID | Severity | Finding |
 | --- | --- | --- |
-| P1 | HIGH | YAML still `plan: free` while live `docuflow-db` is owner-reported Basic with backups. Do not sync YAML. |
+| P1 | HIGH | Full Blueprint still includes unused Redis. Postgres plan in git is `0.1c-256mb`. Do not add a worker. |
 | P2 | HIGH | No production workspace/bucket/secrets exist; reuse of staging would mix data. |
 | P3 | HIGH | Free API spin-down interrupts inline jobs; rate limits reset in memory. |
 | P4 | HIGH | Console email; SMTP blocked on Free web. Password reset unusable for real users. |
@@ -342,7 +348,7 @@ never a blind in-place overwrite from this agent.
 | Risk | Severity | Mitigation |
 | --- | --- | --- |
 | Apply YAML onto staging workspace | CRITICAL | Separate workspace; refuse if `docuflow-staging-*` present |
-| YAML `plan: free` vs paid dashboard | CRITICAL | Do not sync YAML until it matches the paid plan slug; confirm backups |
+| Blueprint Redis vs inline | HIGH | Do not create Redis/worker; link new services to existing `docuflow-db` |
 | Staging bucket/keys in prod | CRITICAL | New bucket and keys; preflight isolation |
 | Inline job + spin-down | HIGH | Paid always-on API or accept stale recovery |
 | Console email | HIGH | SMTP on paid egress, or accept no mail |
@@ -358,8 +364,9 @@ never a blind in-place overwrite from this agent.
 | A Code | AuthN/Z + isolation tests | PASS (staging + local) |
 | A Code | Alembic single head `0003` | PASS (staging inspect) |
 | B Infra | Production workspace exists | Owner-reported **PASS** (no `docuflow-staging-*`) |
-| B Infra | Live Postgres plan + backups | Owner-reported **PASS** (Basic, backups yes). YAML still Free — **do not sync** |
-| B Infra | `infra/render.yaml` applied | **NOT VERIFIED** (must stay unapplied) |
+| B Infra | Live Postgres plan + backups | Owner-reported **PASS** (Basic, backups yes). Git YAML `0.1c-256mb` |
+| B Infra | `infra/render.yaml` applied | **NO** — not applied from this agent |
+| B Infra | Public API + CMS respond | **PASS** (read-only, 18:00 Asia/Jakarta) |
 | C Security | Unique prod S3 keys | Owner-reported **PASS** (not staging). Values not seen. `DOCUFLOW_SECRET_KEY` still generate-on-deploy |
 | C Security | Prod isolation tested | **NOT VERIFIED** |
 | D Data | Dedicated prod bucket | Owner-reported **PASS** (`docuflowai-documents`; not staging/test/default) |
@@ -376,14 +383,14 @@ manual service create** against existing `docuflow-db` is **YES** (inline).
 
 ## 16. Owner action items
 
-1. **Do not** apply `infra/render.yaml` (Free Postgres + unused Redis).
-2. Follow §19 in the production workspace that already has `docuflow-db`.
-3. Reply with service names and public hostnames only (no DSNs, no keys).
+1. **Do not** full-sync `infra/render.yaml` (it still defines unused Redis).
+2. Redis/worker owner-reported **absent**. Cleanup cron owner-reported **running**.
+3. Do **not** point `STAGING_*` at `docuflowai.site` / `docuflowai.online`.
 4. Mock AI and console email stay unless you authorize otherwise.
 
 ## 17. Evidence limitations
 
-- No production host was contacted.
+- Production hosts were contacted **read-only** (GET/OPTIONS). No login or mutations.
 - No Render production dashboard was inspected.
 - Paid pricing is APPROXIMATE.
 - No dependency CVE scan this phase.
@@ -392,11 +399,9 @@ manual service create** against existing `docuflow-db` is **YES** (inline).
 
 ## 18. Final recommendation
 
-**AUTHORIZED, NOT DEPLOYED.** Inline broker only. Agent did not apply
-Blueprint or create Render services.
-
-The product is **staging-verified**. Production API/web are **not** live
-from this phase. Production verification is still **NO**.
+**AUTHORIZED, LIVE HOSTS, NOT VERIFIED.** Inline broker on
+`https://docuflowai.site`. CMS `https://docuflowai.online`. Agent did not
+apply Blueprint. Production verification is still **NO**.
 
 ## 19. Owner deploy procedure (do not Blueprint-sync)
 
@@ -448,11 +453,12 @@ expected on first API start.
 
 ### D. After first boot
 
-Reply with **names and hostnames only**:
+Owner replied (18:00 Asia/Jakarta):
 
-- `docuflow-api` URL
-- `docuflow-web` URL
-- whether Redis or a worker appeared (expected: **no**)
+- API: `https://docuflowai.site`
+- CMS: `https://docuflowai.online`
+- Redis / worker: **no** (18:05 Asia/Jakarta)
+- Cleanup cron: **running** (18:14 Asia/Jakarta)
 
-Then a **production** smoke can run (`STAGING_*` vars must **not** point at
-production). Do not paste DSNs or keys.
+Read-only evidence: `docs/reports/PHASE_9_11_PRODUCTION_LIVE_EVIDENCE.md`.
+Do **not** paste DSNs or keys. Do **not** point `STAGING_*` at production.

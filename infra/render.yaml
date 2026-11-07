@@ -13,8 +13,11 @@
 # live workspace that already has docuflow-worker; removing a service from a
 # Blueprint can delete it on the next sync. Owner approval is required.
 #
-# Compute plans: web, Postgres, and Key Value use Render's Free tier.
-# Syncing this Blueprint does not always downgrade an existing paid service.
+# Compute plans: web and Key Value remain Free. Postgres is paid
+# `0.1c-256mb` (dashboard Basic). Do not set it back to free.
+# JOB_BROKER=inline does not use Redis; applying this file may still create
+# unused `docuflow-redis`. Prefer creating API/web/cron against existing
+# `docuflow-db` instead of a full Blueprint sync.
 #
 # Isolated staging uses infra/render.staging.yaml in a separate Render
 # workspace. Staging omits Redis because JOB_BROKER=inline does not use it.
