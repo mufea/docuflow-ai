@@ -1,11 +1,12 @@
 # Phase 9.11 — Production readiness audit and deployment planning
 
-This is an **audit and plan**. It is **not** a production go-live, not an
-authorization, and not a Blueprint apply.
+This started as an **audit and plan**. On 7 Nov 2026, 17:42 Asia/Jakarta the
+owner sent `Authorize production deploy, keep inline`.
 
-No production resources were created. `infra/render.yaml` was **not** applied.
-No migrations were executed. No application code was changed. No paid provider
-calls were made.
+This agent **did not** apply `infra/render.yaml` (it still lists Postgres
+`plan: free`; this environment has no Render credentials). Application
+services are **not** deployed from here. Keep `JOB_BROKER=inline`. Do **not**
+add Redis or a worker.
 
 ## 1. Executive summary
 
@@ -27,6 +28,7 @@ production system.
 | Backups enabled | **yes** | 17:23 |
 | Production bucket name | `docuflowai-documents` | 17:33 |
 | Production S3 keys unique (not staging) | **yes** | 17:37 |
+| Production deploy authorization | **yes**, keep **inline** | 17:42 |
 
 Staging inspect used a **different** instance (`dpg-dbn71tec6qcc73cric9g-a`).
 Exact Render Blueprint plan slug (for example `basic-256mb`) is still **not**
@@ -37,15 +39,16 @@ Bucket name isolation (names only): `docuflowai-documents` is **not**
 default `docuflow-documents`. Owner reports production S3 keys are **unique**
 (not staging). Values were not received.
 
-**Remaining blockers:**
+**Remaining blockers (post-authorization):**
 
-1. Owner authorization to **deploy application services** is still absent.
-2. Blueprint `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`; Free web SMTP egress blocked.
-3. Free web spin-down still kills in-flight **inline** jobs.
-4. Syncing YAML as-is could still describe Free Postgres (do not apply).
+1. Application services (`docuflow-api` / `web` / `cleanup`) not deployed from this agent.
+2. `infra/render.yaml` still `plan: free` — **do not Blueprint-sync** over Basic `docuflow-db`.
+3. Mock AI + console email; Free web SMTP egress blocked (accepted unless owner changes it).
+4. Free web spin-down still kills in-flight inline jobs.
 
-**Recommendation: NO-GO** for production go-live. Do **not** apply
-`infra/render.yaml`.
+**Recommendation:** deploy is **authorized** (inline only). **Do not apply**
+the git Blueprint. Owner creates API/web/cron in the existing production
+workspace, linking `DATABASE_URL` to `docuflow-db`. See §19.
 
 ## 2. Verified baseline (staging, not production)
 
@@ -366,20 +369,17 @@ never a blind in-place overwrite from this agent.
 | F Ops | Runbook exists | PASS (docs) |
 | F Ops | Backup executed | **NOT VERIFIED** |
 | G Cost | Owner accepted paid Postgres | Owner-reported **PASS** for `docuflow-db` (`dpg-dbiqe70ae00c73cdif7g-a`) |
-| H Auth | Owner production approval | **NOT AUTHORIZED** |
+| H Auth | Owner production approval | **YES** (17:42 Asia/Jakarta, `JOB_BROKER=inline` only) |
 
-A GO for **deploy** requires every CRITICAL item PASS plus explicit owner
-approval. That is **not** met.
+A GO for **agent-applied Blueprint** is still **NO**. A GO for **owner
+manual service create** against existing `docuflow-db` is **YES** (inline).
 
 ## 16. Owner action items
 
-1. Do **not** apply `infra/render.yaml` unless you explicitly authorize a
-   deploy **and** accept that the git Blueprint still says Free Postgres
-   (dashboard `docuflow-db` is Basic; do not let a sync downgrade it).
-2. Decide: keep mock AI + console email for a limited launch, or wait for
-   paid web + SMTP / live AI.
-3. To proceed to API/web deploy, send an explicit
-   `Authorize production deploy` (this message is **not** that).
+1. **Do not** apply `infra/render.yaml` (Free Postgres + unused Redis).
+2. Follow §19 in the production workspace that already has `docuflow-db`.
+3. Reply with service names and public hostnames only (no DSNs, no keys).
+4. Mock AI and console email stay unless you authorize otherwise.
 
 ## 17. Evidence limitations
 
@@ -392,9 +392,67 @@ approval. That is **not** met.
 
 ## 18. Final recommendation
 
-**NO-GO** for application deploy. Data plane is owner-reported ready
-(`docuflow-db` Basic + backups; bucket `docuflowai-documents`; unique keys).
-YAML still says Free. Mock/console email and deploy authorization remain.
+**AUTHORIZED, NOT DEPLOYED.** Inline broker only. Agent did not apply
+Blueprint or create Render services.
 
-The product is **staging-verified**. It is **not** production-deployed,
-**not** production-verified, and **not** production-authorized.
+The product is **staging-verified**. Production API/web are **not** live
+from this phase. Production verification is still **NO**.
+
+## 19. Owner deploy procedure (do not Blueprint-sync)
+
+Workspace: the one with `docuflow-db` and **no** `docuflow-staging-*`.
+Broker: `JOB_BROKER=inline`. Do **not** create Redis or `docuflow-worker`.
+
+**Stop if** you see staging service names, staging bucket `docuflow-staging`,
+or a prompt to change `docuflow-db` to Free.
+
+### A. `docuflow-api` (web service, Python)
+
+- Repo: `mufea/docuflow-ai`, branch `main` (or the commit you intend).
+- Build: `pip install -r requirements.txt`
+- Start: `python -m docuflow.migrate && uvicorn docuflow.main:app --host 0.0.0.0 --port $PORT`
+- Health: `/health`
+- Env (names; do not paste secrets into chat):
+  - `DOCUFLOW_ENV=production`
+  - `DATABASE_URL` from **existing** `docuflow-db` (internal connection)
+  - `JOB_BROKER=inline` (no `REDIS_URL` required)
+  - `STORAGE_BACKEND=s3`, `S3_FORCE_PATH_STYLE=true`, `S3_REGION=auto`
+  - `S3_BUCKET=docuflowai-documents`
+  - `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` / `S3_ENDPOINT_URL` = production unique keys
+  - `DOCUFLOW_SECRET_KEY` = generate unique (do not copy staging)
+  - `COOKIE_SECURE=true`, `COOKIE_SAMESITE=lax`, `LOG_JSON=true`
+  - `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `OCR_ENABLED=true`
+  - `CLEANUP_INTERVAL_SECONDS=0`, `JOB_STALE_MINUTES=90`
+  - After web exists: `DOCUFLOW_PUBLIC_WEB_URL` and `DOCUFLOW_CORS_ORIGINS` = web URL
+  - `DOCUFLOW_TRUSTED_HOSTS=.onrender.com`
+  - `DOCUFLOW_PUBLIC_API_URL` = this service’s public URL
+
+Boot runs `python -m docuflow.migrate` against production Postgres. That is
+expected on first API start.
+
+### B. `docuflow-web` (web service, Node)
+
+- Build: `corepack pnpm install --frozen-lockfile && corepack pnpm --filter web build`
+- Start: `corepack pnpm --filter web start -p $PORT`
+- Health: `/`
+- `NODE_ENV=production`
+- `API_INTERNAL_URL` and `DOCUFLOW_PUBLIC_API_URL` = API public URL
+- `NEXT_PUBLIC_API_BASE=/v1`
+
+### C. `docuflow-cleanup` (cron `*/15 * * * *`)
+
+- Same Python build as API
+- Start: `python -m docuflow.migrate && python -m docuflow.cleanup`
+- Same `DATABASE_URL` (`docuflow-db`) and same production `S3_*` as the API
+- `CLEANUP_LEASE_MINUTES=5`, `STORAGE_DELETE_MAX_ATTEMPTS=8`
+
+### D. After first boot
+
+Reply with **names and hostnames only**:
+
+- `docuflow-api` URL
+- `docuflow-web` URL
+- whether Redis or a worker appeared (expected: **no**)
+
+Then a **production** smoke can run (`STAGING_*` vars must **not** point at
+production). Do not paste DSNs or keys.
