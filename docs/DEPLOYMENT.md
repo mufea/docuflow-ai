@@ -619,7 +619,7 @@ that still has `JOB_BROKER=rq` from an older Blueprint should be changed to
 | Local development | Supported |
 | Automated tests | See `docs/IMPLEMENTATION_STATUS.md` |
 | Render configuration | Blueprint present; validate in the Render dashboard |
-| Successful Render deployment | **PRODUCTION VERIFIED** (9.12). Health + functional + isolation owner-run. Recovery drill **NOT VERIFIED** |
+| Successful Render deployment | **PRODUCTION VERIFIED** (9.12). Health + functional + isolation owner-run. Recovery drill **NOT VERIFIED**. Production recovery ready **NO** |
 | Staging Blueprint | `infra/render.staging.yaml` applied in a dedicated workspace (9.10) |
 | Staging migration `0003` | Owner Shell **PASS** (9.10D) on `docuflow_staging_db` |
 | Production migration `0003` | API boot runs `python -m docuflow.migrate`. Live `alembic_version` **NOT VERIFIED** |

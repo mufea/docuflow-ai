@@ -71,7 +71,7 @@ from Render Shell, stored **outside** the instance. Do not put dumps in git.
 For a **drill** or a **safe** restore:
 
 1. Create or restore into a new Render Postgres, suggested name
-   `docuflow-db-restore-drill` (add a date if the name is taken).
+   `docuflow-db-restore-drill-YYYYMMDD` (today’s UTC date).
 2. Postgres 16. Same region as production if the UI offers it.
 3. Do **not** attach this DSN to `docuflow-api` / `docuflow-web` /
    `docuflow-cleanup`.
@@ -84,46 +84,66 @@ This agent must not click Create/Restore.
 ### 5.1 Drill identity gate (STOP if any check fails)
 
 A name containing `staging` is **not** isolation. Staging is a **live**
-environment. A drill target must be a **new** database the owner named for
-restore, not `docuflow-db` and not `docuflow-staging-db`.
+environment. An approved name containing `restore` or `drill` is
+**necessary but not sufficient**. The DSN hostname must match the
+hostname the owner copied from the **approved restore service** in
+Render Dashboard. The DSN does not prove the Render service name.
 
-**Known production identity (names only; do not print DSNs):**
+**Four identities (keep them separate):**
+
+| Identity | What it is | How you get it |
+| --- | --- | --- |
+| Render **service name** | Dashboard label | Owner types it; example `docuflow-db-restore-drill-20261107` |
+| **Instance id** | `dpg-…-a` | Dashboard, names only |
+| **Hostname** | Postgres host | Dashboard internal hostname of **that** service |
+| **Database name** | Postgres `current_database()` | Dashboard or `SELECT current_database()` **after** identity PASS |
+
+**Known live identities (names only):**
 
 | Field | Value | Evidence |
 | --- | --- | --- |
-| Render service | `docuflow-db` | Phase 9.11 owner |
-| Instance id | `dpg-dbiqe70ae00c73cdif7g-a` | Phase 9.11 owner |
-| Postgres database name | **NOT VERIFIED** | Never guessed |
+| Production service | `docuflow-db` | Phase 9.11 owner |
+| Production instance | `dpg-dbiqe70ae00c73cdif7g-a` | Phase 9.11 owner |
+| Production database name | **NOT VERIFIED** | Do not guess |
 | Staging service | `docuflow-staging-db` | 9.10D |
 | Staging instance | `dpg-dbn71tec6qcc73cric9g-a` | 9.10D |
 | Staging database name | `docuflow_staging_db` | 9.10D |
 
-**Owner-approved recovery target** must be recorded **before** Restore:
+**Before Restore (name only):** approved service must contain `restore` or
+`drill` and must not be `docuflow-db` / `docuflow-staging-db`.
 
-- Example service name: `docuflow-db-restore-drill` (date suffix allowed).
-- Must contain `restore` or `drill`.
-- Must **not** be `docuflow-db` or `docuflow-staging-db`.
+**After the new instance exists, before SQL:**
 
-Print **host and database name only**, then classify:
+```bash
+export RECOVERY_MODE=drill
+export OWNER_APPROVED_RECOVERY_TARGET=docuflow-db-restore-drill-YYYYMMDD
+export EXPECTED_RESTORE_HOSTNAME='<hostname from that service in Render Dashboard>'
+# DATABASE_URL is injected by the **drill** instance shell only. Do not print it.
+uv run python scripts/recovery_identity_gate.py
+```
+
+The script **does not connect**. It prints `host`, `database`,
+`classification` only. Proceed only if `classification isolated-restore`
+and exit 0.
 
 | Classification | When |
 | --- | --- |
-| `production` | Service is `docuflow-db` **or** host contains `dpg-dbiqe70ae00c73cdif7g-a` |
-| `staging` | Service/host/name contains `staging` **or** host contains `dpg-dbn71tec6qcc73cric9g-a` |
-| `isolated-restore` | Owner-approved name matches; contains `restore` or `drill`; **not** production; **not** staging |
-| `ambiguous` | Anything else, including unknown database name vs production name |
+| `production` | Approved service is `docuflow-db` **or** expected/actual host contains `dpg-dbiqe70ae00c73cdif7g-a` |
+| `staging` | Staging service/instance/database `docuflow_staging_db` / `dpg-dbn71tec6qcc73cric9g-a` |
+| `isolated-restore` | Drill-shaped approved name **and** actual DSN host matches `EXPECTED_RESTORE_HOSTNAME` **and** not production/staging |
+| `ambiguous` | Missing approval, missing expected host, hostname mismatch, invalid `RECOVERY_MODE`, or unrecognized identity |
 
-**STOP — do not restore — if:**
+**STOP before Restore / `pg_restore` / SQL if:**
 
-- Owner approval line is missing.
-- Approved target is empty or equals `docuflow-db`.
+- Chat lacks `Authorize isolated restore drill into a new database, not production` plus the exact service name.
+- `RECOVERY_MODE` is not `drill` or `inspect`.
 - Classification is `production`, `staging`, or `ambiguous`.
-- Actual host equals the production instance id.
-- You cannot name the Render **service** for the DSN you are holding.
-- Production API/CMS `DATABASE_URL` would be changed by this restore.
+- `EXPECTED_RESTORE_HOSTNAME` is unset (drill).
+- DSN host does not match that hostname.
+- You would change production API/web/cleanup `DATABASE_URL`.
 
-Failed identity check **stops the drill before** dashboard Restore or
-`pg_restore`. Do not continue “to see what happens”.
+Invalid `RECOVERY_MODE` stops. Missing expected hostname stops **before**
+any connection (the gate never opens a connection).
 
 ## 6. Restore procedure
 
@@ -169,71 +189,55 @@ Do **not** run `pg_restore` unless §5.1 is `isolated-restore`.
 
 ## 7. Database connectivity verification
 
-On the **target** (drill or new prod), print **host and database name only**:
+Run `scripts/recovery_identity_gate.py` **before** SQL. For a drill, abort
+unless classification is `isolated-restore`. Then, on the **drill** target
+only:
 
 ```sql
 SET statement_timeout = '5s';
 SELECT 1;
 SELECT current_database();
-SELECT inet_server_addr();  -- optional; skip if noisy
 ```
 
-Then apply §5.1. For a **drill**, abort unless classification is
-`isolated-restore`. For **production inspect**, abort if classification is
-`staging` or `ambiguous`. Never use a production DSN as a drill target.
+Never use a production DSN as a drill target.
 
 ## 8. Schema and migration verification (read-only)
 
 Expected: one row `0003_cost_efficient_reliability`. Repo command
 (no DSN): `uv run python -m alembic heads`.
 
-**Owner snippet** (Render Shell). Does not import `docuflow`. Does not
-upgrade. Prints host, database, classification, revision only.
+**Identity first** (`scripts/recovery_identity_gate.py`). No SQL.
 
-Default `RECOVERY_MODE=inspect` (production API shell only). For a drill:
-`RECOVERY_MODE=drill` and `OWNER_APPROVED_RECOVERY_TARGET=<service-name>`.
-Confirm the Render **service name** in the dashboard matches the approved
-target; the DSN has no service name.
+```bash
+# drill instance shell only
+export RECOVERY_MODE=drill
+export OWNER_APPROVED_RECOVERY_TARGET=docuflow-db-restore-drill-YYYYMMDD
+export EXPECTED_RESTORE_HOSTNAME='<dashboard hostname of that service>'
+uv run python scripts/recovery_identity_gate.py
+# proceed only if: classification isolated-restore
+```
+
+Production **inspect** (not a drill): `RECOVERY_MODE=inspect` on the
+production API shell. Classification must be `production`. Still no
+upgrade.
+
+**Read-only SQL only after identity PASS.** Do not print DSN. Counts only:
 
 ```python
 import os
-from urllib.parse import urlparse
 import psycopg
+from urllib.parse import urlparse
 
 raw = os.environ["DATABASE_URL"]
-parsed = urlparse(raw)
-host = parsed.hostname or ""
-name = (parsed.path or "/").lstrip("/")
-print("host=", host)
-print("database=", name)
-host_l, name_l = host.lower(), name.lower()
-prod_instance = "dpg-dbiqe70ae00c73cdif7g-a"
-staging_instance = "dpg-dbn71tec6qcc73cric9g-a"
-approved = (os.environ.get("OWNER_APPROVED_RECOVERY_TARGET") or "").strip().lower()
-mode = (os.environ.get("RECOVERY_MODE") or "inspect").strip().lower()
-if prod_instance in host_l:
-    cls = "production"
-elif staging_instance in host_l or "staging" in host_l or "staging" in name_l:
-    cls = "staging"
-elif approved and ("restore" in approved or "drill" in approved) and approved not in {"docuflow-db", "docuflow-staging-db"}:
-    cls = "isolated-restore"
-else:
-    cls = "ambiguous"
-print("classification=", cls)
-print("approved_target_set=", "yes" if approved else "no")
-if mode == "drill" and cls != "isolated-restore":
-    raise SystemExit("stop: drill target is not isolated-restore")
-if mode == "inspect" and cls != "production":
-    raise SystemExit("stop: inspect DSN is not classified production")
-if cls == "ambiguous":
-    raise SystemExit("stop: ambiguous database identity")
+print("host=", urlparse(raw).hostname)
+print("database=", (urlparse(raw).path or "/").lstrip("/"))
 with psycopg.connect(raw, connect_timeout=10) as conn:
-    conn.execute("SET statement_timeout = '5s'")
+    conn.execute("SET statement_timeout = '15s'")
     conn.execute("SELECT 1")
     print("select_1 ok")
+    print("current_database", conn.execute("SELECT current_database()").fetchone()[0])
     rows = [r[0] for r in conn.execute("SELECT version_num FROM alembic_version")]
     print("alembic_version", rows)
-    print("matches_head", rows == ["0003_cost_efficient_reliability"])
 ```
 
 Then, from the app directory if Alembic is installed, **read-only**:
@@ -341,7 +345,7 @@ Production cutover **PASS** additionally:
 | Read-only prod Alembic inspect | `Authorize read-only alembic inspect on production API shell` |
 | Isolated restore drill | `Authorize isolated restore drill into a new database, not production` **and** name the service (must contain `restore` or `drill`) |
 | Production cutover | `Authorize production DATABASE_URL cutover to restored instance <name>` |
-| Delete drill DB | `Delete docuflow-db-restore-drill` |
+| Delete drill DB | `Delete docuflow-db-restore-drill-YYYYMMDD` after evidence is recorded |
 
 This agent will not restore or cut over without one of those lines.
 
@@ -357,3 +361,7 @@ This agent will not restore or cut over without one of those lines.
 7. Application/code rollback: previous Render deploy. Data: restore only.
 
 Contacts stay with the owner. Do not publish DSNs in this file.
+
+Dashboard backup checklist, RTO/RPO template, and cleanup gate:
+`docs/reports/PHASE_9_13B_RECOVERY_DRILL_READINESS.md`. Drill is **not**
+verified until a real isolated restore has evidence.

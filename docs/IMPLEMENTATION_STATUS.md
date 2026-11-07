@@ -1055,3 +1055,10 @@ Audit: `docs/reports/PHASE_9_13_PRODUCTION_RELIABILITY_AUDIT.md`.
 
 RECOVERY DRILL VERIFIED: **NO**.
 PRODUCTION RECOVERY READY: **NO**.
+
+## Phase 9.13B — Recovery drill readiness — blocked on owner restore
+
+Identity gate now requires dashboard hostname match (`scripts/recovery_identity_gate.py`; 9 local tests). No restore run. No paid DB created. Report: `docs/reports/PHASE_9_13B_RECOVERY_DRILL_READINESS.md`.
+
+RECOVERY DRILL VERIFIED: **NO**.
+PRODUCTION RECOVERY READY: **NO**.
