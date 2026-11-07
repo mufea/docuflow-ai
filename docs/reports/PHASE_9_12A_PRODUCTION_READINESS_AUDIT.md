@@ -189,7 +189,8 @@ Optional narrower replies:
 - `Authorize Gate 1 only` — login/logout/invalid password only.
 - `Authorize Gates 1-2` — plus upload/extract/download; **no** delete.
 
-This agent will **not** proceed to mutating production tests until one of those approvals is in chat.
+Owner approved Gates 1–3 at 18:53 Asia/Jakarta. Execution is **owner-run**
+(`docs/reports/PHASE_9_12B_OWNER_RUNBOOK.md`). This agent does not log in.
 
 Do **not** send passwords, session cookies, signed URLs, or DSNs.
 
