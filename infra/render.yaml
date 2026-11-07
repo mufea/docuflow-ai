@@ -26,7 +26,7 @@ previewsEnabled: false
 
 databases:
   - name: docuflow-db
-    plan: free
+    plan: 0.1c-256mb
     postgresMajorVersion: 16
     ipAllowList: []
 
