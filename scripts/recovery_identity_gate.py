@@ -11,7 +11,6 @@ Exit 1 on STOP. Exit 2 on invalid configuration.
 from __future__ import annotations
 
 import os
-import sys
 from urllib.parse import unquote, urlparse
 
 PROD_SERVICE = "docuflow-db"
