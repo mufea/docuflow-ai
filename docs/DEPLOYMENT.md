@@ -57,12 +57,12 @@ and are **not** a billing quote:
 | Local verification | pytest / ruff / mypy / web lint-typecheck-test-build | See `docs/IMPLEMENTATION_STATUS.md` |
 | CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.9 merge is `ae3cc0b` (PR #12, [run 42167872331](https://github.com/mufea/docuflow-ai/actions/runs/42167872331), 6 Nov 2026, 12:22 Asia/Jakarta). Phase 9.10 branch CI on `7d9da7f` succeeded ([run 42172770416](https://github.com/mufea/docuflow-ai/actions/runs/42172770416), 6 Nov 2026, 13:12 Asia/Jakarta) |
 | Provider verification | Dedicated test bucket + `TEST_S3_*` credentials | Owner-run `pytest -q -m provider`: 1 passed, 246 deselected (6 Nov 2026, 19:57 Asia/Jakarta). Mocked S3 tests are not this result |
-| Staging deployment | Isolated non-production Render workspace + staging DB + staging bucket | **Not performed / not verified** — Blueprint is a template only |
+| Staging deployment | Isolated non-production Render workspace + staging DB + staging bucket | **Provisioned** (owner, 7 Nov 2026). Non-mutating `/health` `/ready` frontend **PASS**. Mutating smoke and migrate-verify **not** full staging verification |
 | Production deployment | Live Render workspace serving users | **NOT DEPLOYED — Awaiting owner approval** |
 
 ## Local vs staging vs production
 
-| | Local development | Staging (template only) | Production |
+| | Local development | Staging | Production |
 | --- | --- | --- | --- |
 | Purpose | Engineer laptop / CI | Owner-approved isolated preview | Live users |
 | Blueprint | none | `infra/render.staging.yaml` | `infra/render.yaml` |
@@ -71,7 +71,7 @@ and are **not** a billing quote:
 | Object storage | filesystem | Dedicated staging bucket | Dedicated production bucket |
 | Redis | unused | **Omitted** from the staging Blueprint | Optional Free Key Value (unused while inline) |
 | Job broker | `inline` | `inline` | `inline` (default) |
-| Exists today? | Yes | **No evidence in this repository** | **NOT DEPLOYED** |
+| Exists today? | Yes | **Yes** (owner-applied Blueprint; non-mutating smoke PASS) | **NOT DEPLOYED** |
 
 Do not treat a Git merge or GitHub Actions success as staging or production.
 
@@ -124,15 +124,14 @@ is **provider** only with dedicated `TEST_S3_*`. Render URLs are **staging**.
 
 | Component | Verification | Status |
 | --- | --- | --- |
-| Render workspace | Owner attested dedicated workspace (6 Nov 2026, 17:37 Asia/Jakarta); no production service names | Owner-attested; independent check **NOT EXECUTED**; not PROVISIONED |
-| PostgreSQL | Free plan selected; owner accepts 30-day expiry | **NOT EXECUTED** (database not created until Blueprint apply) |
-| S3 / R2 | Owner attested staging and provider-test buckets exist | Provider-test roundtrip **owner-verified**; staging bucket still not used by a Render service |
-| API | Service deployed | **NOT EXECUTED** |
-| Web | Service deployed | **NOT EXECUTED** |
-| Cleanup | Cron configured | **IMPLEMENTED** in Blueprint; **NOT EXECUTED** as a live cron |
-| Environment | Required variables configured | Template only; secrets not in this environment |
-| Isolation | No production credentials/resources reused | Owner reported preflight **PASS** (6 Nov 2026, 18:33 Asia/Jakarta); agent-run **NOT EXECUTED** |
-| Blueprint apply | `infra/render.staging.yaml` | Owner authorized 6 Nov 2026, 19:59 Asia/Jakarta; dashboard apply **not confirmed**; agent did not apply |
+| Render workspace | Dedicated staging; no production service names | Owner-attested; services `docuflow-staging-*` live |
+| PostgreSQL | `docuflow-staging-db` / `docuflow_staging_db` | **PROVISIONED** (Free, 30-day expiry). `/ready` database true |
+| S3 / R2 | Staging bucket + provider-test bucket | Provider-test **owner-verified**; staging storage `/ready` true |
+| API | `https://docuflow-staging-api.onrender.com` | **PROVISIONED** live; `/health` `/ready` **PASS** |
+| Web | `https://docuflow-staging-web.onrender.com` | **PROVISIONED** live; HTTP 200 **PASS** |
+| Cleanup | `docuflow-staging-cleanup` | Owner: live. Independent cron run **NOT EXECUTED** |
+| Isolation | No Redis, no worker | Owner confirmed absent. Broker `inline` on `/ready` |
+| Blueprint apply | `infra/render.staging.yaml` | **PROVISIONED** (owner-applied). Agent did not apply |
 
 ### Owner provisioning runbook
 

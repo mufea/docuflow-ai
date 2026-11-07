@@ -912,28 +912,46 @@ Production deployment authorized: **NO.**
 
 ## Phase 9.10A — Owner provisioning execution and verification — in progress
 
-Attestation docs merged via PR #14 (`87dccbc`, 6 Nov 2026, 17:53 Asia/Jakarta). Base remains Phase 9.10 merge `8084f07`. This phase does not add application features and does not apply the Blueprint until the owner authorizes it.
+Attestation docs merged via PR #14 (`87dccbc`) and PR #15 (`b151158`, 7 Nov 2026, 07:20 Asia/Jakarta). This phase does not add application features.
 
-Owner attestations recorded 6 Nov 2026, 17:37 Asia/Jakarta. Owner reported preflight **PASS** at 18:33 Asia/Jakarta. Owner ran `uv run pytest -q -m provider` at 19:57 Asia/Jakarta: **1 passed, 246 deselected in 3.90s**. This agent did **not** receive secrets and did **not** run those commands in this environment.
+Owner reported Render services live (7 Nov 2026, 08:03 Asia/Jakarta): `docuflow-staging-api`, `docuflow-staging-web`, `docuflow-staging-db`, `docuflow-staging-cleanup`. No Redis. No worker. Database name `docuflow_staging_db`. Git SHA Render built was not shown.
+
+Independent non-mutating smoke from this environment (7 Nov 2026, 08:04 Asia/Jakarta) against `docuflow-staging-api.onrender.com` / `docuflow-staging-web.onrender.com`:
+
+```
+PASS: GET /health — HTTP 200 status=ok
+PASS: GET /health service — service=docuflow-api
+PASS: GET /ready — HTTP 200 broker=inline checks={'database': True, 'redis': True, 'storage': True}
+PASS: GET /ready broker — inline
+SKIPPED: authentication / upload / job / download / cross_user / delete (STAGING_SMOKE_MUTATIONS is not 1)
+PASS: frontend — HTTP 200
+exit 0
+```
+
+`GET /health` alone is not full staging verification. Mutating smoke and hosted migrate-verify were not run. Secrets were not received.
 
 | Evidence | Status |
 | --- | --- |
-| Render workspace | Owner attested dedicated workspace with no `docuflow-api` / `docuflow-db` / `docuflow-web`. Independent dashboard check: **NOT EXECUTED**. Not marked PROVISIONED. |
-| PostgreSQL provisioning | Plan selected: **Free** (owner accepts 30-day expiry, 1 GB, no managed backups). Database not created. **NOT EXECUTED**. |
-| R2 staging bucket | Owner attested exists (intended name `docuflow-staging`). Independent API check: **NOT EXECUTED**. Not marked PROVISIONED. |
-| R2 staging credentials | Must stay on the owner machine. Not present in this environment. **BLOCKED** for agent-run preflight. |
-| R2 provider testing | Owner-run `uv run pytest -q -m provider`: **1 passed, 246 deselected in 3.90s** (6 Nov 2026, 19:57 Asia/Jakarta). **Provider verified** (owner machine). Agent-run: **NOT EXECUTED**. |
-| Preflight isolation | Owner reported **PASS** (6 Nov 2026, 18:33 Asia/Jakarta). Agent-run preflight **NOT EXECUTED**. A preflight PASS is not live R2 connectivity and not Blueprint apply. |
-| Blueprint application | Owner authorized apply of `infra/render.staging.yaml` (6 Nov 2026, 19:59 Asia/Jakarta). Agent apply: **NOT EXECUTED**. Dashboard apply: awaiting owner confirmation of created services. |
-| Staging migration | **NOT EXECUTED** |
-| Staging health | **NOT EXECUTED** |
-| Staging smoke | **NOT EXECUTED** |
+| Render workspace | Owner attested dedicated workspace. Services named `docuflow-staging-*` only. |
+| PostgreSQL provisioning | **PROVISIONED** (owner: `docuflow-staging-db` live; database name `docuflow_staging_db`; Free plan, 30-day expiry). `/ready` `database=true`. |
+| R2 staging bucket | Owner attested `docuflow-staging`. `/ready` `storage=true` from the staging API. |
+| R2 staging credentials | Injected on Render; not present in this environment. |
+| R2 provider testing | Owner-run `uv run pytest -q -m provider`: **1 passed, 246 deselected** (6 Nov 2026, 19:57 Asia/Jakarta). **Provider verified**. |
+| Preflight isolation | Owner reported **PASS** (6 Nov 2026, 18:33 Asia/Jakarta). |
+| Blueprint application | **PROVISIONED** (owner applied `infra/render.staging.yaml`; four staging services live; no Redis; no worker). |
+| Staging migration | Startup `python -m docuflow.migrate` is in the Blueprint. Independent `staging_migrate_verify.py`: **NOT EXECUTED** (no staging DSN in this environment; `ipAllowList: []`). |
+| Staging health | **PASS** (agent-run `/health` and `/ready`). |
+| Staging smoke | Non-mutating **PASS**. Mutating checks **SKIPPED**. Not full staging verification. |
 
 Free Postgres reminder: expires 30 days after creation; 14-day grace; then deletion. No backups. One Free database per workspace.
 
+Staging provisioned: **YES**. Staging verified: **NO** (mutating smoke and migrate-verify outstanding).
+Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
+Production deployment authorized: **NO.**
+
 ## Next recommended work
 
-1. Owner applies `infra/render.staging.yaml` in the dedicated staging workspace (Free Postgres 30-day expiry). Do not apply `infra/render.yaml`.
-2. After apply, report service names, API/web hostnames (not secrets), database **name** only, and whether Redis or a worker appeared.
+1. Optional mutating smoke with dedicated staging accounts only: `STAGING_SMOKE_MUTATIONS=1`, `STAGING_HOST_CONFIRM=docuflow-staging-api.onrender.com`. Do not paste passwords into chat.
+2. Optional migrate-verify from a host allowed to reach staging Postgres (Render shell or an owner-added IP). Never against production.
 3. Keep `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `JOB_BROKER=inline`. No Redis, no paid worker.
 4. Production remains unauthorized.
