@@ -15,7 +15,7 @@ Baseline `origin/main`: `018b34a`.
 | OWNER VERIFIED (dashboard backup fields) | **NO** |
 | RESTORE DRILL VERIFIED | **NO** |
 | PRODUCTION RECOVERY READY | **NO** |
-| BLOCKED | Actual restore — waiting for explicit owner authorization |
+| BLOCKED | Owner authorized the drill (22:00 Asia/Jakarta). **Agent cannot click Restore.** Waiting on dashboard restore of `docuflow-db-restore-drill-20261107` plus hostname evidence |
 
 Authoritative product flags (9.12 / 9.13 / 9.13A): STAGING VERIFIED **YES**;
 PRODUCTION VERIFIED **YES**; RECOVERY DRILL VERIFIED **NO**.
@@ -82,8 +82,38 @@ Authorize isolated restore drill into a new database, not production
 Approved service name: docuflow-db-restore-drill-YYYYMMDD
 ```
 
-General permission to work on Phase 9.13B is **not** restore authorization.
-**This chat has not included that line. STOP. No restore.**
+Owner (7 Nov 2026, **22:00 Asia/Jakarta**) sent the authorization line.
+Placeholder `YYYYMMDD` is pinned to **20261107**.
+
+Approved service name: **`docuflow-db-restore-drill-20261107`**.
+
+This agent still **did not** click Restore and **cannot** provision Render
+Postgres. The owner must create/restore that **new** service in the
+dashboard.
+
+### Owner dashboard steps (you click Restore)
+
+Workspace: production (has `docuflow-db`, **no** `docuflow-staging-*`).
+
+1. Open `docuflow-db` → Backups.
+2. Confirm backups exist. Record latest backup timestamp (names only).
+3. Restore **into a new instance**, not in-place. Name it exactly
+   `docuflow-db-restore-drill-20261107`.
+4. Do **not** attach it to `docuflow-api`, `docuflow-web`, or
+   `docuflow-cleanup`. Do **not** change production `DATABASE_URL`.
+5. Keep the database private (`ipAllowList` empty / internal).
+6. When it is available, copy from the **new** service only:
+   - Render service name (must match)
+   - Internal hostname (`dpg-…`)
+   - Database name
+   - Latest backup timestamp used
+   - Restore start / available times (Asia/Jakarta)
+7. Reply in chat with those **names and times only**. No DSN, no password.
+
+Then this agent will run `scripts/recovery_identity_gate.py` instructions
+against that hostname. If classification is not `isolated-restore`, STOP.
+
+**Restore executed by this agent: NO.**
 
 After the owner restores in the dashboard:
 

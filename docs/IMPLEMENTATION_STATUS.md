@@ -1058,7 +1058,7 @@ PRODUCTION RECOVERY READY: **NO**.
 
 ## Phase 9.13B — Recovery drill readiness — blocked on owner restore
 
-Identity gate now requires dashboard hostname match (`scripts/recovery_identity_gate.py`; 9 local tests). No restore run. No paid DB created. Report: `docs/reports/PHASE_9_13B_RECOVERY_DRILL_READINESS.md`.
+Identity gate requires dashboard hostname match (`scripts/recovery_identity_gate.py`). Owner authorized isolated restore (22:00 Asia/Jakarta) for `docuflow-db-restore-drill-20261107`. Agent **did not** click Restore. Waiting on dashboard new-instance hostname (names only). Report: `docs/reports/PHASE_9_13B_RECOVERY_DRILL_READINESS.md`.
 
 RECOVERY DRILL VERIFIED: **NO**.
 PRODUCTION RECOVERY READY: **NO**.
