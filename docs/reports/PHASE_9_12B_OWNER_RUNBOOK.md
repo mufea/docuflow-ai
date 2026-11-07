@@ -37,6 +37,14 @@ A_GET_after 404
 
 `A_upload_spoof` may be `400` or `415`. Either is acceptable.
 
+## Observed owner output (20:33 Asia/Jakarta)
+
+Matches the expected labels exactly, including `A_upload_spoof 415`.
+Recorded in `docs/reports/PHASE_9_12_PRODUCTION_FUNCTIONAL_VERIFICATION.md`.
+
+FUNCTIONALLY VERIFIED: **YES**. SECURITY VERIFIED: **YES** (required
+isolation). PRODUCTION VERIFIED: **YES**.
+
 ## Commands
 
 From the repo, with `uv` (do **not** export `STAGING_*`):
