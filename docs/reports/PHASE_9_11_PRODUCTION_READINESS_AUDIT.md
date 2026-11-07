@@ -16,29 +16,31 @@ The application can run with `DOCUFLOW_ENV=production` (fail-fast for SQLite,
 filesystem storage, weak secrets). That is **code** readiness, not a live
 production system.
 
-**Owner update (7 Nov 2026, 16:59 Asia/Jakarta):** database **upgraded to a
-paid plan**. That is **owner-reported**. This agent did **not** open the
-Render dashboard and did **not** see the plan name, backup toggle, or whether
-the instance is `docuflow-staging-db` or a new `docuflow-db`.
+**Owner update (7 Nov 2026, 17:11 Asia/Jakarta), names only:**
 
-`infra/render.yaml` still lists `docuflow-db` `plan: free`. Applying that
-file was **not** done and remains **unsafe** (workspace mix-up; YAML still
-says Free).
+| Question | Owner answer |
+| --- | --- |
+| Database service name | `docuflow-db` (production name, not `docuflow-staging-db`) |
+| Workspace contains `docuflow-staging-*`? | **no** |
+| “Paid plan name” as typed | `dpg-dbiqe70ae00c73cdif7g-a` — this is a Render **instance id/host**, not a plan slug (Basic/Pro/etc.) |
+| Backups enabled | **no** |
+
+Staging inspect used a **different** instance (`dpg-dbn71tec6qcc73cric9g-a` / `docuflow_staging_db`). These look like separate databases.
+
+`infra/render.yaml` still lists `plan: free`. This agent did **not** apply it.
 
 **Remaining blockers:**
 
-1. Production identity of the paid database is **not independently verified**
-   (name, workspace, backups enabled).
-2. No dedicated production object bucket / unique keys confirmed.
-3. Owner authorization to **deploy** is still absent.
-4. Blueprint still sets `AI_PROVIDER=mock` and `EMAIL_BACKEND=console`.
-   Free web SMTP egress is still blocked.
-5. Free web spin-down still kills in-flight **inline** jobs.
+1. **Backups disabled** on `docuflow-db` (CRITICAL for production data).
+2. Paid **plan slug** still not named (instance id is not a plan).
+3. Dedicated production object bucket / unique keys not confirmed.
+4. Owner authorization to **deploy application services** is still absent.
+5. Blueprint `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`; Free web SMTP egress blocked.
+6. Free web spin-down still kills in-flight **inline** jobs.
 
-**Recommendation: NO-GO** for production deployment. Paid Postgres is
-necessary but not sufficient.
-
-Do **not** apply `infra/render.yaml`. Do **not** reuse staging as production.
+**Recommendation: NO-GO** for production go-live. Workspace isolation and a
+distinct `docuflow-db` are owner-reported progress. Enable backups before
+any user data. Do **not** apply `infra/render.yaml`.
 
 ## 2. Verified baseline (staging, not production)
 
@@ -171,7 +173,7 @@ Static review only. **Not a penetration test.**
 
 | ID | Severity | Finding |
 | --- | --- | --- |
-| P1 | CRITICAL | YAML still `plan: free`. Owner reports paid dashboard upgrade; instance identity and backups **NOT VERIFIED**. |
+| P1 | CRITICAL | `docuflow-db` backups **disabled**. YAML still `plan: free`. Plan slug not provided. |
 | P2 | HIGH | No production workspace/bucket/secrets exist; reuse of staging would mix data. |
 | P3 | HIGH | Free API spin-down interrupts inline jobs; rate limits reset in memory. |
 | P4 | HIGH | Console email; SMTP blocked on Free web. Password reset unusable for real users. |
@@ -347,18 +349,18 @@ never a blind in-place overwrite from this agent.
 | A Code | Fail-fast production settings | PASS (code) |
 | A Code | AuthN/Z + isolation tests | PASS (staging + local) |
 | A Code | Alembic single head `0003` | PASS (staging inspect) |
-| B Infra | Production workspace exists | **BLOCKED** |
-| B Infra | Blueprint Postgres plan safe for prod data | **FAIL** (YAML still Free). Dashboard paid: owner-reported, **NOT VERIFIED** |
+| B Infra | Production workspace exists | Owner-reported **PASS** (no `docuflow-staging-*`) |
+| B Infra | Blueprint Postgres plan safe for prod data | YAML still Free (**FAIL** to sync). Live `docuflow-db` paid: owner-reported. Plan slug **NOT VERIFIED**. Backups **FAIL** (off) |
 | B Infra | `infra/render.yaml` applied | **NOT VERIFIED** (must stay unapplied) |
 | C Security | Unique prod secret/keys | **BLOCKED** |
 | C Security | Prod isolation tested | **NOT VERIFIED** |
 | D Data | Dedicated prod bucket | **BLOCKED** |
-| D Data | Managed or operator backups | **NOT VERIFIED** (paid plan claimed; backup toggle not seen) |
+| D Data | Managed or operator backups | **FAIL** (owner: backups enabled **no**) |
 | E Providers | Live AI | **NOT APPLICABLE** until owner enables |
 | E Providers | Real email | **FAIL** on Free web + console |
 | F Ops | Runbook exists | PASS (docs) |
 | F Ops | Backup executed | **NOT VERIFIED** |
-| G Cost | Owner accepted paid Postgres | Owner-reported **PASS**; which instance **NOT VERIFIED** |
+| G Cost | Owner accepted paid Postgres | Owner-reported **PASS** for `docuflow-db` (`dpg-dbiqe70ae00c73cdif7g-a`) |
 | H Auth | Owner production approval | **NOT AUTHORIZED** |
 
 A GO for **deploy** requires every CRITICAL item PASS plus explicit owner
@@ -367,14 +369,13 @@ approval. That is **not** met.
 ## 16. Owner action items
 
 1. Do **not** apply `infra/render.yaml`. YAML still says Free Postgres.
-2. Confirm in chat **without secrets**: database **service name**
-   (`docuflow-staging-db` vs `docuflow-db`), whether the workspace also has
-   `docuflow-staging-*`, paid **plan name**, and whether **backups are enabled**.
-3. If the paid instance is staging-only, production still needs a separate
-   `docuflow-db` in a production-only workspace.
+2. **Enable backups** on `docuflow-db` in the Render dashboard (or confirm
+   the paid tier’s backup product and turn it on). Do not paste DSNs.
+3. Optionally reply with the **plan slug** as shown next to the instance
+   (for example Basic / Pro), not the `dpg-…` id. Not required to enable backups.
 4. Dedicated production bucket + unique keys (not staging). Never paste values.
 5. Decide: inline vs RQ; mock vs live AI; console vs SMTP.
-6. Explicit written authorization is still required before any production apply.
+6. Explicit written authorization is still required before deploying API/web.
 
 ## 17. Evidence limitations
 
@@ -387,10 +388,9 @@ approval. That is **not** met.
 
 ## 18. Final recommendation
 
-**NO-GO** — a paid database plan is necessary and is **owner-reported**, but
-production is still not deployable: YAML remains Free, production identity of
-the paid instance is unverified, bucket/secrets/workspace isolation and
-deploy authorization are outstanding.
+**NO-GO** — `docuflow-db` exists in a workspace without staging services, and
+the owner reports it is paid, but **backups are off**. YAML still says Free.
+Bucket/keys, email/AI, and deploy authorization remain outstanding.
 
 The product is **staging-verified**. It is **not** production-deployed,
 **not** production-verified, and **not** production-authorized.
