@@ -108,6 +108,9 @@ Render Dashboard. The DSN does not prove the Render service name.
 | Staging service | `docuflow-staging-db` | 9.10D |
 | Staging instance | `dpg-dbn71tec6qcc73cric9g-a` | 9.10D |
 | Staging database name | `docuflow_staging_db` | 9.10D |
+| Drill service | `docuflow-db-restore-drill-20261107` | 9.13B owner |
+| Drill instance | `dpg-dbnk595g1s2s73cuafl0-a` | 9.13B owner |
+| Drill database name | `docuflow_db_q32a_d7gs` | 9.13B owner |
 
 **Before Restore (name only):** approved service must contain `restore` or
 `drill` and must not be `docuflow-db` / `docuflow-staging-db`.
