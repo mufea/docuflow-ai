@@ -34,6 +34,7 @@ production functional verification.
 | Production API URL | `https://docuflowai.site` | 18:00 |
 | Production CMS / web URL | `https://docuflowai.online` | 18:00 |
 | Redis / worker appeared? | **no** | 18:05 |
+| Cleanup cron running? | **yes** | 18:14 |
 
 Staging inspect used a **different** instance (`dpg-dbn71tec6qcc73cric9g-a`).
 Git Blueprint Postgres plan is now `0.1c-256mb` (`origin/main` `4f1f07e`).
@@ -48,9 +49,8 @@ default `docuflow-documents`. Owner reports production S3 keys are **unique**
 **Remaining blockers (post-live-hosts):**
 
 1. Production mutating smoke / cross-user isolation **not** run.
-2. Cleanup cron existence **NOT VERIFIED**. Redis/worker owner-reported **absent**.
-3. Mock AI + console email; Free web SMTP egress blocked (accepted unless owner changes it).
-4. Free web spin-down still kills in-flight inline jobs.
+2. Mock AI + console email; Free web SMTP egress blocked (accepted unless owner changes it).
+3. Free web spin-down still kills in-flight inline jobs.
 
 **Recommendation:** public hosts are **live** (inline). Do **not** Blueprint-sync
 Redis. Do **not** point `STAGING_*` at production. Functional production
@@ -384,7 +384,7 @@ manual service create** against existing `docuflow-db` is **YES** (inline).
 ## 16. Owner action items
 
 1. **Do not** full-sync `infra/render.yaml` (it still defines unused Redis).
-2. Redis/worker owner-reported **absent**. Cleanup cron still **NOT VERIFIED**.
+2. Redis/worker owner-reported **absent**. Cleanup cron owner-reported **running**.
 3. Do **not** point `STAGING_*` at `docuflowai.site` / `docuflowai.online`.
 4. Mock AI and console email stay unless you authorize otherwise.
 
@@ -458,6 +458,7 @@ Owner replied (18:00 Asia/Jakarta):
 - API: `https://docuflowai.site`
 - CMS: `https://docuflowai.online`
 - Redis / worker: **no** (18:05 Asia/Jakarta)
+- Cleanup cron: **running** (18:14 Asia/Jakarta)
 
 Read-only evidence: `docs/reports/PHASE_9_11_PRODUCTION_LIVE_EVIDENCE.md`.
 Do **not** paste DSNs or keys. Do **not** point `STAGING_*` at production.

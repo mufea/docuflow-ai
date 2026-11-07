@@ -12,7 +12,7 @@ No login, upload, delete, migrate, or Blueprint apply. No secrets recorded.
 
 These are **not** staging hosts (`docuflow-staging-api.onrender.com` /
 `docuflow-staging-web.onrender.com`). Owner (18:05 Asia/Jakarta): **no
-Redis / worker**.
+Redis / worker**. Owner (18:14 Asia/Jakarta): cleanup cron **is running**.
 
 ## 2. Read-only probes
 
@@ -43,7 +43,6 @@ is consistent with no RQ worker.
 
 - Login, upload, extract, download, or delete on production
 - Cross-user isolation on production
-- Cleanup cron exists or runs
 - Hosted Alembic head on production Postgres
 - Restore drill / backups actually restorable
 - Live AI or real email (still expected mock/console)

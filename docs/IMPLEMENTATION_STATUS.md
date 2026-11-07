@@ -1013,7 +1013,7 @@ Owner (7 Nov 2026, 17:42 Asia/Jakarta): `Authorize production deploy, keep inlin
 
 Owner (18:00 Asia/Jakarta): API `https://docuflowai.site`, CMS `https://docuflowai.online`. Read-only probes **PASS**: `/health` `docuflow-api`, `/ready` `broker=inline` `rq_workers=0` database+storage true, CMS Next.js 200, unauthenticated `/v1/auth/me` 401, CORS allows the CMS origin. Evidence: `docs/reports/PHASE_9_11_PRODUCTION_LIVE_EVIDENCE.md`.
 
-Owner (18:05 Asia/Jakarta): **no Redis / worker**. Do **not** point `STAGING_*` at these hosts. Staging smoke refuses both custom domains. No login/upload. Cleanup cron **NOT VERIFIED**. `ready.redis=true` remains the inline default (no Redis ping).
+Owner (18:05 Asia/Jakarta): **no Redis / worker**. Owner (18:14): cleanup cron **is running**. Do **not** point `STAGING_*` at these hosts. Staging smoke refuses both custom domains. No login/upload. `ready.redis=true` remains the inline default (no Redis ping).
 
 STAGING VERIFIED: **YES**.
 PRODUCTION AUTHORIZED: **YES** (inline only).
