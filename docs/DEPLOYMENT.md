@@ -624,9 +624,13 @@ that still has `JOB_BROKER=rq` from an older Blueprint should be changed to
 
 ## Database backup and recovery
 
-This section is a runbook. It was **not** executed against staging or
-production from this environment. The Blueprint lists a Free Postgres
-instance; the **live** Render plan must be read from the dashboard. Do not
+Production-specific restore, Alembic inspect, and isolated drill:
+`docs/operations/PRODUCTION_DATABASE_RECOVERY_RUNBOOK.md` (Phase 9.13).
+The drill has **not** been executed.
+
+This section is a general runbook. It was **not** executed against staging or
+production from this environment. The Blueprint lists Postgres `0.1c-256mb`;
+the **live** Render plan must still be read from the dashboard. Do not
 assume they match.
 
 ### Persistence risk
