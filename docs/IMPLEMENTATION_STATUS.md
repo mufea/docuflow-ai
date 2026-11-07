@@ -1045,3 +1045,13 @@ HEALTH VERIFIED: **YES**.
 FUNCTIONALLY VERIFIED: **YES**.
 SECURITY VERIFIED: **YES** (required isolation/authz; not a pentest).
 PRODUCTION VERIFIED: **YES**.
+
+## Phase 9.13 — Production reliability and recovery — audit only
+
+Documentation-only (7 Nov 2026, 21:09 Asia/Jakarta). No restore, no production SQL writes, no paid DB, no deploy. Repo Alembic head **VERIFIED** `0003_cost_efficient_reliability` (single linear history). Production `alembic_version` **NOT VERIFIED**. Backups **OWNER VERIFIED** enabled; last backup / retention / PITR / restore **NOT VERIFIED**.
+
+Runbook: `docs/operations/PRODUCTION_DATABASE_RECOVERY_RUNBOOK.md`.
+Audit: `docs/reports/PHASE_9_13_PRODUCTION_RELIABILITY_AUDIT.md`.
+
+RECOVERY DRILL VERIFIED: **NO**.
+PRODUCTION RECOVERY READY: **NO**.

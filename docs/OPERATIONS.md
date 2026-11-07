@@ -31,10 +31,11 @@ The worker listens for SIGTERM and requests RQ stop. The API relies on Uvicorn S
 
 ## Backups
 
-See **Database backup and recovery** in `docs/DEPLOYMENT.md`. Do not assume the
-live Render Postgres plan matches the Blueprint. Free Postgres has no managed
-backups; take `pg_dump` copies yourself. Object-storage versioning is a
-separate control on the bucket you actually use. Redis is expendable.
+See **Database backup and recovery** in `docs/DEPLOYMENT.md`. Production
+restore and isolated drill: `docs/operations/PRODUCTION_DATABASE_RECOVERY_RUNBOOK.md`.
+Do not assume the live Render Postgres plan matches the Blueprint. Free
+Postgres has no managed backups. Object-storage versioning is a separate
+control on the bucket you actually use. Redis is expendable.
 
 ## Credits
 
