@@ -910,11 +910,11 @@ Live S3 provider verification: **NOT EXECUTED**.
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 Production deployment authorized: **NO.**
 
-## Phase 9.10A — Owner provisioning execution and verification — on `cursor/phase-9-10a-owner-provisioning`
+## Phase 9.10A — Owner provisioning execution and verification — in progress
 
-Base: GitHub `main` @ `8084f07835b15000203a737255fd77e0604d3cc6` (Phase 9.10 already merged via PR #13). This phase does not add application features and does not apply the Blueprint until the owner authorizes it.
+Attestation docs merged via PR #14 (`87dccbc`, 6 Nov 2026, 17:53 Asia/Jakarta). Base remains Phase 9.10 merge `8084f07`. This phase does not add application features and does not apply the Blueprint until the owner authorizes it.
 
-Owner attestations recorded 6 Nov 2026, 17:37 Asia/Jakarta. This agent did **not** open Cloudflare or Render dashboards and did **not** receive secrets.
+Owner attestations recorded 6 Nov 2026, 17:37 Asia/Jakarta. Owner reported preflight **PASS** at 18:33 Asia/Jakarta. Owner ran `uv run pytest -q -m provider` at 19:57 Asia/Jakarta: **1 passed, 246 deselected in 3.90s**. This agent did **not** receive secrets and did **not** run those commands in this environment.
 
 | Evidence | Status |
 | --- | --- |
@@ -922,9 +922,9 @@ Owner attestations recorded 6 Nov 2026, 17:37 Asia/Jakarta. This agent did **not
 | PostgreSQL provisioning | Plan selected: **Free** (owner accepts 30-day expiry, 1 GB, no managed backups). Database not created. **NOT EXECUTED**. |
 | R2 staging bucket | Owner attested exists (intended name `docuflow-staging`). Independent API check: **NOT EXECUTED**. Not marked PROVISIONED. |
 | R2 staging credentials | Must stay on the owner machine. Not present in this environment. **BLOCKED** for agent-run preflight. |
-| R2 provider testing | Owner attested `docuflow-provider-test` exists. `TEST_S3_*` unset here. **NOT EXECUTED**. |
-| Preflight isolation | **NOT EXECUTED** (no staging env in this environment). Next owner action. |
-| Blueprint application | **NOT EXECUTED**. Owner confirmed apply of `infra/render.staging.yaml` is **not authorized yet**. |
+| R2 provider testing | Owner-run `uv run pytest -q -m provider`: **1 passed, 246 deselected in 3.90s** (6 Nov 2026, 19:57 Asia/Jakarta). **Provider verified** (owner machine). Agent-run: **NOT EXECUTED**. |
+| Preflight isolation | Owner reported **PASS** (6 Nov 2026, 18:33 Asia/Jakarta). Agent-run preflight **NOT EXECUTED**. A preflight PASS is not live R2 connectivity and not Blueprint apply. |
+| Blueprint application | Owner authorized apply of `infra/render.staging.yaml` (6 Nov 2026, 19:59 Asia/Jakarta). Agent apply: **NOT EXECUTED**. Dashboard apply: awaiting owner confirmation of created services. |
 | Staging migration | **NOT EXECUTED** |
 | Staging health | **NOT EXECUTED** |
 | Staging smoke | **NOT EXECUTED** |
@@ -933,9 +933,7 @@ Free Postgres reminder: expires 30 days after creation; 14-day grace; then delet
 
 ## Next recommended work
 
-1. On the **owner machine**, copy `docs/staging.env.example` to a local untracked file. Fill staging R2 values and a unique `DOCUFLOW_SECRET_KEY`. Do not paste secrets into chat or git.
-2. Run `STAGING_PREFLIGHT=1 python scripts/staging_preflight.py`. Report only PASS/FAIL lines, never keys or DSNs.
-3. Optional: `uv run pytest -q -m provider` with dedicated `TEST_S3_*` against `docuflow-provider-test` only.
-4. Do **not** apply `infra/render.staging.yaml` until the owner explicitly authorizes it after a preflight PASS.
-5. Keep `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `JOB_BROKER=inline`. No Redis, no paid worker.
-6. Production remains unauthorized.
+1. Owner applies `infra/render.staging.yaml` in the dedicated staging workspace (Free Postgres 30-day expiry). Do not apply `infra/render.yaml`.
+2. After apply, report service names, API/web hostnames (not secrets), database **name** only, and whether Redis or a worker appeared.
+3. Keep `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `JOB_BROKER=inline`. No Redis, no paid worker.
+4. Production remains unauthorized.

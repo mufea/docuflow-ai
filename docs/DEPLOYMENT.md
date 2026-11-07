@@ -56,7 +56,7 @@ and are **not** a billing quote:
 | Local development | SQLite or local Postgres, filesystem storage, `JOB_BROKER=inline` | Supported. See `README.md` |
 | Local verification | pytest / ruff / mypy / web lint-typecheck-test-build | See `docs/IMPLEMENTATION_STATUS.md` |
 | CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.9 merge is `ae3cc0b` (PR #12, [run 42167872331](https://github.com/mufea/docuflow-ai/actions/runs/42167872331), 6 Nov 2026, 12:22 Asia/Jakarta). Phase 9.10 branch CI on `7d9da7f` succeeded ([run 42172770416](https://github.com/mufea/docuflow-ai/actions/runs/42172770416), 6 Nov 2026, 13:12 Asia/Jakarta) |
-| Provider verification | Dedicated test bucket + `TEST_S3_*` credentials | **Pending** — mocked S3 tests are not provider verification |
+| Provider verification | Dedicated test bucket + `TEST_S3_*` credentials | Owner-run `pytest -q -m provider`: 1 passed, 246 deselected (6 Nov 2026, 19:57 Asia/Jakarta). Mocked S3 tests are not this result |
 | Staging deployment | Isolated non-production Render workspace + staging DB + staging bucket | **Not performed / not verified** — Blueprint is a template only |
 | Production deployment | Live Render workspace serving users | **NOT DEPLOYED — Awaiting owner approval** |
 
@@ -126,13 +126,13 @@ is **provider** only with dedicated `TEST_S3_*`. Render URLs are **staging**.
 | --- | --- | --- |
 | Render workspace | Owner attested dedicated workspace (6 Nov 2026, 17:37 Asia/Jakarta); no production service names | Owner-attested; independent check **NOT EXECUTED**; not PROVISIONED |
 | PostgreSQL | Free plan selected; owner accepts 30-day expiry | **NOT EXECUTED** (database not created until Blueprint apply) |
-| S3 / R2 | Owner attested staging and provider-test buckets exist | Owner-attested; independent check **NOT EXECUTED**; not PROVISIONED |
+| S3 / R2 | Owner attested staging and provider-test buckets exist | Provider-test roundtrip **owner-verified**; staging bucket still not used by a Render service |
 | API | Service deployed | **NOT EXECUTED** |
 | Web | Service deployed | **NOT EXECUTED** |
 | Cleanup | Cron configured | **IMPLEMENTED** in Blueprint; **NOT EXECUTED** as a live cron |
 | Environment | Required variables configured | Template only; secrets not in this environment |
-| Isolation | No production credentials/resources reused | Script **LOCALLY TESTED**; live preflight **NOT EXECUTED** |
-| Blueprint apply | `infra/render.staging.yaml` | **NOT EXECUTED** — owner has not authorized apply |
+| Isolation | No production credentials/resources reused | Owner reported preflight **PASS** (6 Nov 2026, 18:33 Asia/Jakarta); agent-run **NOT EXECUTED** |
+| Blueprint apply | `infra/render.staging.yaml` | Owner authorized 6 Nov 2026, 19:59 Asia/Jakarta; dashboard apply **not confirmed**; agent did not apply |
 
 ### Owner provisioning runbook
 
