@@ -939,13 +939,13 @@ exit 0
 | R2 provider testing | Owner-run `uv run pytest -q -m provider`: **1 passed, 246 deselected** (6 Nov 2026, 19:57 Asia/Jakarta). **Provider verified**. |
 | Preflight isolation | Owner reported **PASS** (6 Nov 2026, 18:33 Asia/Jakarta). |
 | Blueprint application | **PROVISIONED** (owner applied `infra/render.staging.yaml`; four staging services live; no Redis; no worker). |
-| Staging migration | Startup `python -m docuflow.migrate` is in the Blueprint. Independent `staging_migrate_verify.py`: **NOT EXECUTED** (no staging DSN in this environment; `ipAllowList: []`). |
+| Staging migration | Startup migrate is in the Blueprint. Owner Shell inspect: Alembic `0003_cost_efficient_reliability` **PASS**. No upgrade in 9.10D. |
 | Staging health | **PASS** (agent-run `/health` and `/ready`). |
-| Staging smoke | Non-mutating **PASS**. Owner mutating smoke **PASS** (7 Nov 2026, 09:35 Asia/Jakarta). Cross-user **SKIPPED**. Hosted migrate-verify outstanding. |
+| Staging smoke | Non-mutating **PASS**. Owner mutating smoke **PASS**. Live cross-user **PASS** (9.10D). Hosted Alembic inspect **PASS**. |
 
 Free Postgres reminder: expires 30 days after creation; 14-day grace; then deletion. No backups. One Free database per workspace.
 
-Staging provisioned: **YES**. Staging functional verified: **YES** (smoke lifecycle). Staging verified: **NO** (migrate-verify outstanding).
+Staging provisioned: **YES**. Staging functional verified: **YES**. Staging verified: **YES** (9.10D hosted Alembic inspect + live cross-user).
 Production deployment: **NOT DEPLOYED — Awaiting owner approval.**
 Production deployment authorized: **NO.**
 
@@ -988,9 +988,21 @@ Report: `docs/reports/PHASE_9_10C_STAGING_VERIFICATION.md`.
 STAGING FUNCTIONAL VERIFIED: **YES**. STAGING VERIFIED: **NO**.
 PRODUCTION DEPLOYED: **NO**. PRODUCTION VERIFIED: **NO**. PRODUCTION AUTHORIZED: **NO**.
 
+## Phase 9.10D — Owner verification execution — complete
+
+PR #19 remains the 9.10C merge (`17182e5`). No application-code changes. No schema upgrade in this phase.
+
+Owner hosted migrate-verify (Render Shell on `docuflow-staging-api`, 7 Nov 2026, 15:07 Asia/Jakarta): `database=docuflow_staging_db`, `SELECT 1` ok, Alembic current **and** heads `0003_cost_efficient_reliability`, `matches_head True`, `multiple_heads False`, `schema_mutated False`.
+
+Owner live cross-user (laptop `uv run python`, same timestamp): A GET 200; B GET/download/DELETE **403**; A GET after 200; A cleanup 200; unauthenticated GET **401**.
+
+Report: `docs/reports/PHASE_9_10D_OWNER_VERIFICATION.md`.
+
+STAGING FUNCTIONAL VERIFIED: **YES**. STAGING VERIFIED: **YES**.
+PRODUCTION DEPLOYED: **NO**. PRODUCTION VERIFIED: **NO**. PRODUCTION AUTHORIZED: **NO**.
+
 ## Next recommended work
 
-1. Owner-run hosted migrate-verify from the staging API shell (read-only unless an upgrade is explicitly approved). Never against production. Do not paste DSNs into chat.
-2. Optional: second dedicated staging account for live `cross_user_access`. Do not paste passwords into chat.
-3. Keep `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `JOB_BROKER=inline`. No Redis, no paid worker.
-4. Production remains unauthorized.
+1. Production remains unauthorized. Do not apply `infra/render.yaml` or production env changes.
+2. Keep staging `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `JOB_BROKER=inline`. No Redis, no paid worker.
+3. Free Postgres still expires 30 days after creation; no managed backups.
