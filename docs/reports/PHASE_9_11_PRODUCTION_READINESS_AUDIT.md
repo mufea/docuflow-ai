@@ -25,21 +25,27 @@ production system.
 | Instance id | `dpg-dbiqe70ae00c73cdif7g-a` | 17:11 |
 | Plan (display name) | **Basic** | 17:23 |
 | Backups enabled | **yes** | 17:23 |
+| Production bucket name | `docuflowai-documents` | 17:33 |
 
 Staging inspect used a **different** instance (`dpg-dbn71tec6qcc73cric9g-a`).
 Exact Render Blueprint plan slug (for example `basic-256mb`) is still **not**
 in git. `infra/render.yaml` still lists `plan: free` and was **not** applied.
 
+Bucket name isolation (names only): `docuflowai-documents` is **not**
+`docuflow-staging`, **not** `docuflow-provider-test`, and **not** the code
+default `docuflow-documents`. Unique access keys on the production API are
+**not** verified (must not reuse staging keys).
+
 **Remaining blockers:**
 
-1. Dedicated production object bucket / unique keys not confirmed.
+1. Unique production `S3_*` keys (presence on Render; not copied from staging).
 2. Owner authorization to **deploy application services** is still absent.
 3. Blueprint `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`; Free web SMTP egress blocked.
 4. Free web spin-down still kills in-flight **inline** jobs.
 5. Syncing YAML as-is could still describe Free Postgres (do not apply).
 
-**Recommendation: NO-GO** for production go-live. Database isolation + Basic
-+ backups are owner-reported progress. Do **not** apply `infra/render.yaml`.
+**Recommendation: NO-GO** for production go-live. Do **not** apply
+`infra/render.yaml`.
 
 ## 2. Verified baseline (staging, not production)
 
@@ -353,7 +359,7 @@ never a blind in-place overwrite from this agent.
 | B Infra | `infra/render.yaml` applied | **NOT VERIFIED** (must stay unapplied) |
 | C Security | Unique prod secret/keys | **BLOCKED** |
 | C Security | Prod isolation tested | **NOT VERIFIED** |
-| D Data | Dedicated prod bucket | **BLOCKED** |
+| D Data | Dedicated prod bucket | Owner-reported **PASS** (`docuflowai-documents`; not staging/test/default) |
 | D Data | Managed or operator backups | Owner-reported **PASS** (enabled). Restore drill **NOT VERIFIED** |
 | E Providers | Live AI | **NOT APPLICABLE** until owner enables |
 | E Providers | Real email | **FAIL** on Free web + console |
@@ -368,8 +374,8 @@ approval. That is **not** met.
 ## 16. Owner action items
 
 1. Do **not** apply `infra/render.yaml`. YAML still says Free Postgres.
-2. Dedicated production bucket **name** (not staging) + unique keys on Render.
-   Reply with the **bucket name only**. Never paste keys.
+2. Confirm unique production S3 keys are set on the production API (not the
+   staging keys). Reply **yes/no only**. Never paste key values.
 3. Decide: inline vs RQ; mock vs live AI; console vs SMTP.
 4. Explicit written authorization is still required before deploying API/web.
 
@@ -384,9 +390,9 @@ approval. That is **not** met.
 
 ## 18. Final recommendation
 
-**NO-GO** for application deploy. `docuflow-db` is owner-reported **Basic**
-with **backups on**, in a workspace without staging services. YAML still says
-Free. Bucket/keys, email/AI, and deploy authorization remain outstanding.
+**NO-GO** for application deploy. `docuflow-db` is Basic with backups;
+bucket name `docuflowai-documents` is isolated from staging. YAML still says
+Free. Unique S3 keys, email/AI, and deploy authorization remain outstanding.
 
 The product is **staging-verified**. It is **not** production-deployed,
 **not** production-verified, and **not** production-authorized.
