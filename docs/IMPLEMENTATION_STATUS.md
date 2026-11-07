@@ -1009,7 +1009,7 @@ PRODUCTION DEPLOYED: **NO**. PRODUCTION VERIFIED: **NO**. PRODUCTION AUTHORIZED:
 
 ## Phase 9.11 — Production readiness audit — authorized, not deployed
 
-Owner (7 Nov 2026, 17:42 Asia/Jakarta): `Authorize production deploy, keep inline`. Agent **did not** apply `infra/render.yaml` (still `plan: free`; no Render credentials here). No Redis/worker. Mock AI and console email unchanged.
+Owner (7 Nov 2026, 17:42 Asia/Jakarta): `Authorize production deploy, keep inline`. Agent **did not** apply the Blueprint. Owner commit `4f1f07e` set `infra/render.yaml` `docuflow-db` to `plan: 0.1c-256mb` (17:53 Asia/Jakarta). Redis is still in that YAML; do not create it. Mock AI and console email unchanged.
 
 Owner (17:11–17:37): `docuflow-db` Basic, backups yes, no staging services; bucket `docuflowai-documents`; S3 keys unique (not staging).
 
