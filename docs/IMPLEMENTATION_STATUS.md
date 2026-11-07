@@ -977,10 +977,20 @@ STAGING FUNCTIONAL VERIFIED: **YES** (existing smoke lifecycle; optional cross-u
 STAGING VERIFIED: **NO** (hosted migrate-verify outstanding).
 PRODUCTION DEPLOYED: **NO**. PRODUCTION AUTHORIZED: **NO**.
 
+## Phase 9.10C — Staging final verification and security isolation — incomplete
+
+PR #18 confirmed merged. `origin/main` is `5e9a6b4` (7 Nov 2026, 09:49 Asia/Jakarta). No application-code changes.
+
+Local isolation tests **5 passed** (cross-user GET/download/delete/job 403; unauthenticated `/me` 401). Live staging cross-user: **BLOCKED** (second account unset; no accounts created). Hosted migrate-verify: **BLOCKED** (`DATABASE_URL` / `STAGING_MIGRATE_VERIFY` unset; `ipAllowList: []`). Non-mutating `/health` `/ready` frontend re-checked PASS (10:03 Asia/Jakarta). Mutating smoke not repeated.
+
+Report: `docs/reports/PHASE_9_10C_STAGING_VERIFICATION.md`.
+
+STAGING FUNCTIONAL VERIFIED: **YES**. STAGING VERIFIED: **NO**.
+PRODUCTION DEPLOYED: **NO**. PRODUCTION VERIFIED: **NO**. PRODUCTION AUTHORIZED: **NO**.
+
 ## Next recommended work
 
-1. Optional: second dedicated staging account for `cross_user_access` (403 on another user's download). Do not paste passwords into chat.
-2. Optional migrate-verify from a host allowed to reach staging Postgres (Render shell or an owner-added IP). Never against production.
+1. Owner-run hosted migrate-verify from the staging API shell (read-only unless an upgrade is explicitly approved). Never against production. Do not paste DSNs into chat.
+2. Optional: second dedicated staging account for live `cross_user_access`. Do not paste passwords into chat.
 3. Keep `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, `JOB_BROKER=inline`. No Redis, no paid worker.
 4. Production remains unauthorized.
-5. Rotate the staging account password that was pasted into chat. Do not reuse it.
