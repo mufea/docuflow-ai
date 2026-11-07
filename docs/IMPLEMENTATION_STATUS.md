@@ -1011,9 +1011,9 @@ PRODUCTION DEPLOYED: **NO**. PRODUCTION VERIFIED: **NO**. PRODUCTION AUTHORIZED:
 
 Audit-only. `origin/main` `bed3b61`. No application-code changes. `infra/render.yaml` **not** applied. No production deploy. No migrations from this phase.
 
-Owner (7 Nov 2026, 17:11 Asia/Jakarta): service `docuflow-db`; workspace has **no** `docuflow-staging-*`; instance id `dpg-dbiqe70ae00c73cdif7g-a` (not a plan slug); **backups enabled: no**. Distinct from staging `dpg-dbn71tec6qcc73cric9g-a`. Blueprint YAML still `plan: free`. Not applied.
+Owner (7 Nov 2026, 17:11–17:23 Asia/Jakarta): service `docuflow-db`; workspace has **no** `docuflow-staging-*`; instance `dpg-dbiqe70ae00c73cdif7g-a`; plan display **Basic**; **backups enabled: yes**. Distinct from staging. Blueprint YAML still `plan: free`. Not applied.
 
-Remaining blockers: backups off, prod bucket/keys, Free web/SMTP limits, no deploy authorization.
+Remaining blockers: prod bucket/keys, Free web/SMTP limits, no deploy authorization.
 
 Report: `docs/reports/PHASE_9_11_PRODUCTION_READINESS_AUDIT.md`.
 

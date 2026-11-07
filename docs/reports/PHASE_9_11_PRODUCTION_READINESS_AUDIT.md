@@ -16,31 +16,30 @@ The application can run with `DOCUFLOW_ENV=production` (fail-fast for SQLite,
 filesystem storage, weak secrets). That is **code** readiness, not a live
 production system.
 
-**Owner update (7 Nov 2026, 17:11 Asia/Jakarta), names only:**
+**Owner updates (names only):**
 
-| Question | Owner answer |
-| --- | --- |
-| Database service name | `docuflow-db` (production name, not `docuflow-staging-db`) |
-| Workspace contains `docuflow-staging-*`? | **no** |
-| “Paid plan name” as typed | `dpg-dbiqe70ae00c73cdif7g-a` — this is a Render **instance id/host**, not a plan slug (Basic/Pro/etc.) |
-| Backups enabled | **no** |
+| Question | Owner answer | When (Asia/Jakarta) |
+| --- | --- | --- |
+| Database service name | `docuflow-db` | 7 Nov 2026, 17:11 |
+| Workspace contains `docuflow-staging-*`? | **no** | 17:11 |
+| Instance id | `dpg-dbiqe70ae00c73cdif7g-a` | 17:11 |
+| Plan (display name) | **Basic** | 17:23 |
+| Backups enabled | **yes** | 17:23 |
 
-Staging inspect used a **different** instance (`dpg-dbn71tec6qcc73cric9g-a` / `docuflow_staging_db`). These look like separate databases.
-
-`infra/render.yaml` still lists `plan: free`. This agent did **not** apply it.
+Staging inspect used a **different** instance (`dpg-dbn71tec6qcc73cric9g-a`).
+Exact Render Blueprint plan slug (for example `basic-256mb`) is still **not**
+in git. `infra/render.yaml` still lists `plan: free` and was **not** applied.
 
 **Remaining blockers:**
 
-1. **Backups disabled** on `docuflow-db` (CRITICAL for production data).
-2. Paid **plan slug** still not named (instance id is not a plan).
-3. Dedicated production object bucket / unique keys not confirmed.
-4. Owner authorization to **deploy application services** is still absent.
-5. Blueprint `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`; Free web SMTP egress blocked.
-6. Free web spin-down still kills in-flight **inline** jobs.
+1. Dedicated production object bucket / unique keys not confirmed.
+2. Owner authorization to **deploy application services** is still absent.
+3. Blueprint `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`; Free web SMTP egress blocked.
+4. Free web spin-down still kills in-flight **inline** jobs.
+5. Syncing YAML as-is could still describe Free Postgres (do not apply).
 
-**Recommendation: NO-GO** for production go-live. Workspace isolation and a
-distinct `docuflow-db` are owner-reported progress. Enable backups before
-any user data. Do **not** apply `infra/render.yaml`.
+**Recommendation: NO-GO** for production go-live. Database isolation + Basic
++ backups are owner-reported progress. Do **not** apply `infra/render.yaml`.
 
 ## 2. Verified baseline (staging, not production)
 
@@ -173,7 +172,7 @@ Static review only. **Not a penetration test.**
 
 | ID | Severity | Finding |
 | --- | --- | --- |
-| P1 | CRITICAL | `docuflow-db` backups **disabled**. YAML still `plan: free`. Plan slug not provided. |
+| P1 | HIGH | YAML still `plan: free` while live `docuflow-db` is owner-reported Basic with backups. Do not sync YAML. |
 | P2 | HIGH | No production workspace/bucket/secrets exist; reuse of staging would mix data. |
 | P3 | HIGH | Free API spin-down interrupts inline jobs; rate limits reset in memory. |
 | P4 | HIGH | Console email; SMTP blocked on Free web. Password reset unusable for real users. |
@@ -350,12 +349,12 @@ never a blind in-place overwrite from this agent.
 | A Code | AuthN/Z + isolation tests | PASS (staging + local) |
 | A Code | Alembic single head `0003` | PASS (staging inspect) |
 | B Infra | Production workspace exists | Owner-reported **PASS** (no `docuflow-staging-*`) |
-| B Infra | Blueprint Postgres plan safe for prod data | YAML still Free (**FAIL** to sync). Live `docuflow-db` paid: owner-reported. Plan slug **NOT VERIFIED**. Backups **FAIL** (off) |
+| B Infra | Live Postgres plan + backups | Owner-reported **PASS** (Basic, backups yes). YAML still Free — **do not sync** |
 | B Infra | `infra/render.yaml` applied | **NOT VERIFIED** (must stay unapplied) |
 | C Security | Unique prod secret/keys | **BLOCKED** |
 | C Security | Prod isolation tested | **NOT VERIFIED** |
 | D Data | Dedicated prod bucket | **BLOCKED** |
-| D Data | Managed or operator backups | **FAIL** (owner: backups enabled **no**) |
+| D Data | Managed or operator backups | Owner-reported **PASS** (enabled). Restore drill **NOT VERIFIED** |
 | E Providers | Live AI | **NOT APPLICABLE** until owner enables |
 | E Providers | Real email | **FAIL** on Free web + console |
 | F Ops | Runbook exists | PASS (docs) |
@@ -369,13 +368,10 @@ approval. That is **not** met.
 ## 16. Owner action items
 
 1. Do **not** apply `infra/render.yaml`. YAML still says Free Postgres.
-2. **Enable backups** on `docuflow-db` in the Render dashboard (or confirm
-   the paid tier’s backup product and turn it on). Do not paste DSNs.
-3. Optionally reply with the **plan slug** as shown next to the instance
-   (for example Basic / Pro), not the `dpg-…` id. Not required to enable backups.
-4. Dedicated production bucket + unique keys (not staging). Never paste values.
-5. Decide: inline vs RQ; mock vs live AI; console vs SMTP.
-6. Explicit written authorization is still required before deploying API/web.
+2. Dedicated production bucket **name** (not staging) + unique keys on Render.
+   Reply with the **bucket name only**. Never paste keys.
+3. Decide: inline vs RQ; mock vs live AI; console vs SMTP.
+4. Explicit written authorization is still required before deploying API/web.
 
 ## 17. Evidence limitations
 
@@ -388,9 +384,9 @@ approval. That is **not** met.
 
 ## 18. Final recommendation
 
-**NO-GO** — `docuflow-db` exists in a workspace without staging services, and
-the owner reports it is paid, but **backups are off**. YAML still says Free.
-Bucket/keys, email/AI, and deploy authorization remain outstanding.
+**NO-GO** for application deploy. `docuflow-db` is owner-reported **Basic**
+with **backups on**, in a workspace without staging services. YAML still says
+Free. Bucket/keys, email/AI, and deploy authorization remain outstanding.
 
 The product is **staging-verified**. It is **not** production-deployed,
 **not** production-verified, and **not** production-authorized.
