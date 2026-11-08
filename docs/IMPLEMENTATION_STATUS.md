@@ -1048,17 +1048,17 @@ PRODUCTION VERIFIED: **YES**.
 
 ## Phase 9.13 — Production reliability and recovery — audit only
 
-Documentation-only (7 Nov 2026, 21:09 Asia/Jakarta). No restore, no production SQL writes, no paid DB, no deploy. Repo Alembic head **VERIFIED** `0003_cost_efficient_reliability` (single linear history). Production `alembic_version` **NOT VERIFIED**. Backups **OWNER VERIFIED** enabled; last backup / retention / PITR / restore **NOT VERIFIED**.
+Documentation-only at the time of audit (7 Nov 2026, 21:09 Asia/Jakarta). Repo Alembic head **VERIFIED** `0003_cost_efficient_reliability`. Isolated restore later verified in 9.13B; live `docuflow-db` DSN still not opened. Backups **OWNER VERIFIED** enabled; retention / PITR window still **NOT VERIFIED**.
 
 Runbook: `docs/operations/PRODUCTION_DATABASE_RECOVERY_RUNBOOK.md`.
 Audit: `docs/reports/PHASE_9_13_PRODUCTION_RELIABILITY_AUDIT.md`.
 
-RECOVERY DRILL VERIFIED: **NO**.
-PRODUCTION RECOVERY READY: **NO**.
+RECOVERY DRILL VERIFIED: **YES** (9.13B isolated restore; see below).
+PRODUCTION RECOVERY READY: **YES** (9.13B; no production cutover).
 
-## Phase 9.13B — Recovery drill readiness — blocked on drill SQL
+## Phase 9.13B — Recovery drill — verified (isolated restore)
 
-Identity gate requires dashboard hostname match (`scripts/recovery_identity_gate.py`). Owner authorized isolated restore (22:00 Asia/Jakarta) for `docuflow-db-restore-drill-20261107`. Owner reported the new instance (22:34 Asia/Jakarta): hostname `dpg-dbnk595g1s2s73cuafl0-a`, database `docuflow_db_q32a_d7gs`, restore time used 22:25. Agent **did not** click Restore and **did not** connect. Gate classification **isolated-restore** (exit 0). Production `/health` `/ready` still HTTP 200 `broker=inline`. Schema/Alembic and count SQL **NOT EXECUTED**. Report: `docs/reports/PHASE_9_13B_RECOVERY_DRILL_READINESS.md`.
+Owner authorized isolated restore (7 Nov 2026, 22:00 Asia/Jakarta) for `docuflow-db-restore-drill-20261107`. Owner restored a new instance (22:34): hostname `dpg-dbnk595g1s2s73cuafl0-a`, database `docuflow_db_q32a_d7gs`. Identity gate **isolated-restore**. Owner PSQL on that database (8 Nov 2026, 09:33 Asia/Jakarta): `SELECT 1` ok; `current_database=docuflow_db_q32a_d7gs`; `alembic_version=0003_cost_efficient_reliability`; required tables and `ix_storage_deletions_lease_until` present; counts users=2 documents=131 jobs=52 credit_ledger=142 storage_deletions=131 cleanup_leases=1 fk=7. Agent **did not** click Restore and **did not** connect. Production `/health` `/ready` still HTTP 200 `broker=inline` (09:34). No production cutover. RTO not timed. Report: `docs/reports/PHASE_9_13B_RECOVERY_DRILL_READINESS.md`.
 
-RECOVERY DRILL VERIFIED: **NO**.
-PRODUCTION RECOVERY READY: **NO**.
+RESTORE DRILL VERIFIED: **YES**.
+PRODUCTION RECOVERY READY: **YES** (isolated restore procedure; production still on `docuflow-db`).

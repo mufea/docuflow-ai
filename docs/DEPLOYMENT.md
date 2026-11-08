@@ -25,8 +25,10 @@ Blueprint sync as a completed production deploy by itself.
 for the mandatory functional/isolation smoke. API
 `https://docuflowai.site`. CMS `https://docuflowai.online`.
 `JOB_BROKER=inline`. No Redis, no worker. Cleanup cron owner-reported
-running. Recovery drill and production `alembic_version` remain
-**NOT VERIFIED**.
+running. Isolated restore drill **VERIFIED** (9.13B) on
+`docuflow-db-restore-drill-20261107` with Alembic
+`0003_cost_efficient_reliability`. Production DSN was not opened; production
+was not cut over.
 
 ## Required vs optional services
 
@@ -67,7 +69,7 @@ and are **not** a billing quote:
 | CI verification | GitHub Actions (`postgres:16` for integration tests) | Phase 9.9 merge is `ae3cc0b` (PR #12, [run 42167872331](https://github.com/mufea/docuflow-ai/actions/runs/42167872331), 6 Nov 2026, 12:22 Asia/Jakarta). Phase 9.10 branch CI on `7d9da7f` succeeded ([run 42172770416](https://github.com/mufea/docuflow-ai/actions/runs/42172770416), 6 Nov 2026, 13:12 Asia/Jakarta) |
 | Provider verification | Dedicated test bucket + `TEST_S3_*` credentials | Owner-run `pytest -q -m provider`: 1 passed, 246 deselected (6 Nov 2026, 19:57 Asia/Jakarta). Mocked S3 tests are not this result |
 | Staging deployment | Isolated non-production Render workspace + staging DB + staging bucket | **STAGING VERIFIED** (9.10D). Hosted Alembic `0003` PASS. Live cross-user 403/401 PASS. Not production. |
-| Production deployment | Live Render workspace serving users | **PRODUCTION VERIFIED** (9.12 owner-run smoke). API `https://docuflowai.site`, CMS `https://docuflowai.online`. Recovery drill **NOT VERIFIED**. Production Alembic **NOT VERIFIED**. |
+| Production deployment | Live Render workspace serving users | **PRODUCTION VERIFIED** (9.12 owner-run smoke). API `https://docuflowai.site`, CMS `https://docuflowai.online`. Isolated restore drill **VERIFIED** (9.13B). Production Alembic inferred from restore copy only. |
 
 ## Local vs staging vs production
 
@@ -619,10 +621,10 @@ that still has `JOB_BROKER=rq` from an older Blueprint should be changed to
 | Local development | Supported |
 | Automated tests | See `docs/IMPLEMENTATION_STATUS.md` |
 | Render configuration | Blueprint present; validate in the Render dashboard |
-| Successful Render deployment | **PRODUCTION VERIFIED** (9.12). Health + functional + isolation owner-run. Recovery drill **NOT VERIFIED**. Production recovery ready **NO** |
+| Successful Render deployment | **PRODUCTION VERIFIED** (9.12). Health + functional + isolation owner-run. Isolated restore drill **VERIFIED** (9.13B). Production recovery ready **YES** (no cutover) |
 | Staging Blueprint | `infra/render.staging.yaml` applied in a dedicated workspace (9.10) |
 | Staging migration `0003` | Owner Shell **PASS** (9.10D) on `docuflow_staging_db` |
-| Production migration `0003` | API boot runs `python -m docuflow.migrate`. Live `alembic_version` **NOT VERIFIED** |
+| Production migration `0003` | Restore copy at 7 Nov 2026, 22:25: `0003_cost_efficient_reliability`. Live `docuflow-db` DSN still not opened |
 | Live provider verification | Dedicated `TEST_S3_*` owner-run (6 Nov 2026). Production bucket `docuflowai-documents` (owner-reported) |
 
 ## Health
@@ -642,8 +644,9 @@ Production-specific restore, Alembic inspect, and isolated drill:
 `docs/operations/PRODUCTION_DATABASE_RECOVERY_RUNBOOK.md` (Phase 9.13).
 Owner restored into isolated `docuflow-db-restore-drill-20261107`
 (`dpg-dbnk595g1s2s73cuafl0-a` / `docuflow_db_q32a_d7gs`). Identity gate
-**isolated-restore**. Schema/integrity SQL **not** yet run, so the drill is
-still **NOT VERIFIED**.
+**isolated-restore**. Owner PSQL: Alembic `0003`, required tables, counts
+without error. Drill **VERIFIED**. Production was not cut over. The drill
+instance still bills until the owner deletes it.
 
 This section is a general runbook. It was **not** executed against staging or
 production from this environment. The Blueprint lists Postgres `0.1c-256mb`;

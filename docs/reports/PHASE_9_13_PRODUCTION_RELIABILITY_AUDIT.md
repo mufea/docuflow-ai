@@ -29,8 +29,8 @@ approval is required.
 | IMPLEMENTED (audit + runbook) | **YES** (this PR) |
 | LOCALLY VERIFIED | **YES** (Alembic heads/history; docs) |
 | PRODUCTION CONFIGURATION VERIFIED | **PARTIAL** (owner: backups on; frequency/PITR/last backup **NOT VERIFIED**) |
-| RECOVERY DRILL VERIFIED | **NO** |
-| PRODUCTION RECOVERY READY | **NO** |
+| RECOVERY DRILL VERIFIED | **YES** (later, Phase 9.13B isolated restore) |
+| PRODUCTION RECOVERY READY | **YES** (9.13B; no production cutover) |
 
 ## Baseline commit
 
@@ -110,7 +110,7 @@ for this inspect.
 | Isolation rules | Distinct DSN; do not change production `DATABASE_URL`; API/CMS stay on `docuflow-db` |
 | Integrity checks | SELECT 1; `alembic_version`; required tables; `COUNT(*)` only |
 | Cleanup | Delete the drill instance after evidence |
-| Drill executed | **NO** — **BLOCKED** on owner approval (second DB costs money) |
+| Drill executed | **YES** (9.13B): `docuflow-db-restore-drill-20261107` / `docuflow_db_q32a_d7gs`; Alembic `0003`; see `docs/reports/PHASE_9_13B_RECOVERY_DRILL_READINESS.md` |
 
 ## Reliability risks (document only)
 
@@ -157,7 +157,7 @@ Do not paste DSNs or keys.
 | Action | Occurred |
 | --- | --- |
 | Production modified | **NO** |
-| Restore executed | **NO** |
+| Restore executed | **NO** in 9.13. Owner restore in **9.13B** (new instance only) |
 | Paid resource provisioned | **NO** |
 | Application code changed | **NO** |
 | Production deployment | **NO** |
