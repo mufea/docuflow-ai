@@ -4,8 +4,9 @@ Documentation and owner-gated cleanup only. **This agent did not delete
 any Render resource.** Production DSN was not opened. No application code
 changed. Phase 9.15 (backup/PITR assurance) was **not** executed.
 
-Time: **8 Nov 2026, 15:31 Asia/Jakarta (WIB)**.
-Baseline `origin/main`: `73b2bbe` (expected; confirmed).
+Time: **8 Nov 2026, 15:44 Asia/Jakarta (WIB)**.
+Baseline `origin/main`: `b9e34f5` (PR #31 merged). Earlier 9.14 write-up
+used `73b2bbe`.
 
 ## Status
 
@@ -14,12 +15,13 @@ Baseline `origin/main`: `73b2bbe` (expected; confirmed).
 | IMPLEMENTED (this report + status + owner procedure) | **YES** |
 | LOCALLY VERIFIED | **YES** (git baseline, identity grep, `git diff --check`) |
 | CI VERIFIED | **NOT EXECUTED** (docs-only; no suite required) |
-| OWNER VERIFIED (delete confirmation) | **NO** |
+| OWNER VERIFIED (delete confirmation line) | **YES** (8 Nov 2026, 15:44 Asia/Jakarta) |
 | INFRASTRUCTURE VERIFIED (resource gone) | **NOT EXECUTED** |
-| BLOCKED | Owner must send `Delete docuflow-db-restore-drill-20261107` then click Delete in Render |
+| BLOCKED | Owner must click Delete in Render on the drill instance only, then report names/times |
 
 PHASE 9.14 IMPLEMENTATION: **COMPLETE**.
-PHASE 9.14 INFRASTRUCTURE CLEANUP: **BLOCKED / OWNER ACTION REQUIRED**.
+PHASE 9.14 INFRASTRUCTURE CLEANUP: **BLOCKED / OWNER ACTION REQUIRED**
+(dashboard click + gone-from-list evidence).
 
 ## 1. Recovery evidence audit (preserve 9.13B)
 
@@ -84,22 +86,14 @@ owner checks Connect / env on `docuflow-api`, `docuflow-web`, and
 
 ## 4. Owner approval
 
-Phase 9.14 prompt requested this **cleanup workflow**. That is **not**
-the runbook delete line.
-
 | Approval | Status |
 | --- | --- |
-| Workflow (this phase) | **YES** (owner prompt 8 Nov 2026, 15:31 Asia/Jakarta) |
-| Destructive delete | **NO** — waiting on exact line below |
+| Workflow (Phase 9.14 prompt) | **YES** (8 Nov 2026, 15:31 Asia/Jakarta) |
+| Destructive delete line | **YES** — owner sent `Delete docuflow-db-restore-drill-20261107` at **15:44 Asia/Jakarta** |
+| Dashboard Delete click | **NOT EXECUTED** (this agent cannot click Render) |
 
-Required immediately before clicking Delete:
-
-```
-Delete docuflow-db-restore-drill-20261107
-```
-
-Do **not** interpret the Phase 9.14 prompt as that confirmation.
-Production cutover remains **unauthorized**.
+Production cutover remains **unauthorized**. This agent will **not** delete
+the resource.
 
 ## 5. Owner-executable delete procedure
 
@@ -114,7 +108,7 @@ Workspace: production (has `docuflow-db`). Do **not** open staging.
 5. Confirm it is **not** `docuflow-db` and **not** `dpg-dbiqe70ae00c73cdif7g-a`.
 6. Check `docuflow-api`, `docuflow-web`, and `docuflow-cleanup` env: none
    use this hostname. If any does, **STOP**.
-7. Send the delete line in chat (section 4).
+7. Delete line already received in chat (15:44 Asia/Jakarta).
 8. Delete **only** `docuflow-db-restore-drill-20261107`.
 9. Confirm that service is gone from the list.
 10. Confirm **`docuflow-db`** is still listed.
@@ -130,7 +124,8 @@ docuflow-db still present: YES/NO
 
 ## 6. Post-cleanup verification (after owner report)
 
-**NOT EXECUTED.** No owner delete confirmation yet.
+**NOT EXECUTED.** Delete line received. Dashboard click and
+gone-from-list evidence are still outstanding.
 
 After that report, this phase will record deletion time, then re-check
 read-only `GET https://docuflowai.site/health` and `/ready`. Expected:
