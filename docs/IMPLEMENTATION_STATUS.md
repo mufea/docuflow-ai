@@ -1062,3 +1062,26 @@ Owner authorized isolated restore (7 Nov 2026, 22:00 Asia/Jakarta) for `docuflow
 
 RESTORE DRILL VERIFIED: **YES**.
 PRODUCTION RECOVERY READY: **YES** (isolated restore procedure; production still on `docuflow-db`).
+
+## Phase 9.14 — Recovery drill cleanup — blocked on owner delete
+
+Objective: preserve 9.13B evidence and delete **only** isolated
+`docuflow-db-restore-drill-20261107` (`dpg-dbnk595g1s2s73cuafl0-a` /
+`docuflow_db_q32a_d7gs`). Baseline `origin/main` **`73b2bbe`** (8 Nov 2026,
+15:31 Asia/Jakarta). Evidence reference:
+`docs/reports/PHASE_9_13B_RECOVERY_DRILL_READINESS.md` (unchanged). Cleanup
+report: `docs/reports/PHASE_9_14_RECOVERY_DRILL_CLEANUP.md`.
+
+Identity gate: **PASS** (all three drill identifiers match; not
+`docuflow-db` / `dpg-dbiqe70ae00c73cdif7g-a`). Cleanup readiness: drill
+complete and evidence on `main`; production `/health` `/ready` HTTP 200
+`broker=inline` (independently verified 15:31); dashboard env attachment
+**UNKNOWN**. Owner approval: workflow **YES**; destructive delete **NO**
+(awaiting `Delete docuflow-db-restore-drill-20261107`). Cleanup execution:
+**NOT EXECUTED**. This agent did **not** click Delete. No application code
+changed.
+
+PHASE 9.14 IMPLEMENTATION: **COMPLETE**.
+PHASE 9.14 INFRASTRUCTURE CLEANUP: **BLOCKED / OWNER ACTION REQUIRED**.
+RESTORE DRILL VERIFIED: **YES** (evidence retained).
+PRODUCTION RECOVERY READY: **YES** (unchanged; no cutover).
