@@ -300,6 +300,10 @@ Drill (non-production) **PASS** when all are true:
 - Counts return without error (values may be recorded as integers only).
 - Production API/CMS still served from original `docuflow-db`.
 
+Phase 9.13B owner drill (**8 Nov 2026, 09:33 Asia/Jakarta**) met these
+criteria on `docuflow-db-restore-drill-20261107`. Production cutover was
+not performed.
+
 Production cutover **PASS** additionally:
 
 - `/health` 200 `docuflow-api`

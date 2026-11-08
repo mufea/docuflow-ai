@@ -1,10 +1,11 @@
 # Phase 9.13B — PostgreSQL recovery drill readiness
 
-Owner created the isolated restore instance. **This agent did not click
-Restore** and did not connect to the drill database. Production and staging
-were not modified.
+Owner created the isolated restore instance and ran read-only SQL in its
+PSQL prompt. **This agent did not click Restore** and did not connect to
+the drill database. Production and staging were not modified. Production
+`DATABASE_URL` was not cut over.
 
-Time: **7 Nov 2026, 22:35 Asia/Jakarta (WIB)**.
+Time: **8 Nov 2026, 09:34 Asia/Jakarta (WIB)**.
 Baseline `origin/main`: `018b34a`.
 
 ## Status
@@ -13,16 +14,17 @@ Baseline `origin/main`: `018b34a`.
 | --- | --- |
 | IMPLEMENTED (gate + runbook + this report) | **YES** |
 | LOCALLY VERIFIED | **YES** (`tests/test_phase913b_recovery_identity.py`, 9 passed) |
-| OWNER VERIFIED (dashboard backup fields) | **PARTIAL** (restore time recorded; retention/PITR window still open) |
+| OWNER VERIFIED (dashboard backup fields) | **PARTIAL** (restore-creates-new-instance **YES**; retention/PITR window still open) |
 | IDENTITY GATE | **PASS** (`classification isolated-restore`) |
-| SCHEMA / ALEMBIC SQL | **NOT EXECUTED** |
-| INTEGRITY COUNTS | **NOT EXECUTED** |
-| RESTORE DRILL VERIFIED | **NO** |
-| PRODUCTION RECOVERY READY | **NO** |
-| BLOCKED | Waiting on read-only SQL from the **drill** PSQL shell (not production) |
+| SCHEMA / ALEMBIC SQL | **PASS** (`0003_cost_efficient_reliability`; required tables + index present) |
+| INTEGRITY COUNTS | **PASS** (counts only; no row contents) |
+| RESTORE DRILL VERIFIED | **YES** |
+| PRODUCTION RECOVERY READY | **YES** (isolated restore procedure proven; **no** production cutover) |
+| BLOCKED | None for the drill. Drill instance still bills until owner deletes it |
 
-Authoritative product flags (9.12 / 9.13 / 9.13A): STAGING VERIFIED **YES**;
-PRODUCTION VERIFIED **YES**; RECOVERY DRILL VERIFIED **NO**.
+Authoritative product flags: STAGING VERIFIED **YES**; PRODUCTION VERIFIED
+**YES**; RESTORE DRILL VERIFIED **YES**; PRODUCTION RECOVERY READY **YES**
+(isolated restore only). Production cutover remains **unauthorized**.
 
 ## Audit answers
 
@@ -32,7 +34,7 @@ PRODUCTION VERIFIED **YES**; RECOVERY DRILL VERIFIED **NO**.
 | B. Did it prove DSN host belongs to the approved service? | **No.** The DSN has no Render service name. |
 | C. Could prod/staging be `isolated-restore`? | Known instance ids were rejected first. **Unknown** hosts could still pass. |
 | D. Service vs instance vs hostname vs database? | Named in the runbook; the gate now requires `EXPECTED_RESTORE_HOSTNAME`. |
-| E. `DEPLOYMENT.md` contradictions? | 9.13A mostly aligned. Status table now states recovery drill **NOT VERIFIED** and recovery ready **NO**. |
+| E. `DEPLOYMENT.md` contradictions? | 9.13A aligned. 9.13B status: restore drill **VERIFIED**, recovery ready **YES** (no cutover). |
 | F. Backup details? | Restore-creates-new-instance **YES**. Retention, PITR window, and whether 22:25 is a PITR target still **NOT VERIFIED**. |
 
 ## Identity-gate improvements
@@ -163,75 +165,69 @@ Negative checks (same expected host; wrong actual host):
 
 Do **not** run §8–§9 SQL on production or staging.
 
-## Remaining owner step: read-only SQL on the drill instance
+## Owner drill SQL (8 Nov 2026, 09:33 Asia/Jakarta)
 
-Open **`docuflow-db-restore-drill-20261107`** (not `docuflow-db`) → Connect →
-**PSQL**. Paste the block below. Reply with **labels and integers / names
-only**. Do not paste DSN, password, user rows, or `SELECT *`.
+Owner ran the read-only block in the **drill** PSQL prompt
+(`docuflow_db_q32a_d7gs=>`). This agent did not connect. Prompt database
+name matches the approved drill instance.
 
-```sql
-SET statement_timeout = '15s';
-SELECT 1;
-SELECT current_database();
-SELECT version_num FROM alembic_version;
-SELECT table_name FROM information_schema.tables
- WHERE table_schema = 'public' ORDER BY 1;
-SELECT COUNT(*) FROM users;
-SELECT COUNT(*) FROM documents;
-SELECT COUNT(*) FROM jobs;
-SELECT COUNT(*) FROM credit_ledger;
-SELECT COUNT(*) FROM storage_deletions;
-SELECT COUNT(*) FROM cleanup_leases;
-SELECT COUNT(*) FROM information_schema.table_constraints
- WHERE constraint_type = 'FOREIGN KEY' AND table_schema = 'public';
-SELECT indexname FROM pg_indexes
- WHERE schemaname = 'public'
-   AND indexname = 'ix_storage_deletions_lease_until';
-```
+| Check | Result |
+| --- | --- |
+| `SELECT 1` | **1** |
+| `current_database()` | `docuflow_db_q32a_d7gs` |
+| `alembic_version` | `0003_cost_efficient_reliability` |
+| Repo `alembic heads` (this environment, no DSN) | `0003_cost_efficient_reliability (head)` |
+| `alembic current` CLI on drill | **NOT EXECUTED** (PSQL only; SQL version matches repo head) |
+| Required tables | `users`, `documents`, `jobs`, `cleanup_leases`, `storage_deletions` **present** |
+| Index `ix_storage_deletions_lease_until` | **present** |
+| Public tables (15) | `alembic_version`, `audit_logs`, `cleanup_leases`, `credit_accounts`, `credit_ledger`, `documents`, `email_tokens`, `jobs`, `operation_costs`, `payment_events`, `plans`, `sessions`, `storage_deletions`, `subscriptions`, `users` |
 
-Paste back:
+Counts only (no row contents):
 
-```
-current_database:
-alembic_version:
-tables:
-users:
-documents:
-jobs:
-credit_ledger:
-storage_deletions:
-cleanup_leases:
-fk_count:
-ix_storage_deletions_lease_until: yes/no
-restore_start (Asia/Jakarta, if known):
-database_available (Asia/Jakarta, if known):
-```
+| Table / catalog | Count |
+| --- | ---: |
+| users | 2 |
+| documents | 131 |
+| jobs | 52 |
+| credit_ledger | 142 |
+| storage_deletions | 131 |
+| cleanup_leases | 1 |
+| foreign keys (public) | 7 |
 
-Expected Alembic head in this repo: `0003_cost_efficient_reliability`.
-Do **not** assume production currently matches. Production Alembic remains
-**NOT VERIFIED**.
+Runbook §10 drill criteria: identity `isolated-restore`, not production DSN,
+`SELECT 1`, Alembic `0003`, required tables, counts without error, production
+API still on original `docuflow-db`. **All met.**
+
+Production after SQL evidence (09:34 Asia/Jakarta): `GET https://docuflowai.site/health` HTTP 200 `service=docuflow-api`; `GET /ready` HTTP 200 `broker=inline` `rq_workers=0` `database=true` `storage=true`.
+
+`python -m alembic current` was not run on the drill host. SQL
+`alembic_version` matching repo heads is the evidence used.
+
+Live production DSN was still not opened. Alembic on production at restore
+point **22:25 on 7 Nov 2026** is inferred from this copy only.
 
 Do not run `alembic upgrade` / `downgrade` / `stamp` /
 `python -m docuflow.migrate` / `pg_restore` onto production, staging, or the
-drill instance during this check.
+drill instance for this check.
 
 ## RTO/RPO evidence template (do not invent values)
 
 ```
-Selected backup timestamp: 22:25 (owner-reported; date/timezone inferred 7 Nov 2026 Asia/Jakarta)
+Selected backup timestamp: 22:25 (owner-reported; recorded as 7 Nov 2026, 22:25 Asia/Jakarta)
 Incident/reference timestamp: NOT PROVIDED (drill, not an incident)
 Estimated RPO (backup time vs incident): NOT COMPUTED
 Restore start (Asia/Jakarta): NOT PROVIDED
-Database available (Asia/Jakarta): NOT PROVIDED (instance reported by owner at 22:34)
-Verification complete (Asia/Jakarta): NOT COMPLETE (SQL outstanding)
-Total restore duration (RTO): NOT COMPUTED
-Schema result (alembic_version / required tables): NOT EXECUTED
-Integrity result (counts only): NOT EXECUTED
+Database available (Asia/Jakarta): NOT PROVIDED (instance reported by owner 7 Nov 2026, 22:34)
+Verification complete (Asia/Jakarta): 8 Nov 2026, 09:34
+Total restore duration (RTO): NOT COMPUTED (start/available times not provided)
+Schema result: alembic_version 0003_cost_efficient_reliability; required tables + ix_storage_deletions_lease_until present
+Integrity result: users=2 documents=131 jobs=52 credit_ledger=142 storage_deletions=131 cleanup_leases=1 fk=7
 R2 limitation: restored rows may reference objects not rolled back
 ```
 
-`SELECT 1` alone is **not** recovery readiness. Identity-gate PASS alone is
-**not** recovery readiness.
+Identity-gate PASS plus this SQL is the restore drill. RTO remains
+unmeasured. Dashboard PITR/retention window remains **NOT VERIFIED**.
+Production cutover was **not** performed.
 
 ## Cleanup (separate approval)
 
@@ -240,7 +236,7 @@ Do **not** delete automatically.
 After evidence is recorded, production still uses `docuflow-db`, and no
 service uses the drill DSN, owner may send:
 
-`Delete docuflow-db-restore-drill-YYYYMMDD`
+`Delete docuflow-db-restore-drill-20261107`
 
 Do not delete production or staging databases.
 
