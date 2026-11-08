@@ -646,9 +646,9 @@ Owner restored into isolated `docuflow-db-restore-drill-20261107`
 (`dpg-dbnk595g1s2s73cuafl0-a` / `docuflow_db_q32a_d7gs`). Identity gate
 **isolated-restore**. Owner PSQL: Alembic `0003`, required tables, counts
 without error. Drill **VERIFIED**. Production was not cut over. Phase 9.14
-cleanup of `docuflow-db-restore-drill-20261107` is **authorized** (owner
-delete line 8 Nov 2026, 15:44 Asia/Jakarta) and still **BLOCKED** until the
-owner deletes that instance only in Render
+cleanup of `docuflow-db-restore-drill-20261107` is **OWNER VERIFIED**
+deleted (gone-from-list report 8 Nov 2026, 15:46 Asia/Jakarta; `docuflow-db`
+still present). This agent did not click Delete
 (`docs/reports/PHASE_9_14_RECOVERY_DRILL_CLEANUP.md`).
 
 This section is a general runbook. It was **not** executed against staging or
