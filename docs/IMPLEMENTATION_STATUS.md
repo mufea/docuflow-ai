@@ -1056,9 +1056,9 @@ Audit: `docs/reports/PHASE_9_13_PRODUCTION_RELIABILITY_AUDIT.md`.
 RECOVERY DRILL VERIFIED: **NO**.
 PRODUCTION RECOVERY READY: **NO**.
 
-## Phase 9.13B — Recovery drill readiness — blocked on owner restore
+## Phase 9.13B — Recovery drill readiness — blocked on drill SQL
 
-Identity gate requires dashboard hostname match (`scripts/recovery_identity_gate.py`). Owner authorized isolated restore (22:00 Asia/Jakarta) for `docuflow-db-restore-drill-20261107`. Agent **did not** click Restore. Waiting on dashboard new-instance hostname (names only). Report: `docs/reports/PHASE_9_13B_RECOVERY_DRILL_READINESS.md`.
+Identity gate requires dashboard hostname match (`scripts/recovery_identity_gate.py`). Owner authorized isolated restore (22:00 Asia/Jakarta) for `docuflow-db-restore-drill-20261107`. Owner reported the new instance (22:34 Asia/Jakarta): hostname `dpg-dbnk595g1s2s73cuafl0-a`, database `docuflow_db_q32a_d7gs`, restore time used 22:25. Agent **did not** click Restore and **did not** connect. Gate classification **isolated-restore** (exit 0). Production `/health` `/ready` still HTTP 200 `broker=inline`. Schema/Alembic and count SQL **NOT EXECUTED**. Report: `docs/reports/PHASE_9_13B_RECOVERY_DRILL_READINESS.md`.
 
 RECOVERY DRILL VERIFIED: **NO**.
 PRODUCTION RECOVERY READY: **NO**.
