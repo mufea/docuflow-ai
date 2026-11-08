@@ -352,7 +352,7 @@ Production cutover **PASS** additionally:
 | Read-only prod Alembic inspect | `Authorize read-only alembic inspect on production API shell` |
 | Isolated restore drill | `Authorize isolated restore drill into a new database, not production` **and** name the service (must contain `restore` or `drill`) |
 | Production cutover | `Authorize production DATABASE_URL cutover to restored instance <name>` |
-| Delete drill DB | `Delete docuflow-db-restore-drill-YYYYMMDD` after evidence is recorded |
+| Delete drill DB | `Delete docuflow-db-restore-drill-YYYYMMDD` after evidence is recorded. Phase 9.14 dated name: `Delete docuflow-db-restore-drill-20261107` |
 
 This agent will not restore or cut over without one of those lines.
 

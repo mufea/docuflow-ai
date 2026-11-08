@@ -240,6 +240,9 @@ service uses the drill DSN, owner may send:
 
 Do not delete production or staging databases.
 
+Cleanup procedure (Phase 9.14, not executed):
+`docs/reports/PHASE_9_14_RECOVERY_DRILL_CLEANUP.md`.
+
 ## Safety
 
 | Action | This phase |
