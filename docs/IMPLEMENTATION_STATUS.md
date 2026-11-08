@@ -1083,3 +1083,21 @@ PHASE 9.14 IMPLEMENTATION: **COMPLETE**.
 PHASE 9.14 INFRASTRUCTURE CLEANUP: **OWNER VERIFIED**.
 RESTORE DRILL VERIFIED: **YES** (evidence retained).
 PRODUCTION RECOVERY READY: **YES** (unchanged; no cutover).
+
+## Phase 9.15 — Backup and PITR assurance — blocked on dashboard fields
+
+Objective: read-only assurance of **`docuflow-db`** automated backups, latest
+restore point, retention, PITR available vs enabled, and RPO only if
+timestamps exist. Baseline `origin/main` **`9de55d2`** (8 Nov 2026, 16:03
+Asia/Jakarta). Report: `docs/reports/PHASE_9_15_BACKUP_PITR_ASSURANCE.md`.
+
+9.14 evidence preserved (PR #32). This agent has **no** Render dashboard.
+9.11 “backups enabled” and 9.13B isolated restore are **not** current
+retention/PITR. Official Render docs (workspace Hobby 3d / Pro 7d PITR on
+paid Postgres; none on Free compute) are **OFFICIAL DOCUMENTATION**, not
+this account. All Recovery-page values **UNKNOWN**. RPO **NOT DETERMINABLE**.
+No restore, export, plan change, SQL, or application code.
+
+PHASE 9.15 IMPLEMENTATION: **PARTIAL / DOCUMENTATION COMPLETE**.
+PHASE 9.15 OWNER VERIFICATION: **BLOCKED / EVIDENCE REQUIRED**.
+BACKUP ASSURANCE COMPLETE: **NO**.
