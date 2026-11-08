@@ -198,3 +198,16 @@ a **new** isolated restore authorization if a timing drill is wanted.
 | Production DSN / SQL | **NO** |
 | Application code / Blueprint | **NO** |
 | Production cutover | **NO** |
+
+## I. Later owner-reported screenshot (Phase 9.16 prompt)
+
+**8 Nov 2026, 17:04 Asia/Jakarta.** This agent did **not** view the
+screenshot. Class: **OWNER-REPORTED**.
+
+- `docuflow-db` / `dpg-dbiqe70ae00c73cdif7g-a` / plan `0.1c-256mb` / Blueprint managed
+- PITR recovery window **3 days** (Pro 7-day window mentioned, not used)
+- Logical export successful; created 7 Nov 2026, 5:27 PM; `.dir.tar.gz`; ≥7 day retention
+
+Still unknown: latest restorable PITR timestamp; backup schedule/enabled;
+operational PITR restore; measured RPO/RTO. Do not treat this addendum as
+BACKUP ASSURANCE COMPLETE.
