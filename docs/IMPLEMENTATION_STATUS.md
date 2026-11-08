@@ -1099,5 +1099,31 @@ this account. All Recovery-page values **UNKNOWN**. RPO **NOT DETERMINABLE**.
 No restore, export, plan change, SQL, or application code.
 
 PHASE 9.15 IMPLEMENTATION: **PARTIAL / DOCUMENTATION COMPLETE**.
-PHASE 9.15 OWNER VERIFICATION: **BLOCKED / EVIDENCE REQUIRED**.
-BACKUP ASSURANCE COMPLETE: **NO**.
+PHASE 9.15 OWNER VERIFICATION: **BLOCKED / EVIDENCE REQUIRED** at write-up;
+Phase 9.16 prompt later supplied **OWNER-REPORTED** Recovery screenshot
+fields (3-day PITR window; logical export 7 Nov 2026, 5:27 PM). This agent
+did **not** view the screenshot. Latest restorable PITR instant still
+**UNKNOWN**. BACKUP ASSURANCE COMPLETE: **NO**.
+
+## Phase 9.16 — Measured RTO/RPO — blocked on owner PITR restore
+
+Objective: timed isolated PITR into **new** `docuflow-rto-rpo-drill-20261108`
+only. Baseline `origin/main` **`c44cafa`** (8 Nov 2026, 17:04 Asia/Jakarta).
+Report: `docs/reports/PHASE_9_16_RTO_RPO_RECOVERY_VALIDATION.md`.
+
+Method A (isolated PITR) selected; Method B (logical export) not run.
+9.13B evidence preserved; it is **not** 9.16 RTO. This agent did **not**
+click Restore or provision. Production DSN **NONE**. Cutover **NONE**.
+T0–T3 **NOT MEASURABLE**. Observed RPO **NOT DETERMINABLE**.
+
+PHASE 9.16 IMPLEMENTATION: **PARTIAL**.
+PHASE 9.16 RECOVERY EXECUTION: **BLOCKED / OWNER ACTION REQUIRED**.
+Waiting on:
+
+```
+Authorize isolated PITR restore into a new database, not production
+Approved service name: docuflow-rto-rpo-drill-20261108
+Source: docuflow-db
+PITR timestamp: <YYYY-MM-DD HH:MM Asia/Jakarta>
+Creates billable resource: YES
+```

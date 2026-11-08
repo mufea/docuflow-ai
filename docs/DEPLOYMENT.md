@@ -651,7 +651,10 @@ deleted (gone-from-list report 8 Nov 2026, 15:46 Asia/Jakarta; `docuflow-db`
 still present). This agent did not click Delete
 (`docs/reports/PHASE_9_14_RECOVERY_DRILL_CLEANUP.md`). Phase 9.15 backup/PITR
 dashboard fields for `docuflow-db` are **NOT VERIFIED**
-(`docs/reports/PHASE_9_15_BACKUP_PITR_ASSURANCE.md`).
+(`docs/reports/PHASE_9_15_BACKUP_PITR_ASSURANCE.md`). Phase 9.16 isolated
+timed PITR drill is **BLOCKED** on owner approval
+(`docs/reports/PHASE_9_16_RTO_RPO_RECOVERY_VALIDATION.md`). Do not restore
+into `docuflow-db`.
 
 This section is a general runbook. It was **not** executed against staging or
 production from this environment. The Blueprint lists Postgres `0.1c-256mb`;
