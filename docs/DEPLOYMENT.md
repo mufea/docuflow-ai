@@ -649,7 +649,9 @@ without error. Drill **VERIFIED**. Production was not cut over. Phase 9.14
 cleanup of `docuflow-db-restore-drill-20261107` is **OWNER VERIFIED**
 deleted (gone-from-list report 8 Nov 2026, 15:46 Asia/Jakarta; `docuflow-db`
 still present). This agent did not click Delete
-(`docs/reports/PHASE_9_14_RECOVERY_DRILL_CLEANUP.md`).
+(`docs/reports/PHASE_9_14_RECOVERY_DRILL_CLEANUP.md`). Phase 9.15 backup/PITR
+dashboard fields for `docuflow-db` are **NOT VERIFIED**
+(`docs/reports/PHASE_9_15_BACKUP_PITR_ASSURANCE.md`).
 
 This section is a general runbook. It was **not** executed against staging or
 production from this environment. The Blueprint lists Postgres `0.1c-256mb`;
