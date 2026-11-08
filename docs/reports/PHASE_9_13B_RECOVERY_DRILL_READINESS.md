@@ -20,7 +20,7 @@ Baseline `origin/main`: `018b34a`.
 | INTEGRITY COUNTS | **PASS** (counts only; no row contents) |
 | RESTORE DRILL VERIFIED | **YES** |
 | PRODUCTION RECOVERY READY | **YES** (isolated restore procedure proven; **no** production cutover) |
-| BLOCKED | None for the drill. Drill instance still bills until owner deletes it |
+| BLOCKED | None for the drill. Drill instance owner-reported deleted in 9.14 |
 
 Authoritative product flags: STAGING VERIFIED **YES**; PRODUCTION VERIFIED
 **YES**; RESTORE DRILL VERIFIED **YES**; PRODUCTION RECOVERY READY **YES**
@@ -240,7 +240,7 @@ service uses the drill DSN, owner may send:
 
 Do not delete production or staging databases.
 
-Cleanup procedure (Phase 9.14, not executed):
+Cleanup (Phase 9.14): owner-reported deleted. See
 `docs/reports/PHASE_9_14_RECOVERY_DRILL_CLEANUP.md`.
 
 ## Safety

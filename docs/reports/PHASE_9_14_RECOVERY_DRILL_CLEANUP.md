@@ -4,22 +4,24 @@ Documentation and owner-gated cleanup only. **This agent did not delete
 any Render resource.** Production DSN was not opened. No application code
 changed. Phase 9.15 (backup/PITR assurance) was **not** executed.
 
-Time: **8 Nov 2026, 15:31 Asia/Jakarta (WIB)**.
-Baseline `origin/main`: `73b2bbe` (expected; confirmed).
+Time: **8 Nov 2026, 15:47 Asia/Jakarta (WIB)**.
+Baseline `origin/main`: `b9e34f5` (PR #31 merged). Earlier 9.14 write-up
+used `73b2bbe`.
 
 ## Status
 
 | Label | Status |
 | --- | --- |
 | IMPLEMENTED (this report + status + owner procedure) | **YES** |
-| LOCALLY VERIFIED | **YES** (git baseline, identity grep, `git diff --check`) |
+| LOCALLY VERIFIED | **YES** (git baseline, identity match, `git diff --check`) |
 | CI VERIFIED | **NOT EXECUTED** (docs-only; no suite required) |
-| OWNER VERIFIED (delete confirmation) | **NO** |
-| INFRASTRUCTURE VERIFIED (resource gone) | **NOT EXECUTED** |
-| BLOCKED | Owner must send `Delete docuflow-db-restore-drill-20261107` then click Delete in Render |
+| OWNER VERIFIED (delete line + gone-from-list) | **YES** (line 15:44; gone-from-list report 15:46) |
+| INFRASTRUCTURE VERIFIED (dashboard by this agent) | **NOT EXECUTED** (no Render access) |
+| BLOCKED | None for 9.14 cleanup |
 
 PHASE 9.14 IMPLEMENTATION: **COMPLETE**.
-PHASE 9.14 INFRASTRUCTURE CLEANUP: **BLOCKED / OWNER ACTION REQUIRED**.
+PHASE 9.14 INFRASTRUCTURE CLEANUP: **OWNER VERIFIED** (not independently
+dashboard-verified).
 
 ## 1. Recovery evidence audit (preserve 9.13B)
 
@@ -77,28 +79,18 @@ delete.
 | No other active recovery on this instance | **YES** | This phase is cleanup of that drill only |
 | Identity matches expected isolated restore | **YES** | All three identifiers match 9.13B |
 
-Safe to **prepare** deletion. Not safe for **this agent** to delete.
-Dashboard confirmation of “not attached” remains **UNKNOWN** until the
-owner checks Connect / env on `docuflow-api`, `docuflow-web`, and
-`docuflow-cleanup`.
+Owner later reported the drill service gone and `docuflow-db` still
+present. Dashboard env attachment was not independently inspected.
 
 ## 4. Owner approval
 
-Phase 9.14 prompt requested this **cleanup workflow**. That is **not**
-the runbook delete line.
-
 | Approval | Status |
 | --- | --- |
-| Workflow (this phase) | **YES** (owner prompt 8 Nov 2026, 15:31 Asia/Jakarta) |
-| Destructive delete | **NO** — waiting on exact line below |
+| Workflow (Phase 9.14 prompt) | **YES** (8 Nov 2026, 15:31 Asia/Jakarta) |
+| Destructive delete line | **YES** — owner sent `Delete docuflow-db-restore-drill-20261107` at **15:44 Asia/Jakarta** |
+| Dashboard Delete click | **OWNER VERIFIED** (gone-from-list report 15:46 Asia/Jakarta) |
+| This agent clicked Delete | **NO** |
 
-Required immediately before clicking Delete:
-
-```
-Delete docuflow-db-restore-drill-20261107
-```
-
-Do **not** interpret the Phase 9.14 prompt as that confirmation.
 Production cutover remains **unauthorized**.
 
 ## 5. Owner-executable delete procedure
@@ -114,7 +106,7 @@ Workspace: production (has `docuflow-db`). Do **not** open staging.
 5. Confirm it is **not** `docuflow-db` and **not** `dpg-dbiqe70ae00c73cdif7g-a`.
 6. Check `docuflow-api`, `docuflow-web`, and `docuflow-cleanup` env: none
    use this hostname. If any does, **STOP**.
-7. Send the delete line in chat (section 4).
+7. Delete line already received in chat (15:44 Asia/Jakarta).
 8. Delete **only** `docuflow-db-restore-drill-20261107`.
 9. Confirm that service is gone from the list.
 10. Confirm **`docuflow-db`** is still listed.
@@ -128,34 +120,48 @@ deleted_at (Asia/Jakarta):
 docuflow-db still present: YES/NO
 ```
 
-## 6. Post-cleanup verification (after owner report)
+## 6. Post-cleanup verification
 
-**NOT EXECUTED.** No owner delete confirmation yet.
+Owner report **8 Nov 2026, 15:46 Asia/Jakarta** (names only):
 
-After that report, this phase will record deletion time, then re-check
-read-only `GET https://docuflowai.site/health` and `/ready`. Expected:
-HTTP 200, `broker=inline`, `rq_workers=0`, `database=true`, `storage=true`.
+```
+deleted_service: docuflow-db-restore-drill-20261107
+deleted_instance: dpg-dbnk595g1s2s73cuafl0-a
+deleted_at (Asia/Jakarta): 15:05
+docuflow-db still present: YES
+```
 
-Dashboard “resource gone” will remain **OWNER VERIFIED** unless this
-environment gains Render access (it does not).
+Identity match: service and instance equal the approved drill target, not
+`docuflow-db` / `dpg-dbiqe70ae00c73cdif7g-a`.
 
-## 7. Production protection (this pass)
+Gap: owner-reported `deleted_at` **15:05** is earlier than the chat delete
+line at **15:44**. Recorded as stated. Not adjusted. Possible earlier
+dashboard click or typo. Chat receipt time of the gone-from-list message
+is **15:46**.
 
-Independently verified **8 Nov 2026, 15:31 Asia/Jakarta** (read-only):
+Independently verified after that report (**15:47 Asia/Jakarta**, read-only):
 
 - `GET https://docuflowai.site/health` HTTP 200 `status=ok` `service=docuflow-api`
 - `GET https://docuflowai.site/ready` HTTP 200 `broker=inline` `rq_workers=0`
   `database=true` `storage=true`
 
-No uploads, downloads, SQL, or env changes.
+Dashboard “resource gone” is **OWNER VERIFIED**. This environment has no
+Render dashboard.
+
+## 7. Production protection (this pass)
+
+Pre-delete independent probe **15:31 Asia/Jakarta**: `/health` `/ready` HTTP 200
+`broker=inline`. Post-delete independent probe **15:47**: same. No uploads,
+downloads, SQL, or env changes. Live DSN not opened.
 
 ## 8. Remaining risks / limitations
 
-- Drill instance **still bills** until owner deletes it.
-- Attachment of production `DATABASE_URL` is **UNKNOWN** without dashboard.
+- Drill billing should stop after Render finishes deletion (**OWNER VERIFIED**
+  gone; not independently confirmed here).
 - Live production Alembic still inferred from the 9.13B copy.
 - RTO / PITR / retention still **NOT VERIFIED** (Phase 9.15, not this phase).
 - Deleting the drill does **not** change production backups or R2.
+- `deleted_at` 15:05 vs authorization 15:44 is an unresolved timestamp gap.
 
 ## 9. Files
 
