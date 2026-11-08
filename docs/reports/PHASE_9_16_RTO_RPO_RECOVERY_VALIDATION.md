@@ -217,7 +217,7 @@ No `alembic upgrade` / `stamp` / `migrate` if schema fails. Record failure.
 
 ## M. Cleanup (later, separate line)
 
-After evidence: `Delete docuflow-rto-rpo-drill-20261108`  
+After evidence: `Delete docuflow-rto-rpo-drill-20261108`.
 Never delete `docuflow-db`.
 
 ## N. Files
