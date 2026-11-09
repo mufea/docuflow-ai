@@ -7,7 +7,9 @@ Timezone: **Asia/Jakarta**. Record UTC too if the dashboard shows it.
 
 Related:
 
-- Objectives and gaps: `docs/reports/PHASE_9_18_BUSINESS_CONTINUITY_DR_OBJECTIVES.md`
+- Objectives: `docs/reports/PHASE_9_18_BUSINESS_CONTINUITY_DR_OBJECTIVES.md`
+- Capability assessment (9.19): `docs/reports/PHASE_9_19_RECOVERY_CAPABILITY_GAP_ASSESSMENT.md`
+- Readiness checklist: `docs/runbooks/RECOVERY_READINESS_CHECKLIST.md`
 - Incidents: `docs/runbooks/PRODUCTION_INCIDENT_RESPONSE.md`
 - Database restore procedure: `docs/operations/PRODUCTION_DATABASE_RECOVERY_RUNBOOK.md`
 - Ops: `docs/OPERATIONS.md`
@@ -20,8 +22,8 @@ chat.
 
 | Objective | Target | Capability |
 | --- | --- | --- |
-| Business RTO | **4 hours** | **NOT YET VERIFIED** |
-| Business RPO | **24 hours** | **NOT YET VERIFIED** |
+| Business RTO | **4 hours** | **NOT DEMONSTRATED** (9.19) |
+| Business RPO | **24 hours** | **NOT DEMONSTRATED** (9.19) |
 
 Isolated database restore last measured **15 minutes** (Phase 9.16 T0/T1).
 That is **not** business RTO. Observed RPO is **NOT DETERMINABLE**. Phase

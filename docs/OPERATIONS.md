@@ -76,8 +76,11 @@ Production scenarios (API down, database, storage, cleanup cron, suspected
 data loss, credential exposure):
 `docs/runbooks/PRODUCTION_INCIDENT_RESPONSE.md`.
 Business continuity / DR **objectives** (RTO 4 h / RPO 24 h, owner-approved
-targets, capability not verified):
+targets; 9.19 capability **NOT DEMONSTRATED**):
 `docs/runbooks/BUSINESS_CONTINUITY_AND_DISASTER_RECOVERY.md`.
+Recovery readiness checklist:
+`docs/runbooks/RECOVERY_READINESS_CHECKLIST.md`.
+Capability assessment: `docs/reports/PHASE_9_19_RECOVERY_CAPABILITY_GAP_ASSESSMENT.md`.
 Database restore: `docs/operations/PRODUCTION_DATABASE_RECOVERY_RUNBOOK.md`.
 
 1. Check `/health` then `/ready`. HTTP 503 with `status=degraded` names the failed dependency without secrets.
