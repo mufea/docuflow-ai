@@ -4,7 +4,7 @@ Owner reported the isolated instance Available. **This agent did not click
 Restore** and did not connect. Production DSN was not opened. Production
 cutover is **not authorized**. No application code changed.
 
-Time: **9 Nov 2026, 18:17 Asia/Jakarta (WIB)** (`2026-11-09T18:17:00+07:00`).
+Time: **9 Nov 2026, 18:20 Asia/Jakarta (WIB)** (`2026-11-09T18:20:00+07:00`).
 Baseline `origin/main` at this branch: **`eefec9e`**.
 
 ## Status
@@ -23,7 +23,7 @@ Baseline `origin/main` at this branch: **`eefec9e`**.
 
 PHASE 9.16 IMPLEMENTATION: **COMPLETE** (isolated exercise; limitations below).
 PHASE 9.16 RECOVERY EXECUTION: **COMPLETE** for schema/counts. RPO **NOT DETERMINABLE**.
-PHASE 9.16 CLEANUP: **BLOCKED** — delete line received; dashboard Delete **NOT EXECUTED**.
+PHASE 9.16 CLEANUP: **OWNER VERIFIED** (dashboard gone-from-list; this agent has no Render access).
 
 ## A. Metadata
 
@@ -257,7 +257,7 @@ No `alembic upgrade` / `stamp` / `migrate` was run.
 - Dashboard “PITR timestamp used” blank → RPO not determinable.
 - T2 not sent by owner; 18:16 is SQL-result chat receipt (**INFERRED**).
 - 3-day window is owner-reported screenshot text, not viewed here.
-- Second Basic Postgres bills until the owner deletes it in Render.
+- Drill billing should stop after Render finishes deletion (**OWNER VERIFIED** gone).
 - No production cutover → cannot claim application RTO.
 - R2 objects are a separate recovery domain.
 
@@ -292,7 +292,23 @@ deleted_at (Asia/Jakarta):
 docuflow-db still present: YES/NO
 ```
 
-Dashboard Delete: **NOT EXECUTED**.
+Owner gone-from-list report **9 Nov 2026, 18:20 Asia/Jakarta**:
+
+```
+deleted_service: docuflow-rto-rpo-drill-20261108
+deleted_instance: dpg-dboq68bm8hqs73en0rpg-a
+deleted_at (Asia/Jakarta): 18:19
+docuflow-db still present: YES
+```
+
+Identity matches the approved drill, not production. Class: **OWNER-REPORTED**.
+
+Independently after that report (**18:20 Asia/Jakarta**, read-only):
+`GET https://docuflowai.site/health` HTTP 200 `service=docuflow-api`;
+`GET /ready` HTTP 200 `broker=inline` `rq_workers=0` `database=true`
+`storage=true`.
+
+This agent did **not** click Delete and has no dashboard.
 
 ## N. Files
 

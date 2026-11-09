@@ -1127,12 +1127,13 @@ storage_deletions=131 cleanup_leases=1 fk=7. Extra public relations
 chat receipt (**INFERRED**). `PITR timestamp used` blank → RPO **NOT
 DETERMINABLE**. This agent did **not** click Restore or connect.
 Production `/health` `/ready` HTTP 200 `broker=inline` at 18:09. Drill
-Owner (18:18 Asia/Jakarta) sent `Delete docuflow-rto-rpo-drill-20261108`.
-This agent **did not** click Delete. Cleanup **BLOCKED** on dashboard
-Delete + gone-from-list reply.
+Owner (18:18) sent `Delete docuflow-rto-rpo-drill-20261108`. Owner
+gone-from-list (18:20): same service/instance; `deleted_at` **18:19**;
+`docuflow-db still present: YES`. This agent **did not** click Delete.
+Post-delete `/health` `/ready` HTTP 200 `broker=inline` at **18:20**.
 
 PHASE 9.16 IMPLEMENTATION: **COMPLETE** (isolated exercise).
 PHASE 9.16 RECOVERY EXECUTION: **COMPLETE** (schema/counts). Isolated
 restore duration **15 min** (owner T0/T1). Observed RPO **NOT
 DETERMINABLE**. Business RTO **NOT ESTABLISHED**.
-PHASE 9.16 CLEANUP: **BLOCKED / OWNER ACTION REQUIRED**.
+PHASE 9.16 CLEANUP: **OWNER VERIFIED**.
