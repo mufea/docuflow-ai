@@ -652,7 +652,11 @@ still present). This agent did not click Delete
 (`docs/reports/PHASE_9_14_RECOVERY_DRILL_CLEANUP.md`). Phase 9.15 backup/PITR
 dashboard fields for `docuflow-db` are **NOT VERIFIED**
 (`docs/reports/PHASE_9_15_BACKUP_PITR_ASSURANCE.md`). Phase 9.16 isolated
-timed PITR drill is **BLOCKED** on owner approval
+PITR instance `docuflow-rto-rpo-drill-20261108` is **OWNER-REPORTED**
+Available (`dpg-dboq68bm8hqs73en0rpg-a`). T1−T0 15 min (owner clocks).
+Owner PSQL Alembic `0003` and required tables **PASS**. RPO still
+**NOT DETERMINABLE**. Drill instance **OWNER VERIFIED** deleted (18:19
+Asia/Jakarta); `docuflow-db` still present. This agent did not click Delete
 (`docs/reports/PHASE_9_16_RTO_RPO_RECOVERY_VALIDATION.md`). Do not restore
 into `docuflow-db`.
 

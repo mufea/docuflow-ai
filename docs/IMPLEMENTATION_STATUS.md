@@ -1116,14 +1116,24 @@ Method A (isolated PITR) selected; Method B (logical export) not run.
 click Restore or provision. Production DSN **NONE**. Cutover **NONE**.
 T0–T3 **NOT MEASURABLE**. Observed RPO **NOT DETERMINABLE**.
 
-PHASE 9.16 IMPLEMENTATION: **PARTIAL**.
-PHASE 9.16 RECOVERY EXECUTION: **BLOCKED / OWNER ACTION REQUIRED**.
-Waiting on:
+Owner restored (18:08 Asia/Jakarta): `docuflow-rto-rpo-drill-20261108` /
+`dpg-dboq68bm8hqs73en0rpg-a` / `docuflow_db_q32a_7751`. T0 **17:50**, T1
+**18:05** (15 min isolated restore, owner clocks). Identity gate
+**isolated-restore**. Owner PSQL (18:16): `SELECT 1` ok; database name
+matches; Alembic `0003_cost_efficient_reliability`; required tables +
+index; counts users=2 documents=131 jobs=52 credit_ledger=142
+storage_deletions=131 cleanup_leases=1 fk=7. Extra public relations
+`pg_stat_statements` / `pg_stat_statements_info`. T2 not sent; 18:16 is
+chat receipt (**INFERRED**). `PITR timestamp used` blank → RPO **NOT
+DETERMINABLE**. This agent did **not** click Restore or connect.
+Production `/health` `/ready` HTTP 200 `broker=inline` at 18:09. Drill
+Owner (18:18) sent `Delete docuflow-rto-rpo-drill-20261108`. Owner
+gone-from-list (18:20): same service/instance; `deleted_at` **18:19**;
+`docuflow-db still present: YES`. This agent **did not** click Delete.
+Post-delete `/health` `/ready` HTTP 200 `broker=inline` at **18:20**.
 
-```
-Authorize isolated PITR restore into a new database, not production
-Approved service name: docuflow-rto-rpo-drill-20261108
-Source: docuflow-db
-PITR timestamp: <YYYY-MM-DD HH:MM Asia/Jakarta>
-Creates billable resource: YES
-```
+PHASE 9.16 IMPLEMENTATION: **COMPLETE** (isolated exercise).
+PHASE 9.16 RECOVERY EXECUTION: **COMPLETE** (schema/counts). Isolated
+restore duration **15 min** (owner T0/T1). Observed RPO **NOT
+DETERMINABLE**. Business RTO **NOT ESTABLISHED**.
+PHASE 9.16 CLEANUP: **OWNER VERIFIED**.
