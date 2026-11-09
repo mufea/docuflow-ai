@@ -1116,14 +1116,13 @@ Method A (isolated PITR) selected; Method B (logical export) not run.
 click Restore or provision. Production DSN **NONE**. Cutover **NONE**.
 T0–T3 **NOT MEASURABLE**. Observed RPO **NOT DETERMINABLE**.
 
-PHASE 9.16 IMPLEMENTATION: **PARTIAL**.
-PHASE 9.16 RECOVERY EXECUTION: **BLOCKED / OWNER ACTION REQUIRED**.
-Waiting on:
+Owner (9 Nov 2026, 17:52 Asia/Jakarta) sent the authorization for
+`docuflow-rto-rpo-drill-20261108` source `docuflow-db` PITR
+**2026-11-09 17:50 Asia/Jakarta**, billable YES. This agent **did not**
+click Restore. At 17:53 that target was ~3 minutes old; Render forbids
+restore within 10 minutes of now. Earliest click for 17:50: **18:00
+Asia/Jakarta**. T0–T3 still **NOT MEASURABLE**.
 
-```
-Authorize isolated PITR restore into a new database, not production
-Approved service name: docuflow-rto-rpo-drill-20261108
-Source: docuflow-db
-PITR timestamp: <YYYY-MM-DD HH:MM Asia/Jakarta>
-Creates billable resource: YES
-```
+PHASE 9.16 IMPLEMENTATION: **PARTIAL**.
+PHASE 9.16 RECOVERY EXECUTION: **BLOCKED / OWNER ACTION REQUIRED**
+(10-minute PITR rule, then dashboard Restore to a **new** instance only).

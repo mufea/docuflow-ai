@@ -1,42 +1,41 @@
 # Phase 9.16 — Measured RTO/RPO and recovery validation
 
-Isolated recovery **design** only this pass. **This agent did not restore,
-provision, or delete** any Render resource. Production DSN was not opened.
-Production cutover is **not authorized**. No application code changed.
+Isolated PITR is **authorized**. **This agent did not click Restore.**
+Production DSN was not opened. Production cutover is **not authorized**.
+No application code changed.
 
-Time: **8 Nov 2026, 17:04 Asia/Jakarta (WIB)** (`2026-11-08T17:04:00+07:00`).
-Baseline `origin/main`: **`c44cafa`** (expected; confirmed).
+Time: **9 Nov 2026, 17:53 Asia/Jakarta (WIB)** (`2026-11-09T17:53:00+07:00`).
+Baseline `origin/main`: **`eefec9e`** (PR #34 merged).
 
 ## Status
 
 | Label | Status |
 | --- | --- |
 | IMPLEMENTED (method assessment + resource spec + this report) | **YES** |
-| LOCALLY VERIFIED | **YES** (git baseline `c44cafa`, identity reuse, `git diff --check`) |
+| LOCALLY VERIFIED | **YES** (git baseline, 10-minute PITR rule check) |
 | CI VERIFIED | **NOT EXECUTED** (docs-only) |
-| OWNER APPROVAL (billable isolated restore) | **NOT RECORDED** |
-| RECOVERY EXECUTION | **BLOCKED / OWNER ACTION REQUIRED** |
+| OWNER APPROVAL (billable isolated restore) | **YES** (9 Nov 2026, 17:52 Asia/Jakarta) |
+| RECOVERY EXECUTION | **BLOCKED** — Render forbids restore within 10 minutes of now; approved PITR **17:50** was ~3 minutes old at 17:53. Earliest click for that target: **18:00 Asia/Jakarta**. Then owner clicks Restore. |
 | Isolated RTO | **NOT MEASURABLE** (no T0) |
 | Isolated RPO | **NOT DETERMINABLE** (no recovered-data timestamp) |
 | Business RTO / guaranteed RPO | **NOT ESTABLISHED** |
 
 PHASE 9.16 IMPLEMENTATION: **PARTIAL**.
-PHASE 9.16 RECOVERY EXECUTION: **BLOCKED / OWNER ACTION REQUIRED**.
-
-This prompt is **not** restore authorization. 9.13B counts are **not**
-rewritten. 9.13B duration was **not** a measured RTO (no T0/T1).
+PHASE 9.16 RECOVERY EXECUTION: **BLOCKED / OWNER ACTION REQUIRED**
+(wait until 18:00 WIB or pick an older timestamp, then click Restore on a **new** instance only).
 
 ## A. Metadata
 
 | Field | Value |
 | --- | --- |
 | Phase | 9.16 |
-| Drill ID | `docuflow-rto-rpo-drill-20261108` (proposed; **not created**) |
-| Branch | `cursor/phase-9-16-rto-rpo-recovery-validation-8f43` |
-| Recovery method | **Method A recommended** — isolated PITR to a **new** instance. **NOT EXECUTED** |
+| Drill ID | `docuflow-rto-rpo-drill-20261108` (**authorized; not created**) |
+| Branch | `cursor/phase-9-16-owner-pitr-authorization-8f43` |
+| Recovery method | Method A — isolated PITR. **NOT EXECUTED** |
 | Source | `docuflow-db` / `dpg-dbiqe70ae00c73cdif7g-a` |
+| Selected PITR timestamp | **2026-11-09 17:50 Asia/Jakarta** (`2026-11-09T17:50:00+07:00`) |
 | Destination | Proposed `docuflow-rto-rpo-drill-20261108` — identity **UNKNOWN** until created |
-| Owner approval | **NOT RECORDED** |
+| Owner approval | **RECORDED** |
 
 ## B. Safety evidence
 
@@ -47,7 +46,7 @@ rewritten. 9.13B duration was **not** a measured RTO (no T0/T1).
 | Production mutations | **NONE** |
 | Production cutover | **NONE** |
 | Isolated resource identity | **UNKNOWN** (not provisioned) |
-| Owner approval | **NOT RECORDED** |
+| Owner approval | **RECORDED** |
 
 Protected: `docuflow-db` / `dpg-dbiqe70ae00c73cdif7g-a`. Do not reuse deleted
 `docuflow-db-restore-drill-20261107` / `dpg-dbnk595g1s2s73cuafl0-a`.
@@ -106,7 +105,7 @@ If Restore would replace `docuflow-db`, **do not click it**.
 | Plan | `0.1c-256mb` (same class as production; do not change production) |
 | Storage | Default for that plan; do not resize production |
 | Source | `docuflow-db` PITR |
-| Recovery timestamp | **Owner-selected**; within 3-day window; **≥10 minutes** before click (Render docs). **Not invented** |
+| Recovery timestamp | **2026-11-09 17:50 Asia/Jakarta** — inside owner-reported 3-day window. At 17:53 it was **only ~3 minutes** old. Render: cannot restore within 10 minutes of now. Earliest Start Recovery for this target: **18:00 Asia/Jakarta**. |
 | Expected lifetime | Until T2/T3 evidence, then separate `Delete …` approval |
 | Cleanup | Delete **only** this named instance; never `docuflow-db` |
 | Billable | **YES** (second paid Postgres until deleted) |
@@ -115,17 +114,18 @@ If Restore would replace `docuflow-db`, **do not click it**.
 | Attach to API/web/cleanup | **NO** |
 | Production `DATABASE_URL` | **unchanged** |
 
-## G. Owner approval required (exact)
+## G. Owner approval (recorded)
 
-Do not click Restore until the owner sends:
+Owner (9 Nov 2026, **17:52 Asia/Jakarta**) sent the exact authorization,
+including `PITR timestamp: 2026-11-09 17:50 Asia/Jakarta` and
+`Creates billable resource: YES`.
 
-```
-Authorize isolated PITR restore into a new database, not production
-Approved service name: docuflow-rto-rpo-drill-20261108
-Source: docuflow-db
-PITR timestamp: <YYYY-MM-DD HH:MM Asia/Jakarta>
-Creates billable resource: YES
-```
+**STOP before Restore until** either:
+
+- clock is **18:00 Asia/Jakarta or later** (17:50 + 10 minutes), or
+- owner instead uses an older PITR time already ≥10 minutes in the past.
+
+This agent will **not** click Restore.
 
 Then owner-only dashboard steps:
 
@@ -169,7 +169,7 @@ T0/T1 and is **not** Phase 9.16 RTO.
 | Reference timestamp | **UNKNOWN** (no incident; owner may set inspection time as reference) |
 | Source backup consistency timestamp | **UNKNOWN** |
 | Export completion timestamp | OWNER-REPORTED export created 7 Nov 2026, 5:27 PM (timezone **UNKNOWN**) — unused unless Method B |
-| Selected PITR timestamp | **UNKNOWN** (owner must choose) |
+| Selected PITR timestamp | **2026-11-09 17:50 Asia/Jakarta** (authorized; restore not started) |
 | Actual recovered data timestamp | **UNKNOWN** |
 | Observed recovery-point gap | **NOT DETERMINABLE** |
 | Guaranteed RPO | **UNKNOWN** (3-day window is a retention claim, not a measured gap) |
