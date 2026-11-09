@@ -75,6 +75,9 @@ python -m docuflow.cleanup
 Production scenarios (API down, database, storage, cleanup cron, suspected
 data loss, credential exposure):
 `docs/runbooks/PRODUCTION_INCIDENT_RESPONSE.md`.
+Business continuity / DR **objectives** (RTO 4 h / RPO 24 h, owner-approved
+targets, capability not verified):
+`docs/runbooks/BUSINESS_CONTINUITY_AND_DISASTER_RECOVERY.md`.
 Database restore: `docs/operations/PRODUCTION_DATABASE_RECOVERY_RUNBOOK.md`.
 
 1. Check `/health` then `/ready`. HTTP 503 with `status=degraded` names the failed dependency without secrets.

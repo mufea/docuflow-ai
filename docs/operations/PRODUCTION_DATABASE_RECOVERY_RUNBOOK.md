@@ -1,16 +1,24 @@
 # Production database recovery runbook
 
-Operational procedure for `docuflow-db`. It is **not** proof that a restore
-has been tested. Phase 9.13 status: drill **NOT VERIFIED**.
+Operational procedure for `docuflow-db`. Isolated restores were later
+verified in Phases 9.13B and 9.16; that is **not** production cutover and
+**not** a 4-hour business RTO guarantee. Phase 9.13 header historically
+said drill not verified.
 
 Never paste `DATABASE_URL`, passwords, or keys into chat, tickets, or git.
 
 ## 1. Recovery objectives and scope
 
-| Objective | Target (until measured) |
+Business RTO/RPO (owner-approved **policy**, capability **not** verified):
+`docs/runbooks/BUSINESS_CONTINUITY_AND_DISASTER_RECOVERY.md`.
+Business RTO **4 hours**. Business RPO **24 hours**. Isolated DB restore
+**15 minutes** (9.16) is **not** business RTO. Observed RPO **NOT
+DETERMINABLE**. Phase 9.15 remains open.
+
+| Objective | Target |
 | --- | --- |
-| RPO | Last successful Render backup (often ~daily on Basic) plus any operator `pg_dump` |
-| RTO | Hours: provision/restore a **new** DB, verify, then owner-approved cutover |
+| Business RPO | **24 hours** (approved). Technical capability **NOT YET VERIFIED**. Do not treat backup retention or a 3-day PITR window as measured RPO. |
+| Business RTO | **4 hours** (approved). Technical end-to-end capability **NOT YET VERIFIED**. Isolated restore is one stage only. |
 | In scope | PostgreSQL schema and rows on `docuflow-db` |
 | Out of scope | R2/S3 object bytes, Redis (none), in-flight inline jobs, Render disk |
 

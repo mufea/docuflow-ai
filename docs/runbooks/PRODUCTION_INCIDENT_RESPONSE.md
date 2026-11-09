@@ -9,6 +9,7 @@ Timezone for notes: **Asia/Jakarta**. Record UTC too if the dashboard shows it.
 Related:
 
 - Recovery: `docs/operations/PRODUCTION_DATABASE_RECOVERY_RUNBOOK.md`
+- BC/DR objectives: `docs/runbooks/BUSINESS_CONTINUITY_AND_DISASTER_RECOVERY.md`
 - Ops/logging: `docs/OPERATIONS.md`
 - Audit: `docs/reports/PHASE_9_17_OPERATIONAL_HARDENING.md`
 
@@ -45,7 +46,8 @@ degradation; SEV-3 recoverable; SEV-4 informational.
    approval. Never restore in-place onto `docuflow-db` while it is the live
    copy.
 6. Isolated restore duration last measured **15 minutes** (9.16 T0/T1).
-   That is **not** business RTO.
+   That is **not** business RTO. Owner-approved business RTO is **4 hours**;
+   capability **NOT YET VERIFIED**.
 
 ## Scenario 3 — Storage failure
 
@@ -71,7 +73,8 @@ degradation; SEV-3 recoverable; SEV-4 informational.
 3. Recovery points: dashboard PITR window (owner-reported **3 days**);
    logical export (7 Nov 2026, 5:27 PM, retention ≥7 days). Latest
    restorable instant **UNKNOWN** (9.15 open). Observed RPO **NOT
-   DETERMINABLE**.
+   DETERMINABLE**. Owner-approved business RPO is **24 hours**;
+   capability **NOT YET VERIFIED**.
 4. Isolated restore only, new name, identity gate, then owner cutover
    approval if ever needed. Cutover is **not** pre-authorized.
 
