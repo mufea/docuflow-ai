@@ -1155,4 +1155,28 @@ trigger, restore, or paid monitor. Alert matrix is specification only.
 PHASE 9.17 IMPLEMENTATION: **COMPLETE** (documentation).
 PHASE 9.17 ALERTING: **NOT EXECUTED**.
 BACKUP ASSURANCE COMPLETE: **NO** (9.15 still open).
-Phase 9.18 (business RTO/RPO objectives): **NOT STARTED**.
+Phase 9.18: see below.
+
+## Phase 9.18 — Business continuity and DR objectives — documentation complete
+
+Objective: record owner-approved **business** RTO/RPO and the DR operating
+model. **Not** a restore. Baseline `origin/main` **`6274c73`** (9 Nov 2026,
+19:30 Asia/Jakarta). Report:
+`docs/reports/PHASE_9_18_BUSINESS_CONTINUITY_DR_OBJECTIVES.md`.
+Runbook: `docs/runbooks/BUSINESS_CONTINUITY_AND_DISASTER_RECOVERY.md`.
+
+Owner-approved targets: business RTO **4 hours**; business RPO **24 hours**.
+Capability of either target: **NOT YET VERIFIED**. 9.16 isolated restore
+**15 minutes** preserved (not business RTO). Observed RPO still **NOT
+DETERMINABLE**. 9.15 still open (latest PITR instant **UNKNOWN**; backup
+schedule **NOT INDEPENDENTLY CAPTURED**). Continuity mode: **controlled
+service suspension**. No application code, DSN, restore, cutover, or new
+infrastructure. Alerting remains **NOT EXECUTED**.
+
+PHASE 9.18 IMPLEMENTATION: **COMPLETE** (documentation).
+BUSINESS RTO TARGET: **OWNER APPROVED — 4 HOURS**.
+BUSINESS RTO CAPABILITY: **NOT YET VERIFIED**.
+BUSINESS RPO TARGET: **OWNER APPROVED — 24 HOURS**.
+BUSINESS RPO CAPABILITY: **NOT YET VERIFIED**.
+BACKUP ASSURANCE COMPLETE: **NO** (9.15 still open).
+Phase 9.19 (capability gap closure): **NOT STARTED**.
