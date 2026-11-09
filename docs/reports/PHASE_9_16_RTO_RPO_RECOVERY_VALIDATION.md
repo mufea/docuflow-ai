@@ -4,7 +4,7 @@ Owner reported the isolated instance Available. **This agent did not click
 Restore** and did not connect. Production DSN was not opened. Production
 cutover is **not authorized**. No application code changed.
 
-Time: **9 Nov 2026, 18:09 Asia/Jakarta (WIB)** (`2026-11-09T18:09:00+07:00`).
+Time: **9 Nov 2026, 18:17 Asia/Jakarta (WIB)** (`2026-11-09T18:17:00+07:00`).
 Baseline `origin/main` at this branch: **`eefec9e`**.
 
 ## Status
@@ -16,13 +16,13 @@ Baseline `origin/main` at this branch: **`eefec9e`**.
 | OWNER APPROVAL | **YES** |
 | Owner restore (new instance) | **OWNER-REPORTED** |
 | Isolated DB recovery time (T1−T0) | **PARTIALLY VERIFIED** 15 min (owner clocks) |
-| Integrity SQL (T2) | **NOT EXECUTED** |
-| Isolated RTO (end-to-end T3−T0) | **NOT MEASURABLE** (no T2/T3) |
+| Integrity SQL (T2) | **PASS** (owner PSQL; this agent did not connect) |
+| Isolated RTO (end-to-end T3−T0) | **INFERRED** 26 min using SQL-result chat receipt 18:16 as T2/T3 (owner did not send T2) |
 | Isolated RPO | **NOT DETERMINABLE** (`PITR timestamp used` blank) |
 | Business RTO / guaranteed RPO | **NOT ESTABLISHED** |
 
-PHASE 9.16 IMPLEMENTATION: **PARTIAL**.
-PHASE 9.16 RECOVERY EXECUTION: **PARTIAL** — waiting on drill PSQL (T2).
+PHASE 9.16 IMPLEMENTATION: **COMPLETE** (isolated exercise; limitations below).
+PHASE 9.16 RECOVERY EXECUTION: **COMPLETE** for schema/counts. RPO **NOT DETERMINABLE**.
 
 ## A. Metadata
 
@@ -170,16 +170,16 @@ Owner-reported (9 Nov 2026, 18:08 Asia/Jakarta). Class: **OWNER-REPORTED**.
 | --- | --- |
 | Recovery initiated T0 | **17:50 Asia/Jakarta** (`2026-11-09T17:50:00+07:00`) |
 | Database available T1 | **18:05 Asia/Jakarta** (`2026-11-09T18:05:00+07:00`) |
-| Integrity validation complete T2 | **NOT MEASURABLE** |
-| Recovery validation complete T3 | **NOT MEASURABLE** |
+| Integrity validation complete T2 | **INFERRED** 18:16 Asia/Jakarta (`2026-11-09T18:16:00+07:00`) from SQL-result message time. Owner did **not** send T2. |
+| Recovery validation complete T3 | Same as T2 (no application cutover) |
 
 | Metric | Result |
 | --- | --- |
 | Database restoration duration (T1−T0) | **15 minutes** (OWNER-REPORTED clocks) |
-| Database validation duration (T2−T1) | **NOT MEASURABLE** |
-| End-to-end isolated recovery (T3−T0) | **NOT MEASURABLE** |
-| Isolated database recovery time | **15 minutes** (T1−T0 only; not application RTO) |
-| Isolated recovery validation time | **NOT MEASURABLE** |
+| Database validation duration (T2−T1) | **11 minutes** if T2=18:16 receipt (**INFERRED**; includes chat delay) |
+| End-to-end isolated recovery (T3−T0) | **26 minutes** if T3=18:16 (**INFERRED**) |
+| Isolated database recovery time | **15 minutes** (T1−T0; not application RTO) |
+| Isolated recovery validation time | **11 minutes** (**INFERRED** receipt clock) |
 | Business RTO | **NOT ESTABLISHED** |
 
 Gaps: `PITR timestamp used` was blank. T0 equals the **authorized** PITR
@@ -203,52 +203,39 @@ T0/T1 and is **not** Phase 9.16 RTO.
 | Observed recovery-point gap | **NOT DETERMINABLE** |
 | Guaranteed RPO | **UNKNOWN** (3-day window is a retention claim, not a measured gap) |
 
-## J. Integrity evidence (not run)
+## J. Integrity evidence (owner PSQL, 18:16 Asia/Jakarta)
 
-9.13B historical counts (7 Nov restore copy) — **do not treat as expected
-for a different PITR point**:
-
-users 2, documents 131, jobs 52, credit_ledger 142, storage_deletions 131,
-cleanup_leases 1, FK 7, Alembic `0003_cost_efficient_reliability`.
+Prompt `docuflow_db_q32a_7751=>`. This agent did not connect. Class:
+**OWNER-REPORTED**.
 
 | Check | Expected | Actual | Status |
 | --- | --- | --- | --- |
-| Database availability | isolated dest responds | | NOT EXECUTED |
-| Alembic version | compare to dest only | | NOT EXECUTED |
-| Required tables | users, documents, jobs, cleanup_leases, storage_deletions | | NOT EXECUTED |
-| Index `ix_storage_deletions_lease_until` | present if 0003 | | NOT EXECUTED |
-| Foreign keys | count only | | NOT EXECUTED |
-| Table counts | **not** assumed equal to 9.13B | | NOT EXECUTED |
+| Database availability | `SELECT 1` | 1 | **PASS** |
+| current_database | `docuflow_db_q32a_7751` | `docuflow_db_q32a_7751` | **PASS** |
+| Alembic version | dest only; repo head 0003 | `0003_cost_efficient_reliability` | **PASS** |
+| Required tables | users, documents, jobs, cleanup_leases, storage_deletions | all present | **PASS** |
+| Index `ix_storage_deletions_lease_until` | present if 0003 | present | **PASS** |
+| Foreign keys | count only | 7 | **PASS** (count returned) |
 
-No `alembic upgrade` / `stamp` / `migrate` if schema fails. Record failure.
+Public tables (17): `alembic_version`, `audit_logs`, `cleanup_leases`,
+`credit_accounts`, `credit_ledger`, `documents`, `email_tokens`, `jobs`,
+`operation_costs`, `payment_events`, `pg_stat_statements`,
+`pg_stat_statements_info`, `plans`, `sessions`, `storage_deletions`,
+`subscriptions`, `users`. Extra vs 9.13B: `pg_stat_statements`,
+`pg_stat_statements_info` (extension catalog; not app tables). Not a fail.
 
-### Remaining owner step (T2)
+Counts (not required to match 9.13B; a different restore point):
 
-Open **`docuflow-rto-rpo-drill-20261108`** (not `docuflow-db`) → Connect →
-**PSQL**. Prompt must show `docuflow_db_q32a_7751`. Paste:
+| Table | 9.13B copy (7 Nov) | This drill | Status |
+| --- | ---: | ---: | --- |
+| users | 2 | 2 | same integer; timestamps differ |
+| documents | 131 | 131 | same integer; timestamps differ |
+| jobs | 52 | 52 | same integer; timestamps differ |
+| credit_ledger | 142 | 142 | same integer; timestamps differ |
+| storage_deletions | 131 | 131 | same integer; timestamps differ |
+| cleanup_leases | 1 | 1 | same integer; timestamps differ |
 
-```sql
-SET statement_timeout = '15s';
-SELECT 1;
-SELECT current_database();
-SELECT version_num FROM alembic_version;
-SELECT table_name FROM information_schema.tables
- WHERE table_schema = 'public' ORDER BY 1;
-SELECT COUNT(*) FROM users;
-SELECT COUNT(*) FROM documents;
-SELECT COUNT(*) FROM jobs;
-SELECT COUNT(*) FROM credit_ledger;
-SELECT COUNT(*) FROM storage_deletions;
-SELECT COUNT(*) FROM cleanup_leases;
-SELECT COUNT(*) FROM information_schema.table_constraints
- WHERE constraint_type = 'FOREIGN KEY' AND table_schema = 'public';
-SELECT indexname FROM pg_indexes
- WHERE schemaname = 'public'
-   AND indexname = 'ix_storage_deletions_lease_until';
-```
-
-Paste back labels only (no DSN, no row contents). That completion time is
-**T2**. T3 = T2 for this drill (no app cutover).
+No `alembic upgrade` / `stamp` / `migrate` was run.
 
 ## K. Independent conclusions (this pass)
 
@@ -256,9 +243,9 @@ Paste back labels only (no DSN, no row contents). That completion time is
 | --- | --- |
 | PITR capability | **PARTIALLY VERIFIED** (3-day window + owner new instance) |
 | Logical export recovery | Export present; restore **NOT EXECUTED** |
-| Isolated restore this drill | **OWNER-REPORTED** Available + identity **PASS** |
+| Isolated restore this drill | **OWNER-REPORTED** Available + identity **PASS** + SQL **PASS** |
 | Measured restoration duration | **PARTIALLY VERIFIED** 15 min (owner T0/T1) |
-| Measured validation duration | **NOT MEASURABLE** |
+| Measured validation duration | **INFERRED** 11 min (chat receipt T2) |
 | Observed RPO | **NOT DETERMINABLE** |
 | Guaranteed RPO | **UNKNOWN** |
 | Business RTO target | **NOT ESTABLISHED** |
@@ -267,7 +254,7 @@ Paste back labels only (no DSN, no row contents). That completion time is
 
 - T0/T1 owner-reported; T0 equals authorized PITR 17:50 (possible mix-up).
 - Dashboard “PITR timestamp used” blank → RPO not determinable.
-- T2/T3 not yet run.
+- T2 not sent by owner; 18:16 is SQL-result chat receipt (**INFERRED**).
 - 3-day window is owner-reported screenshot text, not viewed here.
 - Second Basic Postgres bills until deleted.
 - No production cutover → cannot claim application RTO.
