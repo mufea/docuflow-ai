@@ -23,6 +23,7 @@ Baseline `origin/main` at this branch: **`eefec9e`**.
 
 PHASE 9.16 IMPLEMENTATION: **COMPLETE** (isolated exercise; limitations below).
 PHASE 9.16 RECOVERY EXECUTION: **COMPLETE** for schema/counts. RPO **NOT DETERMINABLE**.
+PHASE 9.16 CLEANUP: **BLOCKED** — delete line received; dashboard Delete **NOT EXECUTED**.
 
 ## A. Metadata
 
@@ -256,14 +257,42 @@ No `alembic upgrade` / `stamp` / `migrate` was run.
 - Dashboard “PITR timestamp used” blank → RPO not determinable.
 - T2 not sent by owner; 18:16 is SQL-result chat receipt (**INFERRED**).
 - 3-day window is owner-reported screenshot text, not viewed here.
-- Second Basic Postgres bills until deleted.
+- Second Basic Postgres bills until the owner deletes it in Render.
 - No production cutover → cannot claim application RTO.
 - R2 objects are a separate recovery domain.
 
-## M. Cleanup (later, separate line)
+## M. Cleanup
 
-After evidence: `Delete docuflow-rto-rpo-drill-20261108`.
-Never delete `docuflow-db`.
+Owner (9 Nov 2026, **18:18 Asia/Jakarta**) sent:
+
+`Delete docuflow-rto-rpo-drill-20261108`
+
+This agent will **not** click Delete.
+
+Delete **only** this instance:
+
+| Field | Must match | Stop if |
+| --- | --- | --- |
+| Service | `docuflow-rto-rpo-drill-20261108` | `docuflow-db` |
+| Instance | `dpg-dboq68bm8hqs73en0rpg-a` | `dpg-dbiqe70ae00c73cdif7g-a` |
+| Database | `docuflow_db_q32a_7751` | staging names |
+
+1. Production workspace (not staging).
+2. Open `docuflow-rto-rpo-drill-20261108`. Confirm id and database name.
+3. Confirm API/web/cleanup do **not** use this hostname. If any does, stop.
+4. Delete **only** that service.
+5. Confirm it is gone and **`docuflow-db` is still listed**.
+
+Reply (no DSN):
+
+```
+deleted_service: docuflow-rto-rpo-drill-20261108
+deleted_instance: dpg-dboq68bm8hqs73en0rpg-a
+deleted_at (Asia/Jakarta):
+docuflow-db still present: YES/NO
+```
+
+Dashboard Delete: **NOT EXECUTED**.
 
 ## N. Files
 

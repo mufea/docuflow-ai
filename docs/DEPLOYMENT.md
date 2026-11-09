@@ -655,7 +655,8 @@ dashboard fields for `docuflow-db` are **NOT VERIFIED**
 PITR instance `docuflow-rto-rpo-drill-20261108` is **OWNER-REPORTED**
 Available (`dpg-dboq68bm8hqs73en0rpg-a`). T1−T0 15 min (owner clocks).
 Owner PSQL Alembic `0003` and required tables **PASS**. RPO still
-**NOT DETERMINABLE**. Instance bills until deleted
+**NOT DETERMINABLE**. Delete authorized (18:18 Asia/Jakarta); dashboard
+Delete still outstanding
 (`docs/reports/PHASE_9_16_RTO_RPO_RECOVERY_VALIDATION.md`). Do not restore
 into `docuflow-db`.
 
