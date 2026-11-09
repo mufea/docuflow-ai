@@ -227,3 +227,18 @@ Postgres for drills still bills only when a drill exists (none now).
 | New infrastructure | **NO** |
 | Alerts enabled | **NO** |
 | Live `/health` `/ready` | **YES** once (18:49) |
+
+## Next phase handoff — 9.18 (not started)
+
+Business continuity and DR **objectives** (policy), not another restore:
+
+- Define business RTO and RPO (distinct from 9.16 isolated 15 min / RPO
+  NOT DETERMINABLE).
+- Acceptable downtime and recovery priority (API, CMS, DB, storage, cron).
+- Backup monitoring requirements (close remaining 9.15 fields).
+- Isolated recovery test cadence.
+- Incident escalation owner and DR decision authority.
+- Recovery evidence retention.
+
+Do **not** close 9.15 as a side effect. Do **not** change architecture.
+Do **not** cut over production.

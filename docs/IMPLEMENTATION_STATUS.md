@@ -1155,3 +1155,4 @@ trigger, restore, or paid monitor. Alert matrix is specification only.
 PHASE 9.17 IMPLEMENTATION: **COMPLETE** (documentation).
 PHASE 9.17 ALERTING: **NOT EXECUTED**.
 BACKUP ASSURANCE COMPLETE: **NO** (9.15 still open).
+Phase 9.18 (business RTO/RPO objectives): **NOT STARTED**.
