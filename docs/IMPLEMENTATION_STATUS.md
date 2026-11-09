@@ -1137,3 +1137,21 @@ PHASE 9.16 RECOVERY EXECUTION: **COMPLETE** (schema/counts). Isolated
 restore duration **15 min** (owner T0/T1). Observed RPO **NOT
 DETERMINABLE**. Business RTO **NOT ESTABLISHED**.
 PHASE 9.16 CLEANUP: **OWNER VERIFIED**.
+
+## Phase 9.17 — Production operational hardening — documentation complete
+
+Objective: audit monitoring/alerting and write incident procedures without
+new infrastructure. Baseline `origin/main` **`001fc4e`** (9 Nov 2026,
+18:49 Asia/Jakarta). Report: `docs/reports/PHASE_9_17_OPERATIONAL_HARDENING.md`.
+Runbook: `docs/runbooks/PRODUCTION_INCIDENT_RESPONSE.md`.
+
+9.15/9.16 preserved (RPO **NOT DETERMINABLE**, business RTO **NOT
+ESTABLISHED**, isolated restore **15 min**). Observability is `/health` +
+`/ready` + JSON logs + unknown Render dashboard metrics. No in-repo alerts.
+One read-only probe 18:49: `/health` 200 ~0.22s; `/ready` 200 `broker=inline`
+`rq_workers=0` database/storage true ~0.69s. No application code, DSN, cron
+trigger, restore, or paid monitor. Alert matrix is specification only.
+
+PHASE 9.17 IMPLEMENTATION: **COMPLETE** (documentation).
+PHASE 9.17 ALERTING: **NOT EXECUTED**.
+BACKUP ASSURANCE COMPLETE: **NO** (9.15 still open).

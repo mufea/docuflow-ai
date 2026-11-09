@@ -72,6 +72,11 @@ python -m docuflow.cleanup
 
 ## Incidents
 
+Production scenarios (API down, database, storage, cleanup cron, suspected
+data loss, credential exposure):
+`docs/runbooks/PRODUCTION_INCIDENT_RESPONSE.md`.
+Database restore: `docs/operations/PRODUCTION_DATABASE_RECOVERY_RUNBOOK.md`.
+
 1. Check `/health` then `/ready`. HTTP 503 with `status=degraded` names the failed dependency without secrets.
 2. Inspect failed jobs in `/admin`.
 3. If jobs stay `queued`, confirm `JOB_BROKER=inline` or that the paid worker is running.
