@@ -1179,4 +1179,27 @@ BUSINESS RTO CAPABILITY: **NOT YET VERIFIED**.
 BUSINESS RPO TARGET: **OWNER APPROVED — 24 HOURS**.
 BUSINESS RPO CAPABILITY: **NOT YET VERIFIED**.
 BACKUP ASSURANCE COMPLETE: **NO** (9.15 still open).
-Phase 9.19 (capability gap closure): **NOT STARTED**.
+Phase 9.19: see below.
+
+## Phase 9.19 — Recovery capability gap assessment — documentation complete
+
+Objective: assess existing recovery evidence against owner-approved
+business RTO **4 hours** and RPO **24 hours**. **Not** a restore. Baseline
+`origin/main` **`0c8a8a5`** (9 Nov 2026, 19:55 Asia/Jakarta). Report:
+`docs/reports/PHASE_9_19_RECOVERY_CAPABILITY_GAP_ASSESSMENT.md`.
+Checklist: `docs/runbooks/RECOVERY_READINESS_CHECKLIST.md`.
+
+9.15 remains **OPEN — OWNER EVIDENCE REQUIRED** (schedule/enabled **NOT
+INDEPENDENTLY CAPTURED**; latest restorable PITR timestamp **UNKNOWN**).
+9.16 isolated restore **15 minutes** preserved (not business RTO). Observed
+RPO **NOT DETERMINABLE**. 9.18 targets unchanged. Capability verdicts:
+business RTO **NOT DEMONSTRATED**; business RPO **NOT DEMONSTRATED**.
+Production DR readiness **NOT CERTIFIED**. No application code, DSN,
+restore, cutover, or new infrastructure. Alerting remains **NOT EXECUTED**.
+
+PHASE 9.19 DOCUMENTATION: **COMPLETE**.
+PHASE 9.15: **OPEN — OWNER EVIDENCE REQUIRED**.
+BUSINESS RTO CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS RPO CAPABILITY: **NOT DEMONSTRATED**.
+BACKUP ASSURANCE COMPLETE: **NO**.
+Phase 9.20 (owner 9.15 evidence capture): **NOT STARTED**.
