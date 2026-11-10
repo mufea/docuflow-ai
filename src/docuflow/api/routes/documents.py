@@ -53,18 +53,21 @@ async def upload_document(
     ctx.limiter.hit(f"upload:{user.id}", limit=30, window_seconds=60)
     if not file.filename:
         raise ValidationError("A file name is required.")
-    with tempfile.NamedTemporaryFile(delete=False, suffix=Path(file.filename).suffix) as tmp:
-        total = 0
-        while True:
-            chunk = await file.read(1024 * 1024)
-            if not chunk:
-                break
-            total += len(chunk)
-            if total > settings.max_upload_bytes:
-                raise FileTooLargeError("File exceeds the configured upload limit.")
-            tmp.write(chunk)
-        tmp_path = Path(tmp.name)
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=Path(file.filename).suffix)
+    tmp_path = Path(tmp.name)
     try:
+        try:
+            total = 0
+            while True:
+                chunk = await file.read(1024 * 1024)
+                if not chunk:
+                    break
+                total += len(chunk)
+                if total > settings.max_upload_bytes:
+                    raise FileTooLargeError("File exceeds the configured upload limit.")
+                tmp.write(chunk)
+        finally:
+            tmp.close()
         document = DocumentService(db, ctx.storage, settings).store_upload(user, tmp_path, file.filename)
     finally:
         tmp_path.unlink(missing_ok=True)
@@ -106,13 +109,17 @@ def download_document(
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=Path(document.original_filename).suffix)
     tmp.close()
     dest = Path(tmp.name)
-    ctx.storage.download(document.storage_key, dest)
-    return FileResponse(
-        dest,
-        filename=document.original_filename,
-        media_type=document.content_type,
-        background=BackgroundTask(dest.unlink, missing_ok=True),
-    )
+    try:
+        ctx.storage.download(document.storage_key, dest)
+        return FileResponse(
+            dest,
+            filename=document.original_filename,
+            media_type=document.content_type,
+            background=BackgroundTask(dest.unlink, missing_ok=True),
+        )
+    except Exception:
+        dest.unlink(missing_ok=True)
+        raise
 
 
 @router.delete("/{document_id}")

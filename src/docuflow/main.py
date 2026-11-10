@@ -57,6 +57,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         recover_queued_jobs(factory, broker)
         yield
         scheduler.stop()
+        shutdown = getattr(broker, "shutdown", None)
+        if callable(shutdown):
+            shutdown(wait=True)
 
     app = FastAPI(
         title="DocuFlow AI API",

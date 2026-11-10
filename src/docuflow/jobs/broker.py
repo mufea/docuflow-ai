@@ -43,6 +43,10 @@ class InlineBroker:
             with self._lock:
                 self._inflight.discard(job_id)
 
+    def shutdown(self, wait: bool = True) -> None:
+        """Stop accepting work. Waiting lets in-flight jobs finish a claim."""
+        self.pool.shutdown(wait=wait, cancel_futures=False)
+
 
 class RQBroker:
     def __init__(
@@ -81,6 +85,9 @@ class RQBroker:
         else:
             logger.warning("rq_no_workers_inline_fallback id=%s", job_id)
         self.inline.enqueue(job_id)
+
+    def shutdown(self, wait: bool = True) -> None:
+        self.inline.shutdown(wait=wait)
 
     def active_worker_count(self) -> int:
         try:
