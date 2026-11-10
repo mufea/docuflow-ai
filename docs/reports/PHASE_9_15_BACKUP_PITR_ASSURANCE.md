@@ -266,3 +266,7 @@ not show a latest restorable clock, leave it **UNKNOWN**.
 PHASE 9.15: **OPEN — OWNER EVIDENCE REQUIRED** (latest restorable PITR
 timestamp still **UNKNOWN**). BACKUP ASSURANCE COMPLETE: **NO**.
 Full capture: `docs/reports/PHASE_9_20_OWNER_BACKUP_EVIDENCE.md`.
+Register: `docs/reports/PHASE_9_21_RECOVERY_EVIDENCE_GAP_CLOSURE.md`.
+Status reconciliation: `docs/reports/PHASE_9_22_OPERATIONAL_ASSURANCE.md`.
+Do **not** infer a restorable clock from the 3-day window. Do **not** click
+Restore, Create export, or Connect.

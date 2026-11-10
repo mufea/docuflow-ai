@@ -35,7 +35,10 @@ See **Database backup and recovery** in `docs/DEPLOYMENT.md`. Production
 restore and isolated drill: `docs/operations/PRODUCTION_DATABASE_RECOVERY_RUNBOOK.md`.
 Owner Recovery screenshot (10 Nov 2026, 3-day PITR window; latest restorable
 clock still **UNKNOWN**): `docs/reports/PHASE_9_20_OWNER_BACKUP_EVIDENCE.md`.
-Phase 9.15 remains **open**.
+Evidence register: `docs/reports/PHASE_9_21_RECOVERY_EVIDENCE_GAP_CLOSURE.md`.
+Status reconciliation: `docs/reports/PHASE_9_22_OPERATIONAL_ASSURANCE.md`.
+Phase 9.15 remains **open**. PITR clock **UNKNOWN**. Backup assurance
+**INCOMPLETE**. Production DR **NOT DEMONSTRATED**.
 Do not assume the live Render Postgres plan matches the Blueprint. Free
 Postgres has no managed backups. Object-storage versioning is a separate
 control on the bucket you actually use. Redis is expendable.

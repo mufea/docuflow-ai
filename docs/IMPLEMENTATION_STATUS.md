@@ -1224,3 +1224,51 @@ PHASE 9.20 DOCUMENTATION: **COMPLETE**.
 PHASE 9.15: **OPEN — latest restorable PITR timestamp UNKNOWN**.
 BACKUP ASSURANCE COMPLETE: **NO**.
 BUSINESS RPO CAPABILITY: **NOT DEMONSTRATED** (unchanged).
+Phase 9.21: see below.
+
+## Phase 9.21 — Recovery evidence gap closure — documentation complete
+
+Merged via PR #40 (`f5c817d`, 10 Nov 2026, 13:20 Asia/Jakarta). Report:
+`docs/reports/PHASE_9_21_RECOVERY_EVIDENCE_GAP_CLOSURE.md`.
+
+The 9.21 report was written against `04a0e90` while PR #39 was still
+**OPEN**. Both #39 and #40 are now on `main`. Do **not** read the 9.21
+“PR #39 OPEN” sentences as current git state.
+
+9.15 **OPEN** (latest restorable PITR clock **UNKNOWN**). Isolated DB
+restore **15 minutes** preserved. Observed RPO **NOT DETERMINABLE**. R2
+versioning **NOT VERIFIED**. Business RTO/RPO **NOT DEMONSTRATED**.
+Production DR **NOT DEMONSTRATED**. Alerting **NOT EXECUTED**. No
+application code in that phase.
+
+PHASE 9.21 DOCUMENTATION: **COMPLETE** (merged).
+PHASE 9.15: **OPEN**.
+BACKUP ASSURANCE: **INCOMPLETE**.
+BUSINESS RTO CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS RPO CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION DR READINESS: **NOT DEMONSTRATED**.
+Phase 9.22: see below.
+
+## Phase 9.22 — Operational assurance and recovery readiness closure — documentation complete
+
+Objective: reconcile merged 9.20–9.21 evidence in `IMPLEMENTATION_STATUS.md`
+and related pointers. **Not** a restore. Baseline `origin/main`
+**`f5c817d`** (10 Nov 2026, 13:25 Asia/Jakarta). Report:
+`docs/reports/PHASE_9_22_OPERATIONAL_ASSURANCE.md`.
+
+Restored the missing Phase 9.21 status heading after the #39/#40 merge.
+Did **not** rewrite 9.16 measurement text, 9.18 targets, or 9.21 historical
+PR #39 wording. 9.15 remains **OPEN**. Alerting **NOT EXECUTED**. Business
+RTO/RPO capability **NOT DEMONSTRATED**. Production DR **NOT DEMONSTRATED**.
+APPLICATION CODE UNCHANGED.
+
+PHASE 9.22 DOCUMENTATION: **COMPLETE** (this branch; **not** merged until
+the PR lands).
+PHASE 9.15: **OPEN**.
+LATEST_RESTORABLE_PITR_DATETIME: **UNKNOWN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+PHASE_9_17 ALERTING: **NOT EXECUTED**.
+BUSINESS_RTO_TARGET: **4 HOURS**. BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_TARGET: **24 HOURS**. BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+ISOLATED_DATABASE_RESTORE: **15 MINUTES**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
