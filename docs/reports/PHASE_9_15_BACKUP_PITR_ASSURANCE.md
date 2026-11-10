@@ -263,10 +263,33 @@ clock timezone **not shown**.
 Do **not** click Restore to hunt for a datetime picker. If Recovery does
 not show a latest restorable clock, leave it **UNKNOWN**.
 
-PHASE 9.15: **OPEN — OWNER EVIDENCE REQUIRED** (latest restorable PITR
-timestamp still **UNKNOWN**). BACKUP ASSURANCE COMPLETE: **NO**.
+PHASE 9.15: **OPEN** (schedule/enabled still **NOT DISPLAYED**). Latest
+restorable clock later captured in §K / Phase 9.23. BACKUP ASSURANCE
+COMPLETE: **NO**.
 Full capture: `docs/reports/PHASE_9_20_OWNER_BACKUP_EVIDENCE.md`.
 Register: `docs/reports/PHASE_9_21_RECOVERY_EVIDENCE_GAP_CLOSURE.md`.
 Status reconciliation: `docs/reports/PHASE_9_22_OPERATIONAL_ASSURANCE.md`.
 Do **not** infer a restorable clock from the 3-day window. Do **not** click
-Restore, Create export, or Connect.
+**Start Recovery**, Create export, or Connect.
+
+## K. PITR latest-available clock (10 Nov 2026, 15:42)
+
+Owner sent the Point-in-Time Recovery **picker** (not a completed restore).
+**This agent viewed the image.** Class: **OWNER SCREENSHOT — AGENT VIEWED**.
+**Start Recovery was not clicked.** If the dialog is still open: **Cancel**.
+
+UI: “The latest available time is shown below.”
+
+| Field | Value |
+| --- | --- |
+| Instant | **2026-11-10 15:31:47 UTC+07:00** |
+| Proposed new name (do not create) | `docuflow-db-copy-2` |
+| Screenshot receipt | 15:42 Asia/Jakarta |
+| Observed lag | **~10 minutes** (matches 10-minute PITR rule) |
+
+That lag is **inside** the 24-hour business RPO **target** at this
+inspection. It is **not** a guaranteed RPO. 9.16 observed RPO remains
+**NOT DETERMINABLE**. Report: `docs/reports/PHASE_9_23_PITR_LATEST_AVAILABLE_CLOCK.md`.
+
+PHASE 9.15 clock field: **CAPTURED** (this inspection). PHASE 9.15 overall:
+**OPEN**. BACKUP ASSURANCE COMPLETE: **NO**.
