@@ -1341,7 +1341,40 @@ status tables left as contemporaneous. 9.15 **OPEN**. Backup assurance
 EXECUTED**. Business RTO/RPO **NOT DEMONSTRATED**. Production DR **NOT
 DEMONSTRATED**. APPLICATION CODE UNCHANGED.
 
-PHASE 9.25 DOCUMENTATION: **COMPLETE** (this branch; **not** merged until
+PHASE 9.25 DOCUMENTATION: **MERGED** (PR [#44](https://github.com/mufea/docuflow-ai/pull/44),
+merge commit **`bedb140`**, 10 Nov 2026, 16:37 Asia/Jakarta). Head
+`40bc72d`. CI
+[42790290569](https://github.com/mufea/docuflow-ai/actions/runs/42790290569)
+**SUCCESS**. Documentation merge is **not** operational recovery
+assurance. The contemporaneous “this branch / not merged until this PR
+lands” line is superseded for **current** git status.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+PHASE_9_16_OBSERVED_RPO: **NOT DETERMINABLE**.
+PHASE_9_17_ALERTING: **NOT EXECUTED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 9.26: see below.
+
+## Phase 9.26 — Post-merge Phase 9.25 status reconciliation — documentation complete
+
+Objective: reconcile Phase 9.25 **current** status after PR #44 merged.
+**Not** a restore. Baseline `origin/main` **`bedb140`** (10 Nov 2026,
+18:06 Asia/Jakarta / 11:06 UTC). Report:
+`docs/reports/PHASE_9_26_REPOSITORY_ASSURANCE.md`.
+
+PR #44 **MERGED** `bedb140`. CI
+[42790290569](https://github.com/mufea/docuflow-ai/actions/runs/42790290569)
+**SUCCESS**. Open PRs at this audit: **none**. Owner reports no extra
+Render dashboard fields beyond previously captured evidence; only
+**Restore date & time** changes — **OWNER-REPORTED**, no new screenshot,
+no new timestamp recorded. 9.15 **OPEN**. Backup assurance
+**INCOMPLETE**. 9.16 observed RPO **NOT DETERMINABLE**. Alerting **NOT
+EXECUTED**. Business RTO/RPO **NOT DEMONSTRATED**. Production DR **NOT
+DEMONSTRATED**. APPLICATION CODE UNCHANGED.
+
+PHASE 9.26 DOCUMENTATION: **COMPLETE** (this branch; **not** merged until
 this PR lands).
 PHASE_9_15: **OPEN**.
 BACKUP_ASSURANCE: **INCOMPLETE**.
