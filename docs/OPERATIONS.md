@@ -33,6 +33,10 @@ The worker listens for SIGTERM and requests RQ stop. The API relies on Uvicorn S
 
 See **Database backup and recovery** in `docs/DEPLOYMENT.md`. Production
 restore and isolated drill: `docs/operations/PRODUCTION_DATABASE_RECOVERY_RUNBOOK.md`.
+Recovery evidence register (9.21):
+`docs/reports/PHASE_9_21_RECOVERY_EVIDENCE_GAP_CLOSURE.md`.
+Phase 9.15 remains **open** (latest restorable PITR clock **UNKNOWN**).
+R2 versioning is **NOT VERIFIED**; Postgres PITR does not restore objects.
 Do not assume the live Render Postgres plan matches the Blueprint. Free
 Postgres has no managed backups. Object-storage versioning is a separate
 control on the bucket you actually use. Redis is expendable.

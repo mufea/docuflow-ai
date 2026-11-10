@@ -1202,4 +1202,26 @@ PHASE 9.15: **OPEN — OWNER EVIDENCE REQUIRED**.
 BUSINESS RTO CAPABILITY: **NOT DEMONSTRATED**.
 BUSINESS RPO CAPABILITY: **NOT DEMONSTRATED**.
 BACKUP ASSURANCE COMPLETE: **NO**.
-Phase 9.20 (owner 9.15 evidence capture): **NOT STARTED**.
+Phase 9.20 owner screenshot transcription: **OPEN PR #39** (not on
+`origin/main` `04a0e90`). Phase 9.21: see below.
+
+## Phase 9.21 — Recovery evidence gap closure — documentation complete
+
+Objective: classify Postgres/PITR, R2, DB↔object consistency, and RTO/RPO
+without a restore. Baseline `origin/main` **`04a0e90`** (10 Nov 2026,
+12:55 Asia/Jakarta). Report:
+`docs/reports/PHASE_9_21_RECOVERY_EVIDENCE_GAP_CLOSURE.md`.
+
+PR #39 remains **OPEN** (9.20 screenshot file not on this baseline; 9.21
+does not duplicate it). 9.15 **OPEN** (latest restorable PITR clock
+**UNKNOWN**). Isolated DB restore **15 minutes** preserved. Observed RPO
+**NOT DETERMINABLE**. R2 versioning **NOT VERIFIED**. Business RTO/RPO
+**NOT DEMONSTRATED**. Production DR **NOT DEMONSTRATED**. No application
+code, DSN, restore, R2 mutate, or new infrastructure.
+
+PHASE 9.21 DOCUMENTATION: **COMPLETE**.
+PHASE 9.15: **OPEN**.
+BACKUP ASSURANCE: **INCOMPLETE**.
+BUSINESS RTO CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS RPO CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION DR READINESS: **NOT DEMONSTRATED**.

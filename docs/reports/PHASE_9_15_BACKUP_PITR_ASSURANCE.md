@@ -211,3 +211,7 @@ screenshot. Class: **OWNER-REPORTED**.
 Still unknown: latest restorable PITR timestamp; backup schedule/enabled;
 operational PITR restore; measured RPO/RTO. Do not treat this addendum as
 BACKUP ASSURANCE COMPLETE.
+
+Phase 9.21 gap register: `docs/reports/PHASE_9_21_RECOVERY_EVIDENCE_GAP_CLOSURE.md`.
+Owner Recovery screenshot transcription is in **open** PR #39 (not on
+`main` at 9.21 baseline `04a0e90`). 9.15 remains **OPEN**.
