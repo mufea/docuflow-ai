@@ -1272,3 +1272,25 @@ BUSINESS_RTO_TARGET: **4 HOURS**. BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
 BUSINESS_RPO_TARGET: **24 HOURS**. BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
 ISOLATED_DATABASE_RESTORE: **15 MINUTES**.
 PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 9.23: see below.
+
+## Phase 9.23 — PITR latest-available clock — documentation complete
+
+Objective: record the owner PITR picker screenshot. **Not** a restore.
+Baseline `origin/main` **`4625642`** (10 Nov 2026, 15:42 Asia/Jakarta).
+Report: `docs/reports/PHASE_9_23_PITR_LATEST_AVAILABLE_CLOCK.md`.
+9.15 addendum §K.
+
+Latest available time shown: **2026-11-10 15:31:47 UTC+07:00**. Proposed
+new name `docuflow-db-copy-2` — **do not create**. Start Recovery **not**
+clicked. Observed lag vs 15:42 receipt **~10 minutes**. 9.15 clock gap
+**CAPTURED** for this inspection; 9.15 overall **OPEN** (schedule/enabled
+still not displayed). 9.16 RPO still **NOT DETERMINABLE**. Business RPO
+capability **NOT DEMONSTRATED**. No application code.
+
+PHASE 9.23 DOCUMENTATION: **COMPLETE**.
+LATEST_RESTORABLE_PITR_DATETIME: **2026-11-10T15:31:47+07:00** (historical
+picker; not a live re-check).
+PHASE 9.15: **OPEN**.
+BACKUP ASSURANCE: **INCOMPLETE**.
+BUSINESS RPO CAPABILITY: **NOT DEMONSTRATED**.
