@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
@@ -10,6 +11,8 @@ from sqlalchemy.orm import Session
 from docuflow.billing.plans import PricingPolicy
 from docuflow.exceptions import ConflictError, InsufficientCreditsError
 from docuflow.models import CreditAccount, CreditLedger, Plan, User
+
+logger = logging.getLogger("docuflow.billing")
 
 
 @dataclass(frozen=True, slots=True)
@@ -83,8 +86,14 @@ class CreditService:
     def settle(self, user: User, amount: int, *, job_id: str) -> None:
         account = self.ensure_account(user)
         self._lock(account)
-        if self.session.scalar(select(CreditLedger).where(CreditLedger.idempotency_key == f"settle:{job_id}")):
+        if self._ledger_exists(f"settle:{job_id}"):
             return
+        if self._ledger_exists(f"refund:{job_id}"):
+            logger.info("credit_settle_refused job_id=%s reason=already_refunded", job_id)
+            raise ConflictError(
+                "Credits for this job were already refunded.",
+                details={"job_id": job_id, "reason": "already_refunded"},
+            )
         reserved = min(account.reserved, amount)
         account.reserved -= reserved
         account.balance -= amount

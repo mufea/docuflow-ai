@@ -1660,9 +1660,12 @@ R3: `FORWARDED_ALLOW_IPS` documented; no env or start-command change.
 SIGKILL / `processing` recovery and early `store_result` commits are
 **unchanged** (out of scope).
 
-PHASE 10.2 IMPLEMENTATION: **COMPLETE – UNMERGED**.
+PHASE 10.2 IMPLEMENTATION: **MERGED** (PR
+[#54](https://github.com/mufea/docuflow-ai/pull/54);
+merge `2447ac516d29cfeb7d3297cfcefd6a9591343694`,
+`2026-11-10T14:28:44Z` / **10 Nov 2026, 21:28 Asia/Jakarta**).
 LOCAL VALIDATION: **TESTED**.
-REPOSITORY CI: **NOT RUN** at documentation time (see the 10.2 report / PR checks).
+REPOSITORY CI: **SUCCESS** on PR #54 / `main` push `42834483073`.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 STAGING VERIFIED: **NOT VERIFIED**.
 PHASE_9_15: **OPEN**.
@@ -1690,10 +1693,47 @@ Recommended 10.3B: conditional complete + settle-after-refund guard
 (P0), no Redis. Result persistence is 10.3C. Implementation **not**
 started.
 
-PHASE 10.3A ASSESSMENT: **COMPLETE – UNMERGED**.
-DOCUMENTATION: **COMMITTED** on this branch.
+PHASE 10.3A ASSESSMENT: **MERGED** (PR
+[#55](https://github.com/mufea/docuflow-ai/pull/55);
+merge `fdf5b65952b6a245dbdc9a30a190a39eafff24a5`,
+`2026-11-10T15:23:09Z` / **10 Nov 2026, 22:23 Asia/Jakarta**).
+DOCUMENTATION: **MERGED**.
+REPOSITORY CI: **SUCCESS** on PR #55 checks `42843141915`.
+PHASE 10.3B IMPLEMENTATION: see below.
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+
+## Phase 10.3B — P0 correctness remediation
+
+Objective: conditional job completion and refund-protected settlement
+only. Baseline `origin/main`
+**`fdf5b65952b6a245dbdc9a30a190a39eafff24a5`**. Report:
+`docs/reports/PHASE_10_3B_P0_CORRECTNESS_REMEDIATION.md`.
+
+P0-A: `complete_job_if_processing()` uses
+`UPDATE jobs … WHERE status='processing'`. `JobRunner.process` settles
+only when that update claims the row.
+
+P0-B: `CreditService.settle()` raises `ConflictError` when
+`refund:{job_id}` exists. Account `SELECT FOR UPDATE` serializes
+settle vs refund.
+
+Heartbeat, stale recovery, `_store` commit ordering, Redis, and schema
+changes are **unchanged** (out of scope).
+
+PHASE 10.3B IMPLEMENTATION: **COMPLETE – UNMERGED**.
+LOCAL VALIDATION: **TESTED**.
+POSTGRESQL CONCURRENCY TESTS: **PASS** (local isolated `docuflow_test`).
 REPOSITORY CI: **NOT RUN** at documentation time (see PR checks).
-PHASE 10.3B IMPLEMENTATION: **NOT STARTED**.
 STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 PHASE_9_15: **OPEN**.

@@ -14,6 +14,7 @@ from docuflow.billing.ledger import CreditService
 from docuflow.config import Settings
 from docuflow.conversion.engines import ConversionService
 from docuflow.exceptions import DocuflowError, EncryptedPdfError, UnsupportedOperationError
+from docuflow.jobs.completion import complete_job_if_processing
 from docuflow.jobs.refunds import fail_job_and_refund
 from docuflow.models import Document, Job, User
 from docuflow.ocr.engine import OcrEngine
@@ -73,10 +74,15 @@ class JobRunner:
                 raise UnsupportedOperationError("Job owner no longer exists.")
             try:
                 payload = self._execute(session, job, user)
-                job.result_payload = payload
-                job.status = "completed"
-                job.progress = 100
-                job.completed_at = datetime.now(UTC)
+                completed = complete_job_if_processing(
+                    session,
+                    job_id,
+                    result_payload=payload,
+                    result_document_ids=list(job.result_document_ids or []),
+                )
+                if not completed.claimed:
+                    session.rollback()
+                    return
                 CreditService(session).settle(user, job.credits_reserved, job_id=job.id)
                 job.credits_settled = job.credits_reserved
                 session.commit()
