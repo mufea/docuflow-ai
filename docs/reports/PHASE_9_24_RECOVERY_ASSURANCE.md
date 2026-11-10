@@ -18,6 +18,10 @@ Do **not** create `docuflow-db-copy-2`.
 | CI VERIFIED | **NOT EXECUTED** (docs-only) |
 | MERGED | **NO** until the PR lands |
 
+The Status table above is **contemporaneous** (pre-merge, 10 Nov 2026,
+16:00 Asia/Jakarta). For **current** git status see
+[Post-Merge Verification (Phase 9.25)](#post-merge-verification-phase-925).
+
 PHASE 9.15: **OPEN**.
 BACKUP_ASSURANCE: **INCOMPLETE**.
 PHASE_9_16_OBSERVED_RPO: **NOT DETERMINABLE**.
@@ -184,3 +188,51 @@ Live `/health` `/ready` **NOT EXECUTED**.
 | Backup enabled toggle | Not displayed | UNKNOWN |
 | Business RTO/RPO capability | — | NOT DEMONSTRATED |
 | Production DR | — | NOT DEMONSTRATED |
+
+## Post-Merge Verification (Phase 9.25)
+
+Recorded **10 Nov 2026, 16:20 Asia/Jakarta (WIB)**
+(`2026-11-10T16:20:00+07:00`). Live GitHub API + `git fetch origin`.
+This addendum supersedes the contemporaneous Status table **only** for
+**current** repository status. It does **not** rewrite the 16:00
+implementation record, and it does **not** change any recovery-assurance
+classification.
+
+| Fact | Value | Classification |
+| --- | --- | --- |
+| PR #43 | [Merged](https://github.com/mufea/docuflow-ai/pull/43) into `main` | **VERIFIED** |
+| Merge commit | `dd82e0b2d7628238a1fd4108a151ecc63befd56d` | **VERIFIED** |
+| Merge time | 2026-11-10T09:10:22Z (16:10 Asia/Jakarta) | **VERIFIED** |
+| PR files | Markdown documentation only | **VERIFIED** |
+| CI run | [42787163538](https://github.com/mufea/docuflow-ai/actions/runs/42787163538) | **VERIFIED** |
+| Workflow | `CI` | **VERIFIED** |
+| Head SHA | `1b710b5e6b7a0783e1ec0c0d087427e868ad4b29` | **VERIFIED** |
+| Run conclusion | **SUCCESS** | **VERIFIED** |
+| Job `Python tests and checks` | **SUCCESS** | **VERIFIED** |
+| Step Unit tests | **SUCCESS** (`pytest -m "not integration"`) | **VERIFIED** |
+| Step PostgreSQL integration tests | **SUCCESS** (`pytest -m integration`) | **VERIFIED** |
+| Step Lint | **SUCCESS** (`uv run ruff check src tests scripts`) | **VERIFIED** |
+| Step Typecheck | **SUCCESS** (`uv run mypy src/docuflow`) | **VERIFIED** |
+| Job `Web lint, typecheck, tests, and build` | **SUCCESS** | **VERIFIED** |
+| Step Lint | **SUCCESS** (`pnpm --filter web lint`) | **VERIFIED** |
+| Step Typecheck | **SUCCESS** (`pnpm --filter web typecheck`) | **VERIFIED** |
+| Step Tests | **SUCCESS** (`pnpm --filter web test`) | **VERIFIED** |
+| Step Production build | **SUCCESS** (`pnpm --filter web build`) | **VERIFIED** |
+| Open PRs at this audit | **none** (`gh pr list --state open`, 16:20 Asia/Jakarta) | **VERIFIED** |
+
+The original Status rows `CI VERIFIED = NOT EXECUTED` and
+`MERGED = NO until the PR lands` remain accurate for the 16:00
+pre-merge snapshot. They are **not** current git status.
+
+Unchanged after merge:
+
+- PHASE 9.15: **OPEN**
+- BACKUP_ASSURANCE: **INCOMPLETE**
+- PHASE_9_16_OBSERVED_RPO: **NOT DETERMINABLE**
+- ALERTING_EXECUTION: **NOT EXECUTED**
+- BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**
+- BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**
+- PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**
+- PITR clock **2026-11-10 15:31:47 UTC+7**: OWNER-REPORTED picker; **OBSERVATION ONLY**
+- Observed lag **~10 minutes**: **OBSERVATION ONLY**, not guaranteed RPO
+- Isolated restore **15 minutes**: not business RTO

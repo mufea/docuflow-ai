@@ -1262,8 +1262,9 @@ PR #39 wording. 9.15 remains **OPEN**. Alerting **NOT EXECUTED**. Business
 RTO/RPO capability **NOT DEMONSTRATED**. Production DR **NOT DEMONSTRATED**.
 APPLICATION CODE UNCHANGED.
 
-PHASE 9.22 DOCUMENTATION: **COMPLETE** (this branch; **not** merged until
-the PR lands).
+PHASE 9.22 DOCUMENTATION: **MERGED** (PR #41, merge commit **`4625642`**,
+10 Nov 2026, 13:28 Asia/Jakarta). The contemporaneous “this branch / not
+merged until the PR lands” line is superseded for **current** git status.
 PHASE 9.15: **OPEN**.
 LATEST_RESTORABLE_PITR_DATETIME: **UNKNOWN**.
 BACKUP_ASSURANCE: **INCOMPLETE**.
@@ -1310,13 +1311,42 @@ and enabled toggle **NOT DISPLAYED**. Alerting **NOT EXECUTED**. Business
 RTO/RPO **NOT DEMONSTRATED**. Production DR **NOT DEMONSTRATED**.
 APPLICATION CODE UNCHANGED.
 
-PHASE 9.24 DOCUMENTATION: **COMPLETE** (this branch; **not** merged until
-the PR lands).
+PHASE 9.24 DOCUMENTATION: **MERGED** (PR #43, merge commit **`dd82e0b`**,
+10 Nov 2026, 16:10 Asia/Jakarta). CI run
+[42787163538](https://github.com/mufea/docuflow-ai/actions/runs/42787163538)
+**SUCCESS** on head `1b710b5`. The contemporaneous “this branch / not
+merged until the PR lands” line is superseded for **current** git status.
 PHASE_9_15: **OPEN**.
 BACKUP_ASSURANCE: **INCOMPLETE**.
 PHASE_9_16_OBSERVED_RPO: **NOT DETERMINABLE**.
 LATEST_RESTORABLE_PITR_DATETIME: **2026-11-10 15:31:47 UTC+7** (historical).
 OBSERVED_RECOVERY_LAG: **~10 minutes** (observation only).
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 9.25: see below.
+
+## Phase 9.25 — Post-merge documentation reconciliation — documentation complete
+
+Objective: align 9.22/9.24 **current** status with verified GitHub merges.
+**Not** a restore. Baseline `origin/main` **`dd82e0b`** (10 Nov 2026,
+16:20 Asia/Jakarta). Report:
+`docs/reports/PHASE_9_25_POST_MERGE_DOCUMENTATION_RECONCILIATION.md`.
+
+PR #41 **MERGED** `4625642`. PR #43 **MERGED** `dd82e0b`. CI
+[42787163538](https://github.com/mufea/docuflow-ai/actions/runs/42787163538)
+**SUCCESS**. Open PRs at this audit: **none**. Historical 9.22/9.24 report
+status tables left as contemporaneous. 9.15 **OPEN**. Backup assurance
+**INCOMPLETE**. 9.16 observed RPO **NOT DETERMINABLE**. Alerting **NOT
+EXECUTED**. Business RTO/RPO **NOT DEMONSTRATED**. Production DR **NOT
+DEMONSTRATED**. APPLICATION CODE UNCHANGED.
+
+PHASE 9.25 DOCUMENTATION: **COMPLETE** (this branch; **not** merged until
+this PR lands).
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+PHASE_9_16_OBSERVED_RPO: **NOT DETERMINABLE**.
+PHASE_9_17_ALERTING: **NOT EXECUTED**.
 BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
 BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
 PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
