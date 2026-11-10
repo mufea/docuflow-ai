@@ -18,6 +18,12 @@ Baseline `origin/main`: **`f5c817d`** (expected; confirmed).
 | PRODUCTION VERIFIED | **NOT EXECUTED** (no live probe) |
 | MERGED | **NO** until the PR lands |
 
+The Status table above is **contemporaneous** (pre-merge, 10 Nov 2026,
+13:25 Asia/Jakarta). Phase 9.25 recorded PR #41 **MERGED** as
+`4625642e8fbb35eb12339dd509a23ea800891ef2` at 10 Nov 2026, 13:28
+Asia/Jakarta. That merge does **not** change any assurance classification
+in this report.
+
 ## 1. Executive summary
 
 After PR #39 and #40 merged, `docs/reports/PHASE_9_21_RECOVERY_EVIDENCE_GAP_CLOSURE.md`
