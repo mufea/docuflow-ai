@@ -1728,13 +1728,46 @@ P0-B: `CreditService.settle()` raises `ConflictError` when
 `refund:{job_id}` exists. Account `SELECT FOR UPDATE` serializes
 settle vs refund.
 
-Heartbeat, stale recovery, `_store` commit ordering, Redis, and schema
-changes are **unchanged** (out of scope).
+Heartbeat, stale recovery, Redis, and schema changes were **unchanged**
+in 10.3B. Result-document commit ordering is Phase 10.3C (see below).
 
-PHASE 10.3B IMPLEMENTATION: **COMPLETE – UNMERGED**.
+PHASE 10.3B IMPLEMENTATION: **MERGED** (PR
+[#56](https://github.com/mufea/docuflow-ai/pull/56);
+merge `37412e965f286ffa34122645d2a9ddd13c742e23`,
+`2026-11-10T22:58:32Z` / **11 Nov 2026, 05:58 Asia/Jakarta**).
 LOCAL VALIDATION: **TESTED**.
 POSTGRESQL CONCURRENCY TESTS: **PASS** (local isolated `docuflow_test`).
-REPOSITORY CI: **NOT RUN** at documentation time (see PR checks).
+REPOSITORY CI: **SUCCESS** on PR #56 (`42845895549`) and `main` push
+`42919349095`.
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.3C: see below.
+
+## Phase 10.3C — Atomic result persistence
+
+Objective: defer generated result `Document` commits until the job
+runner’s final PostgreSQL transaction (conditional complete +
+refund-protected settle). Baseline `origin/main`
+**`37412e965f286ffa34122645d2a9ddd13c742e23`**. Implementation
+`5eb04d10653fde60256f748078dc00ccabde1921`. Report:
+`docs/reports/PHASE_10_3C_ATOMIC_RESULT_PERSISTENCE.md`.
+
+`store_upload()` still commits. `store_result(..., commit=False)`
+flushes IDs only. Object-storage uploads are **not** in the database
+transaction; orphans remain possible. No schema change.
+
+PHASE 10.3C IMPLEMENTATION: **IMPLEMENTED**.
+LOCALLY VERIFIED: **YES**.
+CI VERIFIED: **NOT VERIFIED** at documentation time (see PR checks).
 STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 PHASE_9_15: **OPEN**.
