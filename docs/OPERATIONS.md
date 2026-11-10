@@ -40,6 +40,8 @@ Status reconciliation: `docs/reports/PHASE_9_22_OPERATIONAL_ASSURANCE.md`.
 PITR latest-available clock (picker 10 Nov 2026, **15:31:47 UTC+7**;
 **Cancel**, do not Start Recovery):
 `docs/reports/PHASE_9_23_PITR_LATEST_AVAILABLE_CLOCK.md`.
+Consolidation (lag ≠ RPO; 15 min ≠ business RTO):
+`docs/reports/PHASE_9_24_RECOVERY_ASSURANCE.md`.
 Phase 9.15 remains **open** (schedule/enabled still not displayed). Backup
 assurance **INCOMPLETE**. Production DR **NOT DEMONSTRATED**.
 Do not assume the live Render Postgres plan matches the Blueprint. Free
