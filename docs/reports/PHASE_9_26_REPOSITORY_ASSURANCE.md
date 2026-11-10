@@ -151,3 +151,19 @@ BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
 PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
 
 No production operations. No application-code changes.
+
+## Post-merge note — Phase 9.27
+
+The contemporaneous `PHASE 9.26 DOCUMENTATION: COMPLETE (this branch;
+not merged until this PR lands)` line remains accurate for the 18:06
+pre-merge snapshot. For **current** git status (recorded 10 Nov 2026,
+18:14 Asia/Jakarta / `2026-11-10T11:14:45Z`):
+
+- PR [#45](https://github.com/mufea/docuflow-ai/pull/45) **MERGED**
+- Merge commit `c8de923e8ed5597a81cd3a145876bf39693833f3` at
+  2026-11-10T11:09:20Z (18:09 Asia/Jakarta)
+- CI [42804860560](https://github.com/mufea/docuflow-ai/actions/runs/42804860560)
+  **SUCCESS**
+
+That merge does **not** change recovery-assurance classifications.
+Final consolidation: `docs/reports/PHASE_9_27_FINAL_RECOVERY_ASSURANCE_AUDIT.md`.

@@ -1055,6 +1055,9 @@ Audit: `docs/reports/PHASE_9_13_PRODUCTION_RELIABILITY_AUDIT.md`.
 
 RECOVERY DRILL VERIFIED: **YES** (9.13B isolated restore; see below).
 PRODUCTION RECOVERY READY: **YES** (9.13B; no production cutover).
+The line above is **contemporaneous 9.13 wording** for an isolated
+procedure. Later phases, including 9.27, classify production DR
+readiness as **NOT DEMONSTRATED**. Do not read it as a current DR claim.
 
 ## Phase 9.13B — Recovery drill — verified (isolated restore)
 
@@ -1062,6 +1065,8 @@ Owner authorized isolated restore (7 Nov 2026, 22:00 Asia/Jakarta) for `docuflow
 
 RESTORE DRILL VERIFIED: **YES**.
 PRODUCTION RECOVERY READY: **YES** (isolated restore procedure; production still on `docuflow-db`).
+Contemporaneous 9.13B wording. Current production DR readiness:
+**NOT DEMONSTRATED** (Phase 9.27).
 
 ## Phase 9.14 — Recovery drill cleanup — owner-verified
 
@@ -1374,8 +1379,39 @@ no new timestamp recorded. 9.15 **OPEN**. Backup assurance
 EXECUTED**. Business RTO/RPO **NOT DEMONSTRATED**. Production DR **NOT
 DEMONSTRATED**. APPLICATION CODE UNCHANGED.
 
-PHASE 9.26 DOCUMENTATION: **COMPLETE** (this branch; **not** merged until
-this PR lands).
+PHASE 9.26 DOCUMENTATION: **MERGED** (PR [#45](https://github.com/mufea/docuflow-ai/pull/45),
+merge commit **`c8de923`**, 10 Nov 2026, 18:09 Asia/Jakarta). Head
+`cb76479`. CI
+[42804860560](https://github.com/mufea/docuflow-ai/actions/runs/42804860560)
+**SUCCESS**. Documentation merge is **not** operational recovery
+assurance. The contemporaneous “this branch / not merged until this PR
+lands” line is superseded for **current** git status.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+PHASE_9_16_OBSERVED_RPO: **NOT DETERMINABLE**.
+PHASE_9_17_ALERTING: **NOT EXECUTED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 9.27: see below.
+
+## Phase 9.27 — Final recovery assurance audit — documentation complete
+
+Objective: consolidate Phases 9.15–9.26 into one evidence matrix and
+verdict. **Not** a restore. Baseline `origin/main` **`c8de923`**
+(10 Nov 2026, 18:14 Asia/Jakarta). Report:
+`docs/reports/PHASE_9_27_FINAL_RECOVERY_ASSURANCE_AUDIT.md`.
+
+Documentation audit and evidence consolidation only. Backup enablement
+and schedule **UNKNOWN**. PITR clock **2026-11-10 15:31:47 UTC+7** is
+**OBSERVED ONCE**, not guaranteed RPO. Isolated restore **15 minutes**
+is not business RTO. 9.16 observed RPO **NOT DETERMINABLE**. Alerting
+**NOT EXECUTED**. R2/object recovery **NOT VERIFIED**. Business RTO/RPO
+capability **NOT DEMONSTRATED**. Production recovery readiness **NOT
+DEMONSTRATED**. APPLICATION CODE UNCHANGED.
+
+PHASE 9.27 DOCUMENTATION: **COMPLETE** (this branch; **not** merged until
+this PR lands). Documentation audit complete ≠ recovery readiness.
 PHASE_9_15: **OPEN**.
 BACKUP_ASSURANCE: **INCOMPLETE**.
 PHASE_9_16_OBSERVED_RPO: **NOT DETERMINABLE**.

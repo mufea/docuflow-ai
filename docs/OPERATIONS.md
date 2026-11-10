@@ -46,6 +46,9 @@ Post-merge PR/CI reconciliation:
 `docs/reports/PHASE_9_25_POST_MERGE_DOCUMENTATION_RECONCILIATION.md`.
 Phase 9.25 merge / repository assurance snapshot:
 `docs/reports/PHASE_9_26_REPOSITORY_ASSURANCE.md`.
+Final recovery assurance audit (9.15–9.26 consolidation; DR **NOT
+DEMONSTRATED**):
+`docs/reports/PHASE_9_27_FINAL_RECOVERY_ASSURANCE_AUDIT.md`.
 Owner reports no additional Render dashboard fields beyond previously
 captured evidence; the only visible change is **Restore date & time**
 (**OWNER-REPORTED**; no new screenshot; no new timestamp). Do **not**
