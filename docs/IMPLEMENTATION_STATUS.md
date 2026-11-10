@@ -1525,7 +1525,7 @@ BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
 PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
 Phase 10.0B: see below.
 
-## Phase 10.0B — Security hardening — implementation complete (unmerged)
+## Phase 10.0B — Security hardening — implementation complete
 
 Objective: per-client auth rate limits without trusting forwarding
 headers. Baseline `origin/main` **`b9e0e11`** (10 Nov 2026, 19:52
@@ -1538,11 +1538,57 @@ forgot/reset/verify keys use the TCP peer via `rate_limit_client_id`.
 `X-Forwarded-For` / `X-Real-IP` are not used. Memory limiter remains
 process-local. No Redis. 10.0A temp-file/broker fixes left intact.
 
-PHASE 10.0B IMPLEMENTATION: **COMPLETE – UNMERGED**.
+PHASE 10.0B IMPLEMENTATION: **MERGED** (PR
+[#50](https://github.com/mufea/docuflow-ai/pull/50); merge commit:
+`7dcca325c394b79ff759f42ed84ddced5555d344`; merged at
+`2026-11-10T13:00:07Z` / **10 Nov 2026, 20:00 Asia/Jakarta**).
+Repository CI
+[42819517340](https://github.com/mufea/docuflow-ai/actions/runs/42819517340)
+**SUCCESS** (Python tests and checks, Web lint/typecheck/tests/build).
+CI success is **not** production verification. The contemporaneous
+**COMPLETE – UNMERGED** line is superseded for **current** git status.
 LOCAL VALIDATION: **TESTED** (unit + integration pytest, ruff, mypy).
 PRODUCTION VERIFIED: **NOT VERIFIED**.
+STAGING VERIFIED: **NOT VERIFIED**.
 PHASE_9_15: **OPEN**.
 BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.0C: see below.
+
+## Phase 10.0C — Post-merge documentation reconciliation
+
+Objective: reconcile Phase 10.0B current-status with the merged GitHub
+state. Documentation only. Baseline `origin/main`
+**`7dcca325c394b79ff759f42ed84ddced5555d344`** (10 Nov 2026, 20:11
+Asia/Jakarta). Verified live: PR
+[#49](https://github.com/mufea/docuflow-ai/pull/49) **MERGED**
+(`b9e0e11f2ad79883ffbccc7807df6317523d72cd`,
+`2026-11-10T12:49:10Z`); PR
+[#50](https://github.com/mufea/docuflow-ai/pull/50) **MERGED**
+(`7dcca325c394b79ff759f42ed84ddced5555d344`,
+`2026-11-10T13:00:07Z`); CI
+[42819517340](https://github.com/mufea/docuflow-ai/actions/runs/42819517340)
+**SUCCESS**. No open PRs at this audit. Application code,
+infrastructure, and recovery conclusions were not changed.
+
+PHASE 10.0C DOCUMENTATION: **COMPLETE – UNMERGED**.
+PHASE 10.0A IMPLEMENTATION: **MERGED**.
+PHASE 10.0B IMPLEMENTATION: **MERGED**.
+REPOSITORY CI (PR #50): **SUCCESS**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+STAGING VERIFIED: **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
 BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
 BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
 PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.

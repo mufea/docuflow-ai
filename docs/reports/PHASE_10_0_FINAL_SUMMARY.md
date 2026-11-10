@@ -3,15 +3,18 @@
 Documentation of repository-level runtime reliability and auth
 rate-limit hardening. **Not** staging or production certification.
 
-Time: **10 Nov 2026, 19:52 Asia/Jakarta (WIB)** (`2026-11-10T12:52:09Z`).
-`origin/main` at 10.0B start: **`b9e0e11`** (Phase 10.0A merged).
+Time of this reconciliation: **10 Nov 2026, 20:11 Asia/Jakarta (WIB)**
+(`2026-11-10T13:11:47Z`). Current `origin/main`:
+**`7dcca325c394b79ff759f42ed84ddced5555d344`** (PR #50 merge commit).
+The 10.0B-start baseline `b9e0e11` and the original 19:52 Asia/Jakarta
+timestamp remain historical.
 
 ## 1. Scope
 
 | Stream | Phase | Outcome |
 | --- | --- | --- |
-| Upload/download temp files; inline broker shutdown | 10.0A | Code on `main` via PR [#49](https://github.com/mufea/docuflow-ai/pull/49) |
-| Auth rate-limit isolation; no spoofable forwarding headers | 10.0B | This PR; **COMPLETE – UNMERGED** until it lands |
+| Upload/download temp files; inline broker shutdown | 10.0A | **MERGED** via PR [#49](https://github.com/mufea/docuflow-ai/pull/49) (`b9e0e11`, `2026-11-10T12:49:10Z`) |
+| Auth rate-limit isolation; no spoofable forwarding headers | 10.0B | **MERGED** via PR [#50](https://github.com/mufea/docuflow-ai/pull/50) (`7dcca32`, `2026-11-10T13:00:07Z`) |
 
 ## 2. Code-level fixes
 
@@ -21,7 +24,7 @@ Time: **10 Nov 2026, 19:52 Asia/Jakarta (WIB)** (`2026-11-10T12:52:09Z`).
 - Download temps unlinked when storage download fails.
 - API lifespan calls `InlineBroker.shutdown(wait=True)`.
 
-**10.0B (this branch)**
+**10.0B (merged)**
 
 - Forgot-password limit is per TCP peer, not a global `"forgot"` key.
 - Reset-password and verify-email have independent per-peer limits.
@@ -37,7 +40,7 @@ Time: **10 Nov 2026, 19:52 Asia/Jakarta (WIB)** (`2026-11-10T12:52:09Z`).
 
 ## 4. Local validation (10.0B)
 
-`env -u DATABASE_URL`:
+Recorded on the 10.0B PR before merge (`env -u DATABASE_URL`):
 
 - Unit: 259 passed, 1 skipped
 - Integration: 13 passed (127.0.0.1)
@@ -50,11 +53,12 @@ Web suite: **NOT EXECUTED**.
 | Phase | Run | Result | Meaning |
 | --- | --- | --- | --- |
 | 10.0A | [42818081339](https://github.com/mufea/docuflow-ai/actions/runs/42818081339) | **SUCCESS** | Repository CI, **not** production runtime |
-| 10.0B | Recorded on its PR after push | pending until GitHub runs | Same limitation |
+| 10.0B | [42819517340](https://github.com/mufea/docuflow-ai/actions/runs/42819517340) | **SUCCESS** | Repository CI, **not** production runtime |
 
 ## 6. Staging verification
 
-**NOT VERIFIED**. **NOT EXECUTED**.
+**NOT VERIFIED**. **NOT EXECUTED**. No new staging evidence was
+collected in Phase 10.0C.
 
 ## 7. Production verification
 
@@ -65,16 +69,27 @@ Passing CI does **not** imply staging or production readiness.
 
 ## 8. Remaining limitations
 
-- Inline broker: SIGKILL still leaves `processing` rows until stale cleanup.
-- Rate limits: process-local memory; not shared across replicas.
-- Reverse proxy without a trusted-proxy setting: many clients may share
-  one peer bucket (by design vs header spoofing).
+- Rate limiter remains process-local (in-process memory; not shared
+  across replicas).
+- Reverse-proxy clients may share one peer-address bucket.
+- Forwarding headers (`X-Forwarded-For`, `X-Real-IP`) are not trusted
+  for rate-limit identity.
+- Inline broker does not guarantee completion of in-flight work after
+  abrupt process termination (SIGKILL still leaves `processing` rows
+  until stale cleanup).
 - Phase 9.15 backup assurance **OPEN** / **INCOMPLETE**.
+- Backup enablement/schedule **UNKNOWN** / **NOT DISPLAYED**.
+- Observed RPO **NOT DETERMINABLE**.
+- Alerting **NOT EXECUTED** / **NOT VERIFIED**.
+- R2/object restore **NOT VERIFIED**.
 - Business RTO/RPO capability **NOT DEMONSTRATED**.
 - Production DR **NOT DEMONSTRATED**.
 
 ## 9. Combined Phase 10.0 status
 
-10.0A is **MERGED**. 10.0B is **COMPLETE – UNMERGED** on this PR.
+10.0A is **MERGED**. 10.0B is **MERGED**. Repository CI for PR #50 is
+**SUCCESS**. Production verification is **NOT VERIFIED**. Staging
+verification of Phase 10.0 changes is **NOT VERIFIED**.
+
 Together they are a **code-level** reliability and auth-limit hardening
 slice. They are **not** production-verified and **not** DR-ready.
