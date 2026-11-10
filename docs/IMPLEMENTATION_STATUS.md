@@ -2,6 +2,41 @@
 
 Phases are marked complete only when commands below were executed and passed.
 
+## Current-status labels
+
+These labels are **independent**. One does not imply another.
+**MERGED** is not **PRODUCTION VERIFIED**. **CI VERIFIED** is not
+operational verification. Documentation completion is not recovery
+assurance completion. This convention is a process improvement; it does
+not prevent every future stale entry.
+
+| Status | Meaning |
+| --- | --- |
+| IN PROGRESS | Work is actively being implemented |
+| COMPLETE – UNMERGED | Work is complete on a branch; its PR has not merged |
+| MERGED | PR is verified merged into the target branch |
+| CI VERIFIED | Relevant CI checks passed |
+| OWNER VERIFIED | Owner supplied evidence of an operation |
+| STAGING VERIFIED | Required staging evidence is available |
+| PRODUCTION VERIFIED | Required production verification evidence exists |
+
+**COMPLETE – UNMERGED** must not remain the current status after a
+verified merge. Mark **MERGED** only with a verified PR merge state or
+verified Git ancestry and merge commit. If neither is available, use a
+qualified status such as **OWNER-REPORTED**.
+
+### Post-merge reconciliation
+
+After a PR merges:
+
+1. Verify the merge against the target branch.
+2. Update current implementation status in the same PR where practical,
+   or open a small post-merge reconciliation PR.
+3. Record the PR number and merge commit.
+4. Preserve historical branch-state descriptions in historical reports.
+5. Do not change operational evidence classifications merely because
+   documentation merged.
+
 ## Environment inspected (Phase 0)
 
 - OS: Ubuntu 24.04.5, x86_64
@@ -1294,7 +1329,8 @@ clicked. Observed lag vs 15:42 receipt **~10 minutes**. 9.15 clock gap
 still not displayed). 9.16 RPO still **NOT DETERMINABLE**. Business RPO
 capability **NOT DEMONSTRATED**. No application code.
 
-PHASE 9.23 DOCUMENTATION: **COMPLETE**.
+PHASE 9.23 DOCUMENTATION: **COMPLETE**. **MERGED** (PR #42; merge commit:
+`d43a96c`). Documentation COMPLETE describes scope; MERGED is git status.
 LATEST_RESTORABLE_PITR_DATETIME: **2026-11-10T15:31:47+07:00** (historical
 picker; not a live re-check).
 PHASE 9.15: **OPEN**.
@@ -1433,8 +1469,29 @@ Asia/Jakarta). Report:
 Does **not** repeat the 9.27 recovery audit. Does **not** close Phase
 9.15. APPLICATION CODE UNCHANGED.
 
-PHASE 9.28 DOCUMENTATION: **COMPLETE** (this branch; **not** merged until
-this PR lands).
+PHASE 9.28 DOCUMENTATION: **MERGED** (PR #47; merge commit: `b00693d`).
+The contemporaneous “this branch / not merged until this PR lands” line
+is superseded for **current** git status. Documentation merge is not
+recovery assurance.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 9.29: see below.
+
+## Phase 9.29 — Post-merge repository reconciliation — documentation complete
+
+Objective: reconcile Phase 9.28 after PR #47 merged, and record status
+labels plus the post-merge rule. **Not** a restore. Baseline
+`origin/main` **`b00693d`** (10 Nov 2026, 18:44 Asia/Jakarta). Report:
+`docs/reports/PHASE_9_29_POST_MERGE_REPOSITORY_RECONCILIATION.md`.
+
+Does **not** repeat the 9.27 recovery audit. Does **not** close Phase
+9.15. APPLICATION CODE UNCHANGED.
+
+PHASE 9.29 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR; not **MERGED**
+until it lands).
 PHASE_9_15: **OPEN**.
 BACKUP_ASSURANCE: **INCOMPLETE**.
 BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
