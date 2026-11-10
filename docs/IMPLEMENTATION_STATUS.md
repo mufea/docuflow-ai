@@ -1294,3 +1294,29 @@ picker; not a live re-check).
 PHASE 9.15: **OPEN**.
 BACKUP ASSURANCE: **INCOMPLETE**.
 BUSINESS RPO CAPABILITY: **NOT DEMONSTRATED**.
+Phase 9.24: see below.
+
+## Phase 9.24 — Recovery assurance evidence consolidation — documentation complete
+
+Objective: one table for PITR clock vs 9.16 vs business RTO/RPO. **Not** a
+restore. Baseline `origin/main` **`d43a96c`** (10 Nov 2026, 16:00
+Asia/Jakarta). Report: `docs/reports/PHASE_9_24_RECOVERY_ASSURANCE.md`.
+
+Picker instant **2026-11-10 15:31:47 UTC+7** remains a 9.23 **observation**.
+Lag **~10 minutes** is **OBSERVATION ONLY**, not guaranteed RPO. Isolated
+restore **15 minutes** is not business RTO. 9.16 observed RPO **NOT
+DETERMINABLE** (PITR used blank — not back-filled). 9.15 **OPEN**. Schedule
+and enabled toggle **NOT DISPLAYED**. Alerting **NOT EXECUTED**. Business
+RTO/RPO **NOT DEMONSTRATED**. Production DR **NOT DEMONSTRATED**.
+APPLICATION CODE UNCHANGED.
+
+PHASE 9.24 DOCUMENTATION: **COMPLETE** (this branch; **not** merged until
+the PR lands).
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+PHASE_9_16_OBSERVED_RPO: **NOT DETERMINABLE**.
+LATEST_RESTORABLE_PITR_DATETIME: **2026-11-10 15:31:47 UTC+7** (historical).
+OBSERVED_RECOVERY_LAG: **~10 minutes** (observation only).
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.

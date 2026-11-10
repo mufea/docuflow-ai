@@ -83,3 +83,6 @@ PHASE 9.15: **OPEN**. BACKUP ASSURANCE: **INCOMPLETE**.
 | Application / Blueprint / env / plan | **NO** |
 | Start Recovery / export / DSN | **NO** |
 | Screenshot committed to git | **NO** |
+
+Later consolidation (do not treat ~10 min as guaranteed RPO):
+`docs/reports/PHASE_9_24_RECOVERY_ASSURANCE.md`.

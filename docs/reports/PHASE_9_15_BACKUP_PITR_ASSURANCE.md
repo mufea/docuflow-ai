@@ -290,6 +290,8 @@ UI: “The latest available time is shown below.”
 That lag is **inside** the 24-hour business RPO **target** at this
 inspection. It is **not** a guaranteed RPO. 9.16 observed RPO remains
 **NOT DETERMINABLE**. Report: `docs/reports/PHASE_9_23_PITR_LATEST_AVAILABLE_CLOCK.md`.
+Consolidation (lag is observation-only, not business RPO):
+`docs/reports/PHASE_9_24_RECOVERY_ASSURANCE.md`.
 
 PHASE 9.15 clock field: **CAPTURED** (this inspection). PHASE 9.15 overall:
 **OPEN**. BACKUP ASSURANCE COMPLETE: **NO**.
