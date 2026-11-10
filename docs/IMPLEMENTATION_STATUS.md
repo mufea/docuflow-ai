@@ -1716,7 +1716,8 @@ PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
 
 Objective: conditional job completion and refund-protected settlement
 only. Baseline `origin/main`
-**`fdf5b65952b6a245dbdc9a30a190a39eafff24a5`**. Report:
+**`fdf5b65952b6a245dbdc9a30a190a39eafff24a5`**. Implementation
+`ba127972d0abb5160a8e8026dddc37def6fb0119`. Report:
 `docs/reports/PHASE_10_3B_P0_CORRECTNESS_REMEDIATION.md`.
 
 P0-A: `complete_job_if_processing()` uses

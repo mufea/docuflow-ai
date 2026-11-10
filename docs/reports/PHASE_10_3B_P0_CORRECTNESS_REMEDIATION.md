@@ -27,7 +27,7 @@ mutated.
 | Expected `origin/main` | `fdf5b65952b6a245dbdc9a30a190a39eafff24a5` |
 | Actual `origin/main` | `fdf5b65952b6a245dbdc9a30a190a39eafff24a5` (match) |
 | Feature branch | `feat/phase-10-3b-p0-correctness` |
-| Implementation commit | recorded in `docs/IMPLEMENTATION_STATUS.md` after commit |
+| Implementation commit | `ba127972d0abb5160a8e8026dddc37def6fb0119` |
 | Production / staging runtime | **NOT VERIFIED** |
 | Deploy | **NOT EXECUTED** |
 
