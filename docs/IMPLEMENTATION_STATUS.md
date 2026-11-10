@@ -1099,11 +1099,11 @@ this account. All Recovery-page values **UNKNOWN**. RPO **NOT DETERMINABLE**.
 No restore, export, plan change, SQL, or application code.
 
 PHASE 9.15 IMPLEMENTATION: **PARTIAL / DOCUMENTATION COMPLETE**.
-PHASE 9.15 OWNER VERIFICATION: **BLOCKED / EVIDENCE REQUIRED** at write-up;
-Phase 9.16 prompt later supplied **OWNER-REPORTED** Recovery screenshot
-fields (3-day PITR window; logical export 7 Nov 2026, 5:27 PM). This agent
-did **not** view the screenshot. Latest restorable PITR instant still
-**UNKNOWN**. BACKUP ASSURANCE COMPLETE: **NO**.
+PHASE 9.15 OWNER VERIFICATION: **PARTIAL** after 9.20 screenshot (see
+below). At original write-up: **BLOCKED / EVIDENCE REQUIRED**. Phase 9.16
+prompt supplied **OWNER-REPORTED** Recovery fields (3-day PITR window;
+logical export 7 Nov 2026, 5:27 PM) without an agent-viewed image. Latest
+restorable PITR instant still **UNKNOWN**. BACKUP ASSURANCE COMPLETE: **NO**.
 
 ## Phase 9.16 — Measured RTO/RPO — blocked on owner PITR restore
 
@@ -1202,26 +1202,25 @@ PHASE 9.15: **OPEN — OWNER EVIDENCE REQUIRED**.
 BUSINESS RTO CAPABILITY: **NOT DEMONSTRATED**.
 BUSINESS RPO CAPABILITY: **NOT DEMONSTRATED**.
 BACKUP ASSURANCE COMPLETE: **NO**.
-Phase 9.20 owner screenshot transcription: **OPEN PR #39** (not on
-`origin/main` `04a0e90`). Phase 9.21: see below.
+Phase 9.20: see below.
 
-## Phase 9.21 — Recovery evidence gap closure — documentation complete
+## Phase 9.20 — Owner backup-evidence capture — documentation complete
 
-Objective: classify Postgres/PITR, R2, DB↔object consistency, and RTO/RPO
-without a restore. Baseline `origin/main` **`04a0e90`** (10 Nov 2026,
-12:55 Asia/Jakarta). Report:
-`docs/reports/PHASE_9_21_RECOVERY_EVIDENCE_GAP_CLOSURE.md`.
+Objective: transcribe the owner `docuflow-db` Recovery screenshot. **Not**
+a restore. Baseline `origin/main` **`04a0e90`** (10 Nov 2026, 11:29
+Asia/Jakarta). Report: `docs/reports/PHASE_9_20_OWNER_BACKUP_EVIDENCE.md`.
+9.15 addendum §J.
 
-PR #39 remains **OPEN** (9.20 screenshot file not on this baseline; 9.21
-does not duplicate it). 9.15 **OPEN** (latest restorable PITR clock
-**UNKNOWN**). Isolated DB restore **15 minutes** preserved. Observed RPO
-**NOT DETERMINABLE**. R2 versioning **NOT VERIFIED**. Business RTO/RPO
-**NOT DEMONSTRATED**. Production DR **NOT DEMONSTRATED**. No application
-code, DSN, restore, R2 mutate, or new infrastructure.
+This agent **viewed** the image. Identity **`docuflow-db`** /
+**`dpg-dbiqe70ae00c73cdif7g-a`** / **`0.1c-256mb`**. PITR copy: any
+timestamp in the past **3 days**. Restore database **not** clicked. One
+logical export **November 7, 2026 at 5:27 PM** `.dir.tar.gz`; retention
+copy ≥ **7 days**. No DSN in the crop. Latest restorable PITR **clock**
+**UNKNOWN** (not on the page). Backup schedule/enabled **toggles not
+displayed**. Observed RPO **NOT DETERMINABLE**. 9.15 remains **OPEN**.
+No application code, restore, export, or plan change.
 
-PHASE 9.21 DOCUMENTATION: **COMPLETE**.
-PHASE 9.15: **OPEN**.
-BACKUP ASSURANCE: **INCOMPLETE**.
-BUSINESS RTO CAPABILITY: **NOT DEMONSTRATED**.
-BUSINESS RPO CAPABILITY: **NOT DEMONSTRATED**.
-PRODUCTION DR READINESS: **NOT DEMONSTRATED**.
+PHASE 9.20 DOCUMENTATION: **COMPLETE**.
+PHASE 9.15: **OPEN — latest restorable PITR timestamp UNKNOWN**.
+BACKUP ASSURANCE COMPLETE: **NO**.
+BUSINESS RPO CAPABILITY: **NOT DEMONSTRATED** (unchanged).

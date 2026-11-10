@@ -208,10 +208,61 @@ screenshot. Class: **OWNER-REPORTED**.
 - PITR recovery window **3 days** (Pro 7-day window mentioned, not used)
 - Logical export successful; created 7 Nov 2026, 5:27 PM; `.dir.tar.gz`; ≥7 day retention
 
-Still unknown: latest restorable PITR timestamp; backup schedule/enabled;
-operational PITR restore; measured RPO/RTO. Do not treat this addendum as
-BACKUP ASSURANCE COMPLETE.
+Still unknown at that write-up: latest restorable PITR timestamp; backup
+schedule/enabled; operational PITR restore; measured RPO/RTO. Do not treat
+addendum I as BACKUP ASSURANCE COMPLETE.
 
-Phase 9.21 gap register: `docs/reports/PHASE_9_21_RECOVERY_EVIDENCE_GAP_CLOSURE.md`.
-Owner Recovery screenshot transcription is in **open** PR #39 (not on
-`main` at 9.21 baseline `04a0e90`). 9.15 remains **OPEN**.
+## J. Owner Recovery screenshot viewed (10 Nov 2026)
+
+**10 Nov 2026, 11:29 Asia/Jakarta (WIB).** Owner sent a Recovery-page
+screenshot in chat. **This agent viewed the image.** Class: **OWNER
+SCREENSHOT — AGENT VIEWED**. This agent still has **no** Render dashboard
+session and did **not** click Restore, Create export, Connect, or Upgrade.
+
+Identity on the crop (matches protected production):
+
+| Field | Value on screenshot |
+| --- | --- |
+| Header | PostgreSQL **`docuflow-db`** |
+| Plan | **`0.1c-256mb`** |
+| Blueprint | **Blueprint managed** |
+| Service ID | **`dpg-dbiqe70ae00c73cdif7g-a`** |
+| Page | **Recovery** |
+| Connect | Dropdown **closed** (no DSN / URL in the crop) |
+
+Exact PITR UI words:
+
+> Recreate your database from a backup. You can choose to restore from
+> any timestamp in the past **3 days**.
+
+**Restore database** is visible and was **not** clicked. A Pro upsell
+offers a **7-day** window; that is an offer, not this workspace’s current
+window.
+
+Export UI: “All database export files are retained for at least **7
+days**.” One listed export: **November 7, 2026 at 5:27 PM**, file
+**`.dir.tar.gz`**. **Create export** visible, **not** clicked. Export
+clock timezone **not shown**.
+
+| Evidence | Value from this screenshot | Class |
+| --- | --- | --- |
+| Production identity | `docuflow-db` / `dpg-dbiqe70ae00c73cdif7g-a` | **SCREENSHOT-VIEWED** |
+| PITR section present | **YES** | **SCREENSHOT-VIEWED** |
+| PITR available | **YES** (section + Restore database) | **SCREENSHOT-VIEWED** |
+| PITR enabled toggle | **NOT DISPLAYED** | **UNKNOWN** as a named switch |
+| Recovery window | **3 days** | **SCREENSHOT-VIEWED** |
+| PITR selection | “any timestamp in the past 3 days” | **SCREENSHOT-VIEWED** (no clock) |
+| Latest restorable PITR timestamp | **NOT DISPLAYED** | **UNKNOWN** |
+| Backup schedule / frequency | **NOT DISPLAYED** (no cron/daily field) | **NOT INDEPENDENTLY CAPTURED** |
+| Latest backup timestamp | **NOT DISPLAYED** | **UNKNOWN** |
+| Database name | **NOT DISPLAYED** on this crop | **UNKNOWN** |
+| Logical export | 1 row, 7 Nov 2026 5:27 PM, `.dir.tar.gz` | **SCREENSHOT-VIEWED** |
+| Export retention copy | at least 7 days | **SCREENSHOT-VIEWED** |
+| Observed RPO | still needs a restorable clock | **NOT DETERMINABLE** |
+
+Do **not** click Restore to hunt for a datetime picker. If Recovery does
+not show a latest restorable clock, leave it **UNKNOWN**.
+
+PHASE 9.15: **OPEN — OWNER EVIDENCE REQUIRED** (latest restorable PITR
+timestamp still **UNKNOWN**). BACKUP ASSURANCE COMPLETE: **NO**.
+Full capture: `docs/reports/PHASE_9_20_OWNER_BACKUP_EVIDENCE.md`.
