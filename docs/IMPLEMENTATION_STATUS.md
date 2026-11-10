@@ -1490,8 +1490,30 @@ labels plus the post-merge rule. **Not** a restore. Baseline
 Does **not** repeat the 9.27 recovery audit. Does **not** close Phase
 9.15. APPLICATION CODE UNCHANGED.
 
-PHASE 9.29 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR; not **MERGED**
-until it lands).
+PHASE 9.29 DOCUMENTATION: **MERGED** (PR [#48](https://github.com/mufea/docuflow-ai/pull/48);
+merge commit: `3f8e4f7`). The contemporaneous **COMPLETE – UNMERGED** line
+is superseded for **current** git status.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.0A: see below.
+
+## Phase 10.0A — Runtime reliability — implementation complete (unmerged)
+
+Objective: fix confirmed upload/download temp-file leaks and inline-broker
+lifespan shutdown. Baseline `origin/main` **`3f8e4f7`** (10 Nov 2026,
+19:42 Asia/Jakarta). Report: `docs/reports/PHASE_10_0A_RUNTIME_RELIABILITY.md`.
+
+Upload size-validation and store_upload failures now unlink `delete=False`
+temps. Failed storage downloads unlink partial temps. API lifespan calls
+`InlineBroker.shutdown(wait=True)`. Job claim/recovery/credits unchanged.
+No Redis/worker, Blueprint, or production change.
+
+PHASE 10.0A IMPLEMENTATION: **COMPLETE – UNMERGED**.
+LOCAL VALIDATION: **TESTED** (unit + integration pytest, ruff, mypy).
+PRODUCTION VERIFIED: **NOT VERIFIED**.
 PHASE_9_15: **OPEN**.
 BACKUP_ASSURANCE: **INCOMPLETE**.
 BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
