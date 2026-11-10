@@ -16,6 +16,7 @@ from docuflow.api.schemas import (
 from docuflow.billing.ledger import CreditService
 from docuflow.config import Settings
 from docuflow.models import CreditAccount, User
+from docuflow.security.client_ip import rate_limit_client_id
 from docuflow.security.rate_limit import MemoryRateLimiter
 from docuflow.services.auth import AuthService
 from docuflow.services.documents import DocumentService
@@ -71,7 +72,7 @@ def register(
 ) -> UserOut:
     ctx = get_context(request)
     limiter: MemoryRateLimiter = ctx.limiter
-    limiter.hit(f"register:{request.client.host if request.client else 'unknown'}", limit=5, window_seconds=60)
+    limiter.hit(f"register:{rate_limit_client_id(request)}", limit=5, window_seconds=60)
     auth = AuthService(db, settings, ctx.email)
     user = auth.register(email=payload.email, password=payload.password, name=payload.name)
     return _user_out(db, user)
@@ -86,7 +87,7 @@ def login(
     settings: Settings = Depends(get_settings),
 ) -> UserOut:
     ctx = get_context(request)
-    ctx.limiter.hit(f"login:{request.client.host if request.client else 'unknown'}", limit=10, window_seconds=60)
+    ctx.limiter.hit(f"login:{rate_limit_client_id(request)}", limit=10, window_seconds=60)
     auth = AuthService(db, settings, ctx.email)
     user, raw, csrf = auth.login(
         email=payload.email,
@@ -153,7 +154,9 @@ def forgot_password(
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
 ) -> dict[str, bool]:
-    get_context(request).limiter.hit("forgot", limit=8, window_seconds=60)
+    get_context(request).limiter.hit(
+        f"forgot:{rate_limit_client_id(request)}", limit=8, window_seconds=60
+    )
     AuthService(db, settings, get_context(request).email).request_password_reset(payload.email)
     return {"ok": True}
 
@@ -165,6 +168,9 @@ def reset_password(
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
 ) -> dict[str, bool]:
+    get_context(request).limiter.hit(
+        f"reset:{rate_limit_client_id(request)}", limit=10, window_seconds=60
+    )
     AuthService(db, settings, get_context(request).email).reset_password(payload.token, payload.password)
     return {"ok": True}
 
@@ -176,5 +182,8 @@ def verify_email(
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
 ) -> dict[str, bool]:
+    get_context(request).limiter.hit(
+        f"verify:{rate_limit_client_id(request)}", limit=10, window_seconds=60
+    )
     AuthService(db, settings, get_context(request).email).verify_email(payload.token)
     return {"ok": True}

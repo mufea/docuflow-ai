@@ -1500,7 +1500,7 @@ BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
 PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
 Phase 10.0A: see below.
 
-## Phase 10.0A — Runtime reliability — implementation complete (unmerged)
+## Phase 10.0A — Runtime reliability — implementation complete
 
 Objective: fix confirmed upload/download temp-file leaks and inline-broker
 lifespan shutdown. Baseline `origin/main` **`3f8e4f7`** (10 Nov 2026,
@@ -1511,7 +1511,34 @@ temps. Failed storage downloads unlink partial temps. API lifespan calls
 `InlineBroker.shutdown(wait=True)`. Job claim/recovery/credits unchanged.
 No Redis/worker, Blueprint, or production change.
 
-PHASE 10.0A IMPLEMENTATION: **COMPLETE – UNMERGED**.
+PHASE 10.0A IMPLEMENTATION: **MERGED** (PR [#49](https://github.com/mufea/docuflow-ai/pull/49);
+merge commit: `b9e0e11`). CI
+[42818081339](https://github.com/mufea/docuflow-ai/actions/runs/42818081339)
+**SUCCESS** (repository CI, not production runtime). The contemporaneous
+**COMPLETE – UNMERGED** line is superseded for **current** git status.
+LOCAL VALIDATION: **TESTED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.0B: see below.
+
+## Phase 10.0B — Security hardening — implementation complete (unmerged)
+
+Objective: per-client auth rate limits without trusting forwarding
+headers. Baseline `origin/main` **`b9e0e11`** (10 Nov 2026, 19:52
+Asia/Jakarta). Reports:
+`docs/reports/PHASE_10_0B_SECURITY_HARDENING.md`,
+`docs/reports/PHASE_10_0_FINAL_SUMMARY.md`.
+
+Forgot-password no longer uses a global `"forgot"` key. Login/register/
+forgot/reset/verify keys use the TCP peer via `rate_limit_client_id`.
+`X-Forwarded-For` / `X-Real-IP` are not used. Memory limiter remains
+process-local. No Redis. 10.0A temp-file/broker fixes left intact.
+
+PHASE 10.0B IMPLEMENTATION: **COMPLETE – UNMERGED**.
 LOCAL VALIDATION: **TESTED** (unit + integration pytest, ruff, mypy).
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 PHASE_9_15: **OPEN**.
