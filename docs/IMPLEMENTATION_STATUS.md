@@ -1630,3 +1630,47 @@ R2 / OBJECT RESTORE: **NOT VERIFIED**.
 BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
 BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
 PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.1: see below.
+
+## Phase 10.1 — Runtime reliability and security gap assessment — merged
+
+Documentation-only assessment. PR
+[#53](https://github.com/mufea/docuflow-ai/pull/53) **MERGED**
+(`459c21d80f4d1d47f2f7c96212765bd08c2ff44d`,
+`2026-11-10T14:01:58Z` / **10 Nov 2026, 21:01 Asia/Jakarta**).
+Report: `docs/reports/PHASE_10_1_RUNTIME_RELIABILITY_SECURITY_GAP_ASSESSMENT.md`.
+No application remediations in that PR.
+
+PHASE 10.1 DOCUMENTATION: **MERGED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+STAGING VERIFIED: **NOT VERIFIED**.
+Phase 10.2: see below.
+
+## Phase 10.2 — Runtime reliability and security gap remediation
+
+Objective: implement approved R1–R3 only. Baseline `origin/main`
+**`459c21d80f4d1d47f2f7c96212765bd08c2ff44d`** (10 Nov 2026, 21:12
+Asia/Jakarta). Report:
+`docs/reports/PHASE_10_2_RUNTIME_RELIABILITY_REMEDIATION.md`.
+
+R1: route-level HTTP 429 tests for reset-password and verify-email.
+R2: empty expired rate-limit buckets evicted under the existing lock.
+R3: `FORWARDED_ALLOW_IPS` documented; no env or start-command change.
+
+SIGKILL / `processing` recovery and early `store_result` commits are
+**unchanged** (out of scope).
+
+PHASE 10.2 IMPLEMENTATION: **COMPLETE – UNMERGED**.
+LOCAL VALIDATION: **TESTED**.
+REPOSITORY CI: **NOT RUN** at documentation time (see the 10.2 report / PR checks).
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+STAGING VERIFIED: **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.

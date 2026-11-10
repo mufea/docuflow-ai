@@ -12,7 +12,7 @@ Postgres is the source of truth for job status. Redis only delivers `job_id` whe
 
 The API thread pool runs jobs. No separate worker is required. `WORKER_CONCURRENCY` is the pool size. Large PDFs can hit the Free web request/CPU budget; expect slower jobs and possible timeouts.
 
-Audited Redis consumers: RQ enqueue (`jobs/broker.py`), the RQ worker process, and `/ready` when `JOB_BROKER=rq`. Sessions, rate limits, and job state do **not** use Redis. With `JOB_BROKER=inline` the API never submits jobs to RQ, so a dedicated worker is idle.
+Audited Redis consumers: RQ enqueue (`jobs/broker.py`), the RQ worker process, and `/ready` when `JOB_BROKER=rq`. Sessions, rate limits, and job state do **not** use Redis. Rate-limit buckets are process-local; empty expired keys are dropped on the next `hit`. With `JOB_BROKER=inline` the API never submits jobs to RQ, so a dedicated worker is idle. `FORWARDED_ALLOW_IPS` must not be `*`; see `docs/DEPLOYMENT.md`.
 
 ### Worker deployment (`JOB_BROKER=rq`) — scaling option
 
