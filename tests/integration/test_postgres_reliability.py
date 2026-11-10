@@ -18,9 +18,10 @@ from docuflow.jobs.leases import LEASE_NAME, acquire_lease, release_lease
 from docuflow.jobs.refunds import fail_job_and_refund
 from docuflow.jobs.retention import run_runtime_cleanup
 from docuflow.jobs.runner import JobRunner
-from docuflow.models import CleanupLease, CreditLedger, Job, StorageDeletion, User
+from docuflow.models import CleanupLease, CreditLedger, Document, Job, StorageDeletion, User
 from docuflow.services.documents import DocumentService
 from docuflow.storage.filesystem import FilesystemStorage
+from tests.pdf.conftest import write_text_pdf
 
 pytestmark = pytest.mark.integration
 
@@ -569,5 +570,119 @@ def test_postgres_runner_skips_settle_after_lost_completion(
     assert stored.result_payload == {}
     assert account.reserved == 0
     assert account.balance == 20
+    assert pg_session.query(CreditLedger).filter_by(idempotency_key=f"settle:{job_id}").first() is None
+    assert pg_session.query(CreditLedger).filter_by(idempotency_key=f"refund:{job_id}").first() is not None
+
+
+def test_postgres_deferred_result_document_is_invisible_until_commit(
+    pg_session: Session, pg_session_factory: sessionmaker[Session], tmp_path: Path
+) -> None:
+    user = _user(pg_session)
+    settings = Settings(
+        env="test",
+        secret_key="test-secret-key-please-change",
+        storage_backend="filesystem",
+        storage_local_path=str(tmp_path / "storage"),
+    )
+    storage = FilesystemStorage(tmp_path / "storage")
+    source = write_text_pdf(tmp_path / "out.pdf", ["pg-deferred"])
+    stored = DocumentService(pg_session, storage, settings).store_result(
+        user, source, "out.pdf", origin="job:extract_text", commit=False
+    )
+    other = pg_session_factory()
+    try:
+        assert other.get(Document, stored.id) is None
+        pg_session.commit()
+        other.expire_all()
+        visible = other.get(Document, stored.id)
+        assert visible is not None
+        assert visible.origin == "job:extract_text"
+    finally:
+        other.close()
+
+
+def test_postgres_deferred_result_document_rollback_drops_row(
+    pg_session: Session, pg_session_factory: sessionmaker[Session], tmp_path: Path
+) -> None:
+    user = _user(pg_session)
+    settings = Settings(
+        env="test",
+        secret_key="test-secret-key-please-change",
+        storage_backend="filesystem",
+        storage_local_path=str(tmp_path / "storage"),
+    )
+    storage = FilesystemStorage(tmp_path / "storage")
+    source = write_text_pdf(tmp_path / "out.pdf", ["pg-rollback"])
+    stored = DocumentService(pg_session, storage, settings).store_result(
+        user, source, "out.pdf", origin="job:extract_text", commit=False
+    )
+    doc_id = stored.id
+    key = stored.storage_key
+    pg_session.rollback()
+    other = pg_session_factory()
+    try:
+        assert other.get(Document, doc_id) is None
+        assert storage.exists(key) is True
+    finally:
+        other.close()
+
+
+def test_postgres_lost_completion_rolls_back_flushed_result_document(
+    pg_session: Session, pg_session_factory: sessionmaker[Session], tmp_path: Path
+) -> None:
+    user = _user(pg_session)
+    CreditService(pg_session).ensure_account(user)
+    job = Job(user_id=user.id, operation="extract_text", status="queued", credits_reserved=3)
+    pg_session.add(job)
+    pg_session.commit()
+    CreditService(pg_session).reserve(user, 3, job_id=job.id)
+    pg_session.commit()
+    job_id = job.id
+    settings = Settings(
+        env="test",
+        secret_key="test-secret-key-please-change",
+        storage_backend="filesystem",
+        storage_local_path=str(tmp_path / "storage"),
+        job_broker="inline",
+        ai_provider="mock",
+    )
+    storage = FilesystemStorage(tmp_path / "storage")
+    runner = JobRunner(
+        session_factory=pg_session_factory,
+        storage=storage,
+        settings=settings,
+        ai=MagicMock(),
+    )
+    stored_ids: list[str] = []
+
+    def store_then_lose(work_session: Session, work_job: Job, work_user: User) -> dict[str, str]:
+        source = write_text_pdf(tmp_path / "late.pdf", ["late"])
+        stored = DocumentService(work_session, storage, settings).store_result(
+            work_user, source, "late.pdf", origin="job:extract_text", commit=False
+        )
+        stored_ids.append(stored.id)
+        work_job.result_document_ids = [stored.id]
+        other = pg_session_factory()
+        try:
+            fail_job_and_refund(
+                other,
+                work_job.id,
+                code="timeout",
+                message="stale cleanup",
+                expected_statuses=("processing",),
+                commit=True,
+            )
+        finally:
+            other.close()
+        return {"result_files": [stored.original_filename]}
+
+    runner._execute = store_then_lose  # type: ignore[method-assign]
+    runner.process(job_id)
+    pg_session.expire_all()
+    stored_job = pg_session.get(Job, job_id)
+    assert stored_job is not None
+    assert stored_job.status == "failed"
+    assert stored_ids
+    assert pg_session.get(Document, stored_ids[0]) is None
     assert pg_session.query(CreditLedger).filter_by(idempotency_key=f"settle:{job_id}").first() is None
     assert pg_session.query(CreditLedger).filter_by(idempotency_key=f"refund:{job_id}").first() is not None

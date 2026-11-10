@@ -39,12 +39,30 @@ class DocumentService:
 
     def store_upload(self, user: User, source: Path, original_filename: str) -> Document:
         return self._store(
-            user, source, original_filename, origin="upload", retention_hours=self.settings.file_retention_hours
+            user,
+            source,
+            original_filename,
+            origin="upload",
+            retention_hours=self.settings.file_retention_hours,
+            commit=True,
         )
 
-    def store_result(self, user: User, source: Path, original_filename: str, origin: str) -> Document:
+    def store_result(
+        self,
+        user: User,
+        source: Path,
+        original_filename: str,
+        origin: str,
+        *,
+        commit: bool = True,
+    ) -> Document:
         return self._store(
-            user, source, original_filename, origin=origin, retention_hours=self.settings.result_retention_hours
+            user,
+            source,
+            original_filename,
+            origin=origin,
+            retention_hours=self.settings.result_retention_hours,
+            commit=commit,
         )
 
     def get_owned(self, user: User, document_id: str) -> Document:
@@ -321,6 +339,7 @@ class DocumentService:
         *,
         origin: str,
         retention_hours: int,
+        commit: bool = True,
     ) -> Document:
         if source.stat().st_size > self.settings.max_upload_bytes:
             raise FileTooLargeError("File exceeds the configured upload limit.")
@@ -347,6 +366,9 @@ class DocumentService:
             expires_at=datetime.now(UTC) + timedelta(hours=retention_hours),
         )
         self.session.add(document)
-        self.session.commit()
+        if commit:
+            self.session.commit()
+        else:
+            self.session.flush()
         self.session.refresh(document)
         return document

@@ -148,6 +148,7 @@ class JobRunner:
                     output,
                     original_filename=output.name,
                     origin=f"job:{job.operation}",
+                    commit=False,
                 )
                 result_ids.append(stored.id)
                 stored_names.append(stored.original_filename)
