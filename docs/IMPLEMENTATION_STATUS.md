@@ -1674,3 +1674,34 @@ R2 / OBJECT RESTORE: **NOT VERIFIED**.
 BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
 BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
 PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.3A: see below.
+
+## Phase 10.3A — Durable job recovery and result consistency — assessment
+
+Documentation-only. Baseline `origin/main`
+**`2447ac516d29cfeb7d3297cfcefd6a9591343694`**. Working paper:
+`docs/reports/PHASE_10_3A_PART_1_REPOSITORY_AUDIT.md`. Final report:
+`docs/reports/PHASE_10_3A_DURABLE_JOB_RECOVERY_AND_RESULT_CONSISTENCY_ASSESSMENT.md`.
+
+Confirmed: duplicate `queued` delivery is safe; `processing` is not
+resumed (stale fail+refund); `_store` commits before job completion;
+complete is unconditional; `settle` does not refuse `refund:{job_id}`.
+Recommended 10.3B: conditional complete + settle-after-refund guard
+(P0), no Redis. Result persistence is 10.3C. Implementation **not**
+started.
+
+PHASE 10.3A ASSESSMENT: **COMPLETE – UNMERGED**.
+DOCUMENTATION: **COMMITTED** on this branch.
+REPOSITORY CI: **NOT RUN** at documentation time (see PR checks).
+PHASE 10.3B IMPLEMENTATION: **NOT STARTED**.
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
