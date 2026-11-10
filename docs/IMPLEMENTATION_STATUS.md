@@ -1410,12 +1410,33 @@ is not business RTO. 9.16 observed RPO **NOT DETERMINABLE**. Alerting
 capability **NOT DEMONSTRATED**. Production recovery readiness **NOT
 DEMONSTRATED**. APPLICATION CODE UNCHANGED.
 
-PHASE 9.27 DOCUMENTATION: **COMPLETE** (this branch; **not** merged until
-this PR lands). Documentation audit complete ≠ recovery readiness.
+PHASE 9.27 DOCUMENTATION: **MERGED** (PR #46; merge commit: `1e13469`).
+Documentation audit complete ≠ recovery readiness. The contemporaneous
+“this branch / not merged until this PR lands” line is superseded for
+**current** git status.
 PHASE_9_15: **OPEN**.
 BACKUP_ASSURANCE: **INCOMPLETE**.
 PHASE_9_16_OBSERVED_RPO: **NOT DETERMINABLE**.
 PHASE_9_17_ALERTING: **NOT EXECUTED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 9.28: see below.
+
+## Phase 9.28 — Post-merge status reconciliation — documentation complete
+
+Objective: correct Phase 9.27 current-status after PR #46 merged. **Not**
+a restore. Baseline `origin/main` **`1e13469`** (10 Nov 2026, 18:23
+Asia/Jakarta). Report:
+`docs/reports/PHASE_9_28_POST_MERGE_STATUS_RECONCILIATION.md`.
+
+Does **not** repeat the 9.27 recovery audit. Does **not** close Phase
+9.15. APPLICATION CODE UNCHANGED.
+
+PHASE 9.28 DOCUMENTATION: **COMPLETE** (this branch; **not** merged until
+this PR lands).
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
 BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
 BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
 PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
