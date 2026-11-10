@@ -123,6 +123,11 @@ or alerting change. No `env` / `printenv` / `.env`.
 
 **READY FOR REVIEW** after the PR exists. **Not MERGED.**
 
+The two lines above are **contemporaneous** (pre-merge). Current git
+status: PR #41 **MERGED** as `4625642` (recorded in the Status qualifier
+above). Phase 9.26 does **not** change any operational verification
+result in this report.
+
 Separately: PHASE_9_15 **OPEN**; BACKUP_ASSURANCE **INCOMPLETE**;
 BUSINESS_RTO_CAPABILITY **NOT DEMONSTRATED**; BUSINESS_RPO_CAPABILITY
 **NOT DEMONSTRATED**; PRODUCTION_DR_READINESS **NOT DEMONSTRATED**.

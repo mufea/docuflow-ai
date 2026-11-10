@@ -181,6 +181,10 @@ authorized live checks **outside** this documentation phase.
 lands. Does **not** claim production recovery assurance, business
 RTO/RPO compliance, or production DR readiness.
 
+The three lines above are **contemporaneous** (pre-merge, 10 Nov 2026,
+16:20 Asia/Jakarta). For **current** git status see
+[Post-Merge Addendum — Phase 9.26](#post-merge-addendum-phase-926).
+
 PHASE 9.22: **MERGED** (PR #41, `4625642`).
 PHASE 9.24: **MERGED** (PR #43, `dd82e0b`).
 PHASE 9.15: **OPEN**.
@@ -190,3 +194,39 @@ PHASE_9_17_ALERTING: **NOT EXECUTED**.
 BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
 BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
 PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+
+## Post-Merge Addendum — Phase 9.26
+
+Recorded **10 Nov 2026, 18:06 Asia/Jakarta (WIB)**
+(`2026-11-10T11:06:08Z`). Live GitHub API + `git fetch origin`.
+The contemporaneous Status / final-classification wording above
+(`READY FOR REVIEW` / `Not MERGED until this PR lands`) remains
+accurate for the 16:20 pre-merge snapshot. It is **superseded for
+current repository status** by this addendum. Recovery-assurance
+classifications are **unchanged**.
+
+| Fact | Value | Classification |
+| --- | --- | --- |
+| PR #44 | [Merged](https://github.com/mufea/docuflow-ai/pull/44) into `main` | **VERIFIED** |
+| Merge commit | `bedb1408f083695a6f0f61c0a28752baddd11493` | **VERIFIED** |
+| Merge time | 2026-11-10T09:37:04Z (16:37 Asia/Jakarta) | **VERIFIED** |
+| PR head | `40bc72d0d11ee910143d28a45558dca88818e52a` | **VERIFIED** |
+| PR files | Markdown documentation only | **VERIFIED** |
+| CI run | [42790290569](https://github.com/mufea/docuflow-ai/actions/runs/42790290569) | **VERIFIED** |
+| Workflow | `CI` | **VERIFIED** |
+| Run conclusion | **SUCCESS** | **VERIFIED** |
+| Job `Python tests and checks` | **SUCCESS** (unit; PostgreSQL integration; lint; typecheck) | **VERIFIED** |
+| Job `Web lint, typecheck, tests, and build` | **SUCCESS** (lint; typecheck; tests; production build) | **VERIFIED** |
+| `origin/main` at this audit | `bedb1408f083695a6f0f61c0a28752baddd11493` | **VERIFIED** |
+| Open PRs at this audit | **none** (`gh pr list --state open`, 18:06 Asia/Jakarta) | **VERIFIED** |
+| Extra Render dashboard fields | none beyond previously captured evidence; only **Restore date & time** changes | **OWNER-REPORTED** (no new screenshot) |
+| New PITR timestamp | not recorded | **NOT VERIFIED** / not invented |
+| Restore / copy / export | not performed | **NOT EXECUTED** |
+
+Current documentation status after merge: Phase 9.25 **MERGED**. That
+is documentation completion, **not** operational recovery assurance.
+
+Remaining inconsistencies addressed in Phase 9.26: the
+`IMPLEMENTATION_STATUS.md` current-status line that still said
+Phase 9.25 was unmerged. Historical Status tables in 9.22/9.24/9.25
+reports are preserved as contemporaneous snapshots.

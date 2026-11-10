@@ -44,6 +44,12 @@ Consolidation (lag ≠ RPO; 15 min ≠ business RTO):
 `docs/reports/PHASE_9_24_RECOVERY_ASSURANCE.md`.
 Post-merge PR/CI reconciliation:
 `docs/reports/PHASE_9_25_POST_MERGE_DOCUMENTATION_RECONCILIATION.md`.
+Phase 9.25 merge / repository assurance snapshot:
+`docs/reports/PHASE_9_26_REPOSITORY_ASSURANCE.md`.
+Owner reports no additional Render dashboard fields beyond previously
+captured evidence; the only visible change is **Restore date & time**
+(**OWNER-REPORTED**; no new screenshot; no new timestamp). Do **not**
+Start Recovery, Restore, or Create export.
 Phase 9.15 remains **open** (schedule/enabled still not displayed). Backup
 assurance **INCOMPLETE**. Production DR **NOT DEMONSTRATED**.
 Do not assume the live Render Postgres plan matches the Blueprint. Free
