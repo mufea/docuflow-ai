@@ -370,6 +370,45 @@ Do not treat the Blueprint as a completed production deploy.
   also runs migrate so revision `0003_cost_efficient_reliability` exists
   before the first sweep. Do not run production migrations from this environment.
 
+## Uvicorn proxy headers and `FORWARDED_ALLOW_IPS`
+
+Three layers are distinct. Do not treat them as one setting.
+
+1. **Application rate-limit identity** uses the ASGI TCP peer
+   (`request.client.host`) via `rate_limit_client_id`. Auth routes do **not**
+   read `X-Forwarded-For`, `X-Real-IP`, or `Forwarded`.
+2. **Uvicorn** (this API’s process) has `proxy_headers=True` by default. When
+   the connecting peer is in `forwarded_allow_ips`, uvicorn may rewrite
+   `request.client` from forwarding headers **before** application code runs.
+3. **Deployment** controls that allow-list with `FORWARDED_ALLOW_IPS` (uvicorn
+   default: `127.0.0.1` when unset). The Blueprint start command does **not**
+   pass `--proxy-headers` or `--forwarded-allow-ips`. `infra/render.yaml` does
+   **not** set `FORWARDED_ALLOW_IPS`.
+
+`FORWARDED_ALLOW_IPS` is the list of **proxy TCP peers** uvicorn may trust
+when applying forwarding headers. It is not a list of end-user IPs.
+
+Do **not** set `FORWARDED_ALLOW_IPS=*`. That trusts forwarding headers from
+every peer, so clients can spoof identity and bypass per-client auth quotas.
+
+Do **not** copy guessed Render proxy CIDRs into this file or into env vars.
+Align the allow-list with the **actual** hop that connects to uvicorn, only
+after that hop is known from the running service. This repository does not
+claim a verified production value.
+
+Behind an untrusted or unconfigured reverse proxy, many users may share one
+peer address. Login, register, forgot-password, reset-password, and
+verify-email quotas then apply to that shared bucket. That is safer than
+header spoofing and is the current design. It can cause false positives.
+
+Live `FORWARDED_ALLOW_IPS` on production or staging dashboards is **NOT
+VERIFIED** by this documentation. Safe check: in the Render dashboard, confirm
+the variable is unset or is a specific proxy address you intend to trust; do
+not paste secrets, DSNs, or the value into tickets. Do not change production
+or staging env from an agent environment.
+
+Documenting this variable does **not** make rate limiting proxy-aware.
+
 ## Required production environment
 
 See `.env.example`. At minimum:
@@ -780,4 +819,4 @@ Render keeps previous deploys. Roll back the web, API, and worker together if th
 
 ## HTTPS and domains
 
-Terminate TLS at Render. Point the custom domain at the web service and set `DOCUFLOW_PUBLIC_WEB_URL` accordingly. The web service proxies `/v1` to the API so cookies stay first-party.
+Terminate TLS at Render. Point the custom domain at the web service and set `DOCUFLOW_PUBLIC_WEB_URL` accordingly. The web service proxies `/v1` to the API so cookies stay first-party. Auth rate limits still key off the API process’s TCP peer unless uvicorn is explicitly told to trust a proxy via `FORWARDED_ALLOW_IPS` (see **Uvicorn proxy headers** above). Do not set that variable to `*`.
