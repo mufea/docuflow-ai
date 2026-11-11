@@ -1832,7 +1832,53 @@ Current job heartbeat is claim + progress 25/80 ORM commits. None during
 conditional heartbeat and a heartbeat-age predicate on stale fail. No
 schema. Retry/resume out of scope.
 
-PHASE 10.4A ASSESSMENT: **COMPLETE – UNMERGED**.
+PHASE 10.4A ASSESSMENT: **MERGED** (PR
+[#59](https://github.com/mufea/docuflow-ai/pull/59);
+merge `0e405713da5300f41ec319ee59d2d9af5a7d71db`,
+`2026-11-11T02:12:02Z` / **11 Nov 2026, 09:12 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status.
+JOB HEARTBEAT IMPROVEMENTS: **NOT IMPLEMENTED**.
+STALE-PROCESSING RECOVERY IMPROVEMENTS: **NOT IMPLEMENTED**.
+PHASE 10.4B: **NOT STARTED**.
+REPOSITORY CI: **SUCCESS** on PR #59
+([42943776384](https://github.com/mufea/docuflow-ai/actions/runs/42943776384))
+and `main` push
+[42944354468](https://github.com/mufea/docuflow-ai/actions/runs/42944354468)
+(Python `130273440231`, Web `130273440059`; `main` push completed
+**11 Nov 2026, 09:14 Asia/Jakarta**).
+**MERGED** and **CI VERIFIED** do not mean **STAGING VERIFIED** or
+**PRODUCTION VERIFIED**.
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.4A-R: see below.
+
+## Phase 10.4A-R — Post-merge documentation reconciliation
+
+Documentation-only. Baseline `origin/main`
+**`0e405713da5300f41ec319ee59d2d9af5a7d71db`**.
+
+Corrects the stale Phase 10.4A **COMPLETE – UNMERGED** current-status
+line after PR #59 merged. Does not reimplement or expand the 10.4A
+assessment. No application, schema, or infrastructure change.
+
+PHASE 10.4A ASSESSMENT: **MERGED**.
+PHASE 10.4A-R DOCUMENTATION: **COMPLETE – UNMERGED**.
+JOB HEARTBEAT IMPROVEMENTS: **NOT IMPLEMENTED**.
+STALE-PROCESSING RECOVERY IMPROVEMENTS: **NOT IMPLEMENTED**.
+PHASE 10.4B: **NOT STARTED**.
+**MERGED** and **CI VERIFIED** do not mean **STAGING VERIFIED** or
+**PRODUCTION VERIFIED**.
 STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
