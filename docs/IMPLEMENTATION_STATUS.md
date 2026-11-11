@@ -1799,7 +1799,40 @@ Documentation-only. Baseline `origin/main`
 Corrects stale Phase 10.3C GitHub merge and CI labels. No application,
 schema, or infrastructure change.
 
-PHASE 10.3D DOCUMENTATION: **COMPLETE – UNMERGED**.
+PHASE 10.3D DOCUMENTATION: **MERGED** (PR
+[#58](https://github.com/mufea/docuflow-ai/pull/58);
+merge `4948c79611dbe2f9d53b6cbc5b84b1cba25385a1`,
+`2026-11-11T01:57:44Z` / **11 Nov 2026, 08:57 Asia/Jakarta**).
+REPOSITORY CI: **SUCCESS** on PR #58 (`42940281583`) and `main` push
+[42942654911](https://github.com/mufea/docuflow-ai/actions/runs/42942654911)
+(Python `130267911113`, Web `130267911399`).
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.4A: see below.
+
+## Phase 10.4A — Job heartbeat and liveness assessment
+
+Documentation-only. Baseline `origin/main`
+**`4948c79611dbe2f9d53b6cbc5b84b1cba25385a1`**. Report:
+`docs/reports/PHASE_10_4A_JOB_HEARTBEAT_LIVENESS_ASSESSMENT.md`.
+
+Current job heartbeat is claim + progress 25/80 ORM commits. None during
+`_run_operation`. Stale cleanup SELECTs by age then fails with
+`WHERE status='processing'` only. Recommended 10.4B: dedicated-session
+conditional heartbeat and a heartbeat-age predicate on stale fail. No
+schema. Retry/resume out of scope.
+
+PHASE 10.4A ASSESSMENT: **COMPLETE – UNMERGED**.
 STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
