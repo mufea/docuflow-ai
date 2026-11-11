@@ -2002,12 +2002,25 @@ PHASE 10.4A ASSESSMENT: **MERGED**.
 PHASE 10.4A-R DOCUMENTATION: **MERGED**.
 PHASE 10.4A-R2 DOCUMENTATION: **MERGED**.
 PHASE 10.4A-R3 DOCUMENTATION: **MERGED**.
-PHASE 10.4A-R4 DOCUMENTATION: **COMPLETE – UNMERGED**.
+PHASE 10.4A-R4 DOCUMENTATION: **MERGED** (PR
+[#63](https://github.com/mufea/docuflow-ai/pull/63);
+merge `094700a9b6b37fbfec2f9cd3c18faf85a3cab52c`,
+`2026-11-11T06:07:26Z` / **11 Nov 2026, 13:07 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status.
 JOB HEARTBEAT IMPROVEMENTS: **NOT IMPLEMENTED**.
 STALE-PROCESSING RECOVERY IMPROVEMENTS: **NOT IMPLEMENTED**.
 PHASE 10.4B: **NOT STARTED**.
+REPOSITORY CI: **SUCCESS** on PR #63
+([42967961830](https://github.com/mufea/docuflow-ai/actions/runs/42967961830))
+and `main` push
+[42970219782](https://github.com/mufea/docuflow-ai/actions/runs/42970219782)
+(Python `130356722176`, Web `130356721881`; `main` push completed
+**11 Nov 2026, 13:09 Asia/Jakarta**).
 **MERGED** and **CI VERIFIED** do not mean **STAGING VERIFIED** or
 **PRODUCTION VERIFIED**.
+This update records PR #63 as **MERGED**. It does not implement
+heartbeat or stale recovery. Phase 10.4B remains **NOT STARTED**.
 STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
