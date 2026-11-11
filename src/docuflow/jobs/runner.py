@@ -13,8 +13,9 @@ from docuflow.ai.providers import AIProvider, validate_structured
 from docuflow.billing.ledger import CreditService
 from docuflow.config import Settings
 from docuflow.conversion.engines import ConversionService
-from docuflow.exceptions import DocuflowError, EncryptedPdfError, UnsupportedOperationError
+from docuflow.exceptions import DocuflowError, EncryptedPdfError, JobStateError, UnsupportedOperationError
 from docuflow.jobs.completion import complete_job_if_processing
+from docuflow.jobs.heartbeat import ProcessingHeartbeat, touch_processing_heartbeat
 from docuflow.jobs.refunds import fail_job_and_refund
 from docuflow.models import Document, Job, User
 from docuflow.ocr.engine import OcrEngine
@@ -116,6 +117,10 @@ class JobRunner:
             commit=True,
         )
 
+    def _mark_progress(self, session: Session, job_id: str, progress: int) -> None:
+        session.execute(update(Job).where(Job.id == job_id, Job.status == "processing").values(progress=progress))
+        session.commit()
+
     def _execute(self, session: Session, job: Job, user: User) -> dict[str, Any]:
         docs = [session.get(Document, item) for item in job.input_document_ids]
         if any(item is None or item.deleted_at is not None for item in docs):
@@ -133,13 +138,19 @@ class JobRunner:
                 dest = work / f"{doc.id}{Path(doc.original_filename).suffix or '.bin'}"
                 self.storage.download(doc.storage_key, dest)
                 local_paths.append(dest)
-            job.progress = 25
-            job.heartbeat_at = datetime.now(UTC)
-            session.commit()
-            outputs, extra = self._run_operation(job, local_paths, work, password)
-            job.progress = 80
-            job.heartbeat_at = datetime.now(UTC)
-            session.commit()
+            self._mark_progress(session, job.id, 25)
+            if not touch_processing_heartbeat(self.session_factory, job.id):
+                raise JobStateError("Job is no longer processing.")
+            with ProcessingHeartbeat(
+                self.session_factory,
+                job.id,
+                interval_seconds=self.settings.job_heartbeat_seconds,
+            ) as beat:
+                outputs, extra = self._run_operation(job, local_paths, work, password)
+                still_owned = beat.owned
+            if not still_owned or not touch_processing_heartbeat(self.session_factory, job.id):
+                raise JobStateError("Job is no longer processing.")
+            self._mark_progress(session, job.id, 80)
             result_ids: list[str] = []
             stored_names: list[str] = []
             for output in outputs:

@@ -7,11 +7,12 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import timedelta
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from docuflow.config import Settings
 from docuflow.jobs.clock import as_utc, utc_now
+from docuflow.jobs.heartbeat import stale_processing_clause
 from docuflow.jobs.leases import LEASE_NAME, LeaseGuard, acquire_lease, release_lease
 from docuflow.jobs.refunds import fail_job_and_refund, refund_terminal_job
 from docuflow.models import Job
@@ -147,10 +148,7 @@ def _fail_stale_jobs(
         session.scalars(
             select(Job).where(
                 Job.status == "processing",
-                or_(
-                    Job.heartbeat_at < cutoff,
-                    and_(Job.heartbeat_at.is_(None), Job.started_at.is_not(None), Job.started_at < cutoff),
-                ),
+                stale_processing_clause(cutoff),
             )
         )
     )
@@ -171,6 +169,7 @@ def _fail_stale_jobs(
             code="timeout",
             message="The worker did not finish before the timeout.",
             expected_statuses=("processing",),
+            stale_before=cutoff,
             commit=True,
         )
         if not result.claimed:

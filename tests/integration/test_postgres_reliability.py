@@ -14,6 +14,7 @@ from docuflow.config import Settings
 from docuflow.exceptions import ConflictError
 from docuflow.jobs.clock import utc_now
 from docuflow.jobs.completion import complete_job_if_processing
+from docuflow.jobs.heartbeat import touch_processing_heartbeat
 from docuflow.jobs.leases import LEASE_NAME, acquire_lease, release_lease
 from docuflow.jobs.refunds import fail_job_and_refund
 from docuflow.jobs.retention import run_runtime_cleanup
@@ -686,3 +687,75 @@ def test_postgres_lost_completion_rolls_back_flushed_result_document(
     assert pg_session.get(Document, stored_ids[0]) is None
     assert pg_session.query(CreditLedger).filter_by(idempotency_key=f"settle:{job_id}").first() is None
     assert pg_session.query(CreditLedger).filter_by(idempotency_key=f"refund:{job_id}").first() is not None
+
+
+def test_postgres_heartbeat_wins_over_stale_fail(
+    pg_session: Session, pg_session_factory: sessionmaker[Session]
+) -> None:
+    user = _user(pg_session)
+    CreditService(pg_session).ensure_account(user)
+    cutoff = utc_now() - timedelta(minutes=90)
+    job = Job(
+        user_id=user.id,
+        operation="extract_text",
+        status="processing",
+        credits_reserved=4,
+        started_at=cutoff - timedelta(minutes=5),
+        heartbeat_at=cutoff - timedelta(minutes=5),
+    )
+    pg_session.add(job)
+    pg_session.commit()
+    CreditService(pg_session).reserve(user, 4, job_id=job.id)
+    pg_session.commit()
+    job_id = job.id
+    barrier = threading.Barrier(2)
+    outcomes: list[str] = []
+    errors: list[BaseException] = []
+
+    def heartbeat_worker() -> None:
+        try:
+            barrier.wait(timeout=5)
+            outcomes.append("beat" if touch_processing_heartbeat(pg_session_factory, job_id) else "beat_skip")
+        except Exception as exc:
+            errors.append(exc)
+
+    def fail_worker() -> None:
+        session = pg_session_factory()
+        try:
+            barrier.wait(timeout=5)
+            result = fail_job_and_refund(
+                session,
+                job_id,
+                code="timeout",
+                message="stale",
+                expected_statuses=("processing",),
+                stale_before=cutoff,
+                commit=True,
+            )
+            outcomes.append("failed" if result.claimed else "fail_rejected")
+        except Exception as exc:
+            errors.append(exc)
+        finally:
+            session.close()
+
+    threads = [threading.Thread(target=heartbeat_worker), threading.Thread(target=fail_worker)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(timeout=10)
+    assert errors == []
+    pg_session.expire_all()
+    stored = pg_session.get(Job, job_id)
+    assert stored is not None
+    refund_row = pg_session.query(CreditLedger).filter_by(idempotency_key=f"refund:{job_id}").first()
+    if stored.status == "processing":
+        assert "beat" in outcomes
+        assert refund_row is None
+        assert stored.heartbeat_at is not None
+        assert stored.heartbeat_at >= cutoff
+    else:
+        assert stored.status == "failed"
+        assert stored.error_code == "timeout"
+        assert refund_row is not None
+        assert "failed" in outcomes
+        assert "beat_skip" in outcomes or "beat" in outcomes

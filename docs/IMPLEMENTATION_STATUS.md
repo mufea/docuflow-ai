@@ -2033,3 +2033,32 @@ R2 / OBJECT RESTORE: **NOT VERIFIED**.
 BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
 BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
 PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.4B: see below.
+
+## Phase 10.4B — Job heartbeat and stale-processing recovery
+
+Baseline `origin/main`
+**`77a9538730e9ca81bde59e44be0a8d72367ebc0a`**. Report:
+`docs/reports/PHASE_10_4B_JOB_HEARTBEAT_STALE_RECOVERY.md`.
+
+Dedicated-session `touch_processing_heartbeat` (`WHERE status='processing'`),
+60s timer during `_run_operation`, heartbeat-age predicate on stale fail.
+No schema, Redis, resume, or automatic retry. 10.3B/C complete/settle and
+deferred result documents are preserved.
+
+PHASE 10.4B IMPLEMENTATION: **COMPLETE – UNMERGED**.
+JOB HEARTBEAT IMPROVEMENTS: **IMPLEMENTED** (repository; not deployed).
+STALE-PROCESSING RECOVERY IMPROVEMENTS: **IMPLEMENTED** (fail+refund
+predicate; processing jobs are not resumed).
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
