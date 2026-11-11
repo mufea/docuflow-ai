@@ -2508,18 +2508,64 @@ or start SR6-D mutations.
 
 PHASE 10.4B IMPLEMENTATION: **MERGED**.
 PHASE 10.4B-SR6-B DOCUMENTATION: **MERGED**.
-PHASE 10.4B-SR6-C DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4B-SR6-C DOCUMENTATION: **MERGED** (PR
+[#76](https://github.com/mufea/docuflow-ai/pull/76);
+merge `7d46732a2ee4a37e8ad0b45df816fb77d4327c0d`,
+`2026-11-11T10:51:53Z` / **11 Nov 2026, 17:51 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status.
+REPOSITORY CI: **SUCCESS** on `main` push
+[43007160625](https://github.com/mufea/docuflow-ai/actions/runs/43007160625)
+(Python `130477388797`, Web `130477388241`; `main` push completed
+**11 Nov 2026, 17:53 Asia/Jakarta**).
 INFRASTRUCTURE ACTIONS: **NOT EXECUTED**.
 OWNER APPROVAL: **NOT APPROVED**.
-A0: **READY FOR OWNER DECISION**.
-A1: **READY FOR OWNER DECISION** (depends on A0).
-A2: **BLOCKED BY DEPENDENCY** (A1).
-A4: **BLOCKED BY DEPENDENCY** (A1 live hosts).
+A0: **PENDING APPROVER ASSIGNMENT**.
+A1: **PENDING APPROVER ASSIGNMENT** (depends on A0).
+A2: **BLOCKED** (depends on A1).
+A4: **BLOCKED** (depends on A1 live hosts).
 PHASE 10.4B-S STAGING EXECUTION: **BLOCKED** / **NOT EXECUTED**.
 STAGING READINESS: **BLOCKED**.
 Independent re-probe **11 Nov 2026, 17:37 Asia/Jakarta**: documented
 staging API/web still HTTP 404 `x-render-routing: no-server`.
-SR6-D entry: **NO-GO** until named `APPROVE A0` / `APPROVE A1`.
+SR6-D: **NO-GO**.
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.4B-SR6-C1: see below.
+
+## Phase 10.4B-SR6-C1 — Named owner approval governance
+
+Documentation-only. Baseline `origin/main`
+**`7d46732a2ee4a37e8ad0b45df816fb77d4327c0d`**. Report:
+`docs/reports/PHASE_10_4B_SR6_C1_APPROVAL_GOVERNANCE.md`.
+
+Corrects stale Phase 10.4B-SR6-C **COMPLETE – UNMERGED**. Records an
+approval register with **UNASSIGNED** identities. Does **not** grant
+approvals. Does not provision, deploy, or start SR6-D.
+
+PHASE 10.4B IMPLEMENTATION: **MERGED**.
+PHASE 10.4B-SR6-C DOCUMENTATION: **MERGED**.
+PHASE 10.4B-SR6-C1 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+NAMED OWNERS: **UNASSIGNED**.
+APPROVER AUTHORITY: **NOT VERIFIED**.
+APPROVAL EVIDENCE: **MISSING**.
+INFRASTRUCTURE ACTIONS: **NOT EXECUTED**.
+OWNER APPROVAL: **NOT APPROVED**.
+SR6-D: **NO-GO**.
+PHASE 10.4B-S STAGING EXECUTION: **BLOCKED** / **NOT EXECUTED**.
+STAGING READINESS: **BLOCKED**.
+Independent re-probe **11 Nov 2026, 18:08 Asia/Jakarta**: documented
+staging API/web still HTTP 404 `x-render-routing: no-server`.
 STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
