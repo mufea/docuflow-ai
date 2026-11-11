@@ -2135,18 +2135,57 @@ staging, or implement Phase 10.4C.
 
 PHASE 10.4B IMPLEMENTATION: **MERGED**.
 PHASE 10.4B-R2 DOCUMENTATION: **MERGED**.
-PHASE 10.4B-R3 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4B-R3 DOCUMENTATION: **MERGED** (PR
+[#67](https://github.com/mufea/docuflow-ai/pull/67);
+merge `0c97790ac5464bb674494ca83679a4bc6ca9c1d8`,
+`2026-11-11T08:42:01Z` / **11 Nov 2026, 15:42 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status.
 JOB HEARTBEAT IMPROVEMENTS: **IMPLEMENTED** (merged; not deployed).
 STALE-PROCESSING RECOVERY IMPROVEMENTS: **IMPLEMENTED** (fail+refund
 predicate; processing jobs are not resumed).
-REPOSITORY CI: **SUCCESS** on PR #66 (`42987402176`) and `main` push
-[42987548255](https://github.com/mufea/docuflow-ai/actions/runs/42987548255).
+REPOSITORY CI: **SUCCESS** on PR #67
+([42988801228](https://github.com/mufea/docuflow-ai/actions/runs/42988801228))
+and `main` push
+[42989107356](https://github.com/mufea/docuflow-ai/actions/runs/42989107356)
+(Python `130417329445`, Web `130417329978`; `main` push completed
+**11 Nov 2026, 15:43 Asia/Jakarta**).
 **MERGED** and **CI VERIFIED** do not mean **STAGING VERIFIED** or
 **PRODUCTION VERIFIED**.
-After this documentation PR merges, Phase 10.4B remains **MERGED**; do
-not read this R3 **COMPLETE – UNMERGED** line as 10.4B git status.
+This update records PR #67 as **MERGED**. Phase 10.4B remains **MERGED**.
 STAGING VERIFIED (Phase 10.4B heartbeat/stale recovery): **NOT VERIFIED**.
 Historical Phase 9.10D staging functional/migrate evidence is not 10.4B-S.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.4B-S: see below.
+
+## Phase 10.4B-S — Controlled staging verification
+
+Documentation of a **stopped** staging execution. Baseline `origin/main`
+**`0c97790ac5464bb674494ca83679a4bc6ca9c1d8`**. Report:
+`docs/reports/PHASE_10_4B_S_STAGING_VERIFICATION.md`.
+
+Gate A main push CI **SUCCESS**. Gate C: documented staging hosts return
+HTTP 404 `x-render-routing: no-server`. No staging jobs were created.
+No DSN was used. No worker was terminated.
+
+PHASE 10.4B IMPLEMENTATION: **MERGED**.
+PHASE 10.4B-R2 DOCUMENTATION: **MERGED**.
+PHASE 10.4B-R3 DOCUMENTATION: **MERGED**.
+PHASE 10.4B-S STAGING EXECUTION: **BLOCKED** / **NOT EXECUTED**.
+STAGING READINESS: **BLOCKED**.
+HEARTBEAT / STALE DETECTION / RECOVERY / FENCING / CREDIT INTEGRITY:
+**NOT VERIFIED**.
+STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
 PHASE_9_15: **OPEN**.
