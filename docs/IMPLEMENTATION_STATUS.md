@@ -2264,12 +2264,55 @@ Blueprints, deploy, migrate, create jobs, or start Phase 10.4C.
 
 PHASE 10.4B IMPLEMENTATION: **MERGED**.
 PHASE 10.4B-SR DOCUMENTATION: **MERGED**.
-PHASE 10.4B-SR2 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4B-SR2 DOCUMENTATION: **MERGED** (PR
+[#70](https://github.com/mufea/docuflow-ai/pull/70);
+merge `fe1f0d0ea4b5301f159be1ea72afc7413b02f0f0`,
+`2026-11-11T09:03:44Z` / **11 Nov 2026, 16:03 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status.
+REPOSITORY CI: **SUCCESS** on `main` push
+[42991996035](https://github.com/mufea/docuflow-ai/actions/runs/42991996035)
+(Python `130426889629`, Web `130426889791`; `main` push completed
+**11 Nov 2026, 16:05 Asia/Jakarta**).
 PHASE 10.4B-S STAGING EXECUTION: **BLOCKED** / **NOT EXECUTED**.
 STAGING READINESS: **BLOCKED**.
 PHASE 10.4B-S DECISION: **BLOCKED**.
 Closed this phase: B5 accepted as procedure (SQL backdate; no API
 restart). B1–B4 remain open. No application-code change required.
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.4B-SR3: see below.
+
+## Phase 10.4B-SR3 — Post-merge reconciliation and staging reassessment
+
+Documentation-only. Baseline `origin/main`
+**`fe1f0d0ea4b5301f159be1ea72afc7413b02f0f0`**. Report:
+`docs/reports/PHASE_10_4B_SR3_POST_MERGE_RECONCILIATION.md`.
+
+Corrects stale Phase 10.4B-SR2 **COMPLETE – UNMERGED**. Independently
+re-probes documented staging hosts. Does not apply Blueprints, deploy,
+migrate, create jobs, or start Phase 10.4C.
+
+PHASE 10.4B IMPLEMENTATION: **MERGED**.
+PHASE 10.4B-SR2 DOCUMENTATION: **MERGED**.
+PHASE 10.4B-SR3 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4B-S STAGING EXECUTION: **BLOCKED** / **NOT EXECUTED**.
+STAGING READINESS: **BLOCKED**.
+PHASE 10.4B-S DECISION: **BLOCKED**.
+Independent re-probe **11 Nov 2026, 16:09 Asia/Jakarta**: documented
+staging API/web still HTTP 404 `x-render-routing: no-server`. B1–B4
+OPEN. B5 ACCEPTED. Runtime architecture remains **inline**
+(`JOB_BROKER=inline`); separate-worker recovery is **NOT APPLICABLE**.
 STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
