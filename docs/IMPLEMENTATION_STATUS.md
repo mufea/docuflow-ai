@@ -2220,13 +2220,56 @@ mutate jobs, or implement Phase 10.4C.
 
 PHASE 10.4B IMPLEMENTATION: **MERGED**.
 PHASE 10.4B-S STAGING EXECUTION: **BLOCKED** / **NOT EXECUTED**.
-PHASE 10.4B-SR DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4B-SR DOCUMENTATION: **MERGED** (PR
+[#69](https://github.com/mufea/docuflow-ai/pull/69);
+merge `f01462e550634652cb6081978719380077d169ca`,
+`2026-11-11T08:53:20Z` / **11 Nov 2026, 15:53 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status.
+REPOSITORY CI: **SUCCESS** on PR #69
+([42990305186](https://github.com/mufea/docuflow-ai/actions/runs/42990305186))
+and `main` push
+[42990603233](https://github.com/mufea/docuflow-ai/actions/runs/42990603233)
+(Python `130422269115`, Web `130422269484`; `main` push completed
+**11 Nov 2026, 15:55 Asia/Jakarta**).
 STAGING READINESS: **BLOCKED**.
 Confirmed critical blocker: Render `x-render-routing: no-server` on
-documented staging API/web hosts (re-probed **11 Nov 2026, 15:50
+documented staging API/web hosts (re-probed **11 Nov 2026, 16:01
 Asia/Jakarta**). Root cause of missing processes is **UNKNOWN** (owner
 dashboard required). Free Postgres 30-day expiry is **not** a confirmed
 cause (9.10D provisioned 7 Nov 2026).
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.4B-SR2: see below.
+
+## Phase 10.4B-SR2 — Staging blocker closure and owner remediation
+
+Documentation-only. Baseline `origin/main`
+**`f01462e550634652cb6081978719380077d169ca`**. Report:
+`docs/reports/PHASE_10_4B_SR2_STAGING_BLOCKER_CLOSURE.md`.
+
+Records PR #69 merge and main CI SUCCESS. Re-probes staging hosts.
+Produces owner-only remediation instructions. Does **not** apply
+Blueprints, deploy, migrate, create jobs, or start Phase 10.4C.
+
+PHASE 10.4B IMPLEMENTATION: **MERGED**.
+PHASE 10.4B-SR DOCUMENTATION: **MERGED**.
+PHASE 10.4B-SR2 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4B-S STAGING EXECUTION: **BLOCKED** / **NOT EXECUTED**.
+STAGING READINESS: **BLOCKED**.
+PHASE 10.4B-S DECISION: **BLOCKED**.
+Closed this phase: B5 accepted as procedure (SQL backdate; no API
+restart). B1–B4 remain open. No application-code change required.
 STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
