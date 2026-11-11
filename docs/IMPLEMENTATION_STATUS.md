@@ -1873,7 +1873,49 @@ line after PR #59 merged. Does not reimplement or expand the 10.4A
 assessment. No application, schema, or infrastructure change.
 
 PHASE 10.4A ASSESSMENT: **MERGED**.
-PHASE 10.4A-R DOCUMENTATION: **COMPLETE – UNMERGED**.
+PHASE 10.4A-R DOCUMENTATION: **MERGED** (PR
+[#60](https://github.com/mufea/docuflow-ai/pull/60);
+merge `11e787e559799b10fe91c5cdd0e868947d83b733`,
+`2026-11-11T03:51:00Z` / **11 Nov 2026, 10:51 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status.
+JOB HEARTBEAT IMPROVEMENTS: **NOT IMPLEMENTED**.
+STALE-PROCESSING RECOVERY IMPROVEMENTS: **NOT IMPLEMENTED**.
+PHASE 10.4B: **NOT STARTED**.
+REPOSITORY CI: **SUCCESS** on PR #60
+([42955058488](https://github.com/mufea/docuflow-ai/actions/runs/42955058488))
+and `main` push
+[42955417239](https://github.com/mufea/docuflow-ai/actions/runs/42955417239)
+(Python `130309232347`, Web `130309232518`; `main` push completed
+**11 Nov 2026, 10:53 Asia/Jakarta**).
+**MERGED** and **CI VERIFIED** do not mean **STAGING VERIFIED** or
+**PRODUCTION VERIFIED**.
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.4A-R2: see below.
+
+## Phase 10.4A-R2 — Post-merge documentation reconciliation
+
+Documentation-only. Baseline `origin/main`
+**`11e787e559799b10fe91c5cdd0e868947d83b733`**.
+
+Corrects the stale Phase 10.4A-R **COMPLETE – UNMERGED** current-status
+line after PR #60 merged. Does not reimplement Phase 10.4A or 10.4B.
+No application, schema, or infrastructure change.
+
+PHASE 10.4A ASSESSMENT: **MERGED**.
+PHASE 10.4A-R DOCUMENTATION: **MERGED**.
+PHASE 10.4A-R2 DOCUMENTATION: **COMPLETE – UNMERGED**.
 JOB HEARTBEAT IMPROVEMENTS: **NOT IMPLEMENTED**.
 STALE-PROCESSING RECOVERY IMPROVEMENTS: **NOT IMPLEMENTED**.
 PHASE 10.4B: **NOT STARTED**.
