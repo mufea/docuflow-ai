@@ -2437,7 +2437,12 @@ or start Part 2.
 
 PHASE 10.4B IMPLEMENTATION: **MERGED**.
 PHASE 10.4B-SR5 DOCUMENTATION: **MERGED**.
-PHASE 10.4B-SR6-A DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4B-SR6-A DOCUMENTATION: **MERGED** (PR
+[#74](https://github.com/mufea/docuflow-ai/pull/74);
+merge `61b6d6853c94d3c976a8f022d7db04cf3b397011`,
+`2026-11-11T10:12:10Z` / **11 Nov 2026, 17:12 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status.
 PHASE 10.4B-S STAGING EXECUTION: **BLOCKED** / **NOT EXECUTED**.
 STAGING READINESS: **BLOCKED**.
 PHASE 10.4B-S DECISION: **BLOCKED**.
@@ -2445,6 +2450,29 @@ Independent re-probe **11 Nov 2026, 16:54 Asia/Jakarta**: documented
 staging API/web still HTTP 404 `x-render-routing: no-server`. Minimum
 change: reuse `infra/render.staging.yaml` (no Redis, no paid worker).
 Owner approval for Part 2: **NOT REQUESTED**.
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
+Phase 10.4B-SR6-B: see below.
+
+## Phase 10.4B-SR6-B — Owner staging infrastructure remediation (Part 2)
+
+Documentation-only on this PR. Report:
+`docs/reports/PHASE_10_4B_SR6_OWNER_INFRASTRUCTURE_REMEDIATION.md`.
+
+No action-level owner approvals were supplied. No Blueprint apply,
+deploy, env change, or Render mutation. Read-only re-probe only.
+
+PHASE 10.4B IMPLEMENTATION: **MERGED**.
+PHASE 10.4B-SR5 DOCUMENTATION: **MERGED**.
+PHASE 10.4B-SR6-A DOCUMENTATION: **MERGED**.
+PHASE 10.4B-SR6-B DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+INFRASTRUCTURE ACTIONS: **NOT EXECUTED**.
+OWNER APPROVAL: **NOT APPROVED** / A1–A2 **PENDING APPROVAL**.
+PHASE 10.4B-S STAGING EXECUTION: **BLOCKED** / **NOT EXECUTED**.
+STAGING READINESS: **BLOCKED**.
+Independent re-probe **11 Nov 2026, 17:09 Asia/Jakarta**: documented
+staging API/web still HTTP 404 `x-render-routing: no-server`.
 STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
