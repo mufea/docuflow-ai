@@ -2392,7 +2392,16 @@ or start Phase 10.4C.
 
 PHASE 10.4B IMPLEMENTATION: **MERGED**.
 PHASE 10.4B-SR4 DOCUMENTATION: **MERGED**.
-PHASE 10.4B-SR5 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4B-SR5 DOCUMENTATION: **MERGED** (PR
+[#73](https://github.com/mufea/docuflow-ai/pull/73);
+merge `c081dc844075b6d76e7938de3cdc401837676f03`,
+`2026-11-11T09:45:00Z` / **11 Nov 2026, 16:44 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status.
+REPOSITORY CI: **SUCCESS** on `main` push
+[42997784272](https://github.com/mufea/docuflow-ai/actions/runs/42997784272)
+(Python `130446084354`, Web `130446084891`; `main` push completed
+**11 Nov 2026, 16:46 Asia/Jakarta**).
 PHASE 10.4B-S STAGING EXECUTION: **BLOCKED** / **NOT EXECUTED**.
 STAGING READINESS: **BLOCKED**.
 PHASE 10.4B-S DECISION: **BLOCKED**.
@@ -2401,6 +2410,41 @@ staging API/web still HTTP 404 `x-render-routing: no-server`. B1–B4
 OPEN. B5 ACCEPTED. Closure order: inspect workspace → B1 → B3 →
 `/health` `/ready` → B2 → B4 process. No application-code change
 required. Runtime architecture remains **inline**.
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.4B-SR6-A: see below.
+
+## Phase 10.4B-SR6-A — Staging infrastructure audit (Part 1)
+
+Documentation-only. Baseline `origin/main`
+**`c081dc844075b6d76e7938de3cdc401837676f03`**. Report:
+`docs/reports/PHASE_10_4B_SR6_A_INFRASTRUCTURE_AUDIT.md`.
+
+Corrects stale Phase 10.4B-SR5 **COMPLETE – UNMERGED**. Independently
+re-probes documented staging hosts. Records a minimum remediation plan
+and owner approval checklist. Does **not** provision, deploy, migrate,
+or start Part 2.
+
+PHASE 10.4B IMPLEMENTATION: **MERGED**.
+PHASE 10.4B-SR5 DOCUMENTATION: **MERGED**.
+PHASE 10.4B-SR6-A DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4B-S STAGING EXECUTION: **BLOCKED** / **NOT EXECUTED**.
+STAGING READINESS: **BLOCKED**.
+PHASE 10.4B-S DECISION: **BLOCKED**.
+Independent re-probe **11 Nov 2026, 16:54 Asia/Jakarta**: documented
+staging API/web still HTTP 404 `x-render-routing: no-server`. Minimum
+change: reuse `infra/render.staging.yaml` (no Redis, no paid worker).
+Owner approval for Part 2: **NOT REQUESTED**.
 STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
