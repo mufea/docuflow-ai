@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from datetime import datetime
 
 from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from docuflow.billing.ledger import CreditService, RefundResult
 from docuflow.jobs.clock import utc_now
+from docuflow.jobs.heartbeat import stale_processing_clause
 from docuflow.models import Job, User
 
 logger = logging.getLogger("docuflow.jobs")
@@ -27,11 +29,15 @@ def fail_job_and_refund(
     code: str,
     message: str,
     expected_statuses: tuple[str, ...] = ("processing",),
+    stale_before: datetime | None = None,
     commit: bool = True,
 ) -> JobFailResult:
     """Mark a job failed and refund its reservation in one transaction.
 
     The job-row claim is an atomic ``UPDATE ... WHERE status IN expected``.
+    When ``stale_before`` is set, the claim also requires an old
+    ``heartbeat_at`` (or ``started_at`` if heartbeat is null), so a live
+    beat cannot be failed after the stale SELECT.
     The credit refund uses the ledger idempotency key ``refund:{job_id}``.
     Either both persist or, if ``commit`` is true and the transaction is
     rolled back by the caller, neither does.
@@ -42,9 +48,12 @@ def fail_job_and_refund(
             session.rollback()
         return JobFailResult(claimed=False, refund=None, previous_status=None)
     previous = job.status
+    filters = [Job.id == job_id, Job.status.in_(expected_statuses)]
+    if stale_before is not None:
+        filters.append(stale_processing_clause(stale_before))
     claimed = session.execute(
         update(Job)
-        .where(Job.id == job_id, Job.status.in_(expected_statuses))
+        .where(*filters)
         .values(
             status="failed",
             error_code=code,
