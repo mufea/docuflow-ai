@@ -2601,9 +2601,19 @@ approvals, provision, or start SR6-D.
 
 PHASE 10.4B IMPLEMENTATION: **MERGED**.
 PHASE 10.4B-SR6-C1 DOCUMENTATION: **MERGED**.
-PHASE 10.4B-SR6-C2 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4B-SR6-C2 DOCUMENTATION: **MERGED** (PR
+[#78](https://github.com/mufea/docuflow-ai/pull/78);
+merge `d4afb3971f6d190239562943c0ca9feb240c63e0`,
+`2026-11-11T11:48:33Z` / **11 Nov 2026, 18:48 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status.
+REPOSITORY CI: **SUCCESS** on `main` push
+[43014998052](https://github.com/mufea/docuflow-ai/actions/runs/43014998052)
+(Python `130503734155`, Web `130503733858`; `main` push completed
+**11 Nov 2026, 18:50 Asia/Jakarta**).
 A0–A4 OWNERS: **UNASSIGNED**.
 AUTHORIZED APPROVERS: **UNASSIGNED** / **AUTHORITY NOT VERIFIED**.
+A0–A4 APPROVALS: **PENDING**.
 APPROVAL EVIDENCE: **MISSING**.
 DECISION PACKAGE: **COMPLETE**.
 INFRASTRUCTURE ACTIONS: **NOT EXECUTED**.
@@ -2612,6 +2622,51 @@ PHASE 10.4B-S STAGING EXECUTION: **BLOCKED** / **NOT EXECUTED**.
 STAGING READINESS: **BLOCKED**.
 Independent re-probe **11 Nov 2026, 18:47 Asia/Jakarta**: documented
 staging API/web still HTTP 404 `x-render-routing: no-server`.
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Post-merge documentation reconciliation after PR #78: see below.
+
+## Post-merge documentation reconciliation after PR #78
+
+Documentation-only. Not a new SR6-C3 phase. Baseline `origin/main`
+**`d4afb3971f6d190239562943c0ca9feb240c63e0`**.
+
+Corrects stale Phase 10.4B-SR6-C2 **COMPLETE – UNMERGED**. Records
+independently verified PR #78 merge and main CI SUCCESS. Does **not**
+assign A0–A4 owners, grant approvals, provision, deploy, or start
+SR6-D.
+
+Owner-reported merge SHA
+`0c95a9b9e869c8d5f06ea03094d32078d10ffd75` is **not** the PR #78
+merge. Independent GitHub shows that SHA is `Merge pull request #61`
+(Phase 10.4A-R2, `2026-11-11T04:16:06Z` / **11 Nov 2026, 11:16
+Asia/Jakarta**). Independently verified PR #78 merge is
+`d4afb3971f6d190239562943c0ca9feb240c63e0`. CI run `43014998052`
+`headSha` matches `d4afb39`. Owner-reported CI run and job IDs
+independently match.
+
+PHASE 10.4B IMPLEMENTATION: **MERGED**.
+PHASE 10.4B-SR6-C2 DOCUMENTATION: **MERGED**.
+POST-MERGE DOCUMENTATION RECONCILIATION: **COMPLETE – UNMERGED**
+(this PR). Becomes **RECONCILED** after this change is merged.
+A0–A4 OWNERS: **UNASSIGNED**.
+AUTHORIZED APPROVERS: **UNASSIGNED** / **AUTHORITY NOT VERIFIED**.
+A0–A4 APPROVALS: **PENDING**.
+APPROVAL EVIDENCE: **MISSING**.
+INFRASTRUCTURE ACTIONS: **NOT EXECUTED**.
+SR6-D: **NO-GO**.
+PHASE 10.4B-S STAGING EXECUTION: **BLOCKED** / **NOT EXECUTED**.
+STAGING READINESS: **BLOCKED**.
 STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
