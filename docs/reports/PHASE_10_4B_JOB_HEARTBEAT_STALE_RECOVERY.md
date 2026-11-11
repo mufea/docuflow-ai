@@ -41,3 +41,20 @@ Stale fail still refunds once. Lost-ownership complete does not settle.
 - SIGKILL after claim still waits for stale+cron.
 - Heartbeat is liveness of database writes, not engine progress.
 - Staging / production: **NOT VERIFIED**.
+
+## GitHub merge evidence (post-merge addendum)
+
+Recorded by Phase 10.4B-R2. Does not add staging or production
+verification.
+
+| Item | Value |
+| --- | --- |
+| PR | [#65](https://github.com/mufea/docuflow-ai/pull/65) **MERGED** |
+| PR head | `f1802a06461d1e0c6138330e5a40fae8ec09b10f` |
+| Merge commit / `origin/main` | `17dfe9c9d27420b0d6999e75dc1c09e6b9da4bef` |
+| Merged at | `2026-11-11T07:47:14Z` / **11 Nov 2026, 14:47 Asia/Jakarta** |
+| PR CI | [42976568192](https://github.com/mufea/docuflow-ai/actions/runs/42976568192) **SUCCESS** |
+| Main push CI | [42982048354](https://github.com/mufea/docuflow-ai/actions/runs/42982048354) **SUCCESS** |
+| Main CI completed | `2026-11-11T07:49:08Z` / **11 Nov 2026, 14:49 Asia/Jakarta** |
+
+**MERGED** is not **DEPLOYED**. CI **SUCCESS** is not **STAGING VERIFIED**.

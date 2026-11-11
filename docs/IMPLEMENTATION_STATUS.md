@@ -2046,10 +2046,62 @@ Dedicated-session `touch_processing_heartbeat` (`WHERE status='processing'`),
 No schema, Redis, resume, or automatic retry. 10.3B/C complete/settle and
 deferred result documents are preserved.
 
-PHASE 10.4B IMPLEMENTATION: **COMPLETE – UNMERGED**.
-JOB HEARTBEAT IMPROVEMENTS: **IMPLEMENTED** (repository; not deployed).
+PHASE 10.4B IMPLEMENTATION: **MERGED** (PR
+[#65](https://github.com/mufea/docuflow-ai/pull/65);
+merge `17dfe9c9d27420b0d6999e75dc1c09e6b9da4bef`,
+`2026-11-11T07:47:14Z` / **11 Nov 2026, 14:47 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status.
+IMPLEMENTATION COMMIT: `f1802a06461d1e0c6138330e5a40fae8ec09b10f`.
+JOB HEARTBEAT IMPROVEMENTS: **IMPLEMENTED** (merged; not deployed).
 STALE-PROCESSING RECOVERY IMPROVEMENTS: **IMPLEMENTED** (fail+refund
 predicate; processing jobs are not resumed).
+REPOSITORY CI: **SUCCESS** on PR #65
+([42976568192](https://github.com/mufea/docuflow-ai/actions/runs/42976568192))
+and `main` push
+[42982048354](https://github.com/mufea/docuflow-ai/actions/runs/42982048354)
+(Python `130394478975`, Web `130394479451`; `main` push completed
+**11 Nov 2026, 14:49 Asia/Jakarta**).
+**MERGED** and **CI VERIFIED** do not mean **STAGING VERIFIED** or
+**PRODUCTION VERIFIED**.
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.4B-R2: see below.
+
+## Phase 10.4B-R2 — Post-merge documentation reconciliation
+
+Documentation-only. Baseline `origin/main`
+**`17dfe9c9d27420b0d6999e75dc1c09e6b9da4bef`**. Report:
+`docs/reports/PHASE_10_4B_POST_MERGE_RECONCILIATION.md`.
+
+Corrects the stale Phase 10.4B **COMPLETE – UNMERGED** current-status
+line after PR #65 merged. Does not reimplement heartbeat or stale
+recovery. No application, schema, or infrastructure change.
+
+PHASE 10.4B IMPLEMENTATION: **MERGED**.
+PHASE 10.4B-R2 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+JOB HEARTBEAT IMPROVEMENTS: **IMPLEMENTED** (merged; not deployed).
+STALE-PROCESSING RECOVERY IMPROVEMENTS: **IMPLEMENTED** (fail+refund
+predicate; processing jobs are not resumed).
+REPOSITORY CI: **SUCCESS** on PR #65 (`42976568192`) and `main` push
+[42982048354](https://github.com/mufea/docuflow-ai/actions/runs/42982048354)
+(Python `130394478975`, Web `130394479451`).
+**MERGED** and **CI VERIFIED** do not mean **STAGING VERIFIED** or
+**PRODUCTION VERIFIED**.
+This update records PR #65 as **MERGED**. It does not implement
+Phase 10.4C. After this documentation PR merges, Phase 10.4B remains
+**MERGED**; do not read this R2 **COMPLETE – UNMERGED** line as 10.4B
+git status.
 STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
