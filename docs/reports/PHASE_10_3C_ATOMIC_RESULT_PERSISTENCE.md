@@ -159,3 +159,28 @@ PRODUCTION VERIFIED: **NOT VERIFIED**.
 
 No staging or production mutation, migration, deploy, or DSN use.
 GitHub CI is not runtime verification.
+
+## 14. Post-merge verification addendum
+
+Added by Phase 10.3D. Does **not** change the documentation-time
+status in §12.
+
+| Item | Evidence |
+| --- | --- |
+| PR | [#57](https://github.com/mufea/docuflow-ai/pull/57) **MERGED** |
+| Implementation commit | `5eb04d10653fde60256f748078dc00ccabde1921` |
+| Merge commit | `439670adbeea515d4abfb4eae56d87760be75415` |
+| Merge time | `2026-11-10T23:49:22Z` / **11 Nov 2026, 06:49 Asia/Jakarta** |
+| PR CI | [42925974925](https://github.com/mufea/docuflow-ai/actions/runs/42925974925) **SUCCESS** on `fa5d0dbf9e3347f05b309bb176716ff09dfbd738` |
+| PR Python | [130212416067](https://github.com/mufea/docuflow-ai/actions/runs/42925974925/job/130212416067) **SUCCESS** (1m51s) |
+| PR Web | [130212415600](https://github.com/mufea/docuflow-ai/actions/runs/42925974925/job/130212415600) **SUCCESS** (30s) |
+| `main` push CI | [42926477693](https://github.com/mufea/docuflow-ai/actions/runs/42926477693) **SUCCESS** on `439670adbeea515d4abfb4eae56d87760be75415` |
+| `main` Python | [130214112603](https://github.com/mufea/docuflow-ai/actions/runs/42926477693/job/130214112603) **SUCCESS** — unit tests, PostgreSQL integration tests, lint, typecheck |
+| `main` Web | [130214112259](https://github.com/mufea/docuflow-ai/actions/runs/42926477693/job/130214112259) **SUCCESS** — lint, typecheck, tests, production build |
+| Deployment | **NOT DEPLOYED** |
+| Staging | **NOT VERIFIED** |
+| Production | **NOT VERIFIED** |
+
+Repository CI is not staging or production runtime verification.
+PostgreSQL integration evidence here is the GitHub Actions
+`postgres:16` service job, not a production DSN.
