@@ -60,6 +60,7 @@ def fail_job_and_refund(
             error_message=message,
             completed_at=utc_now(),
         )
+        .execution_options(synchronize_session=False)
     )
     if int(getattr(claimed, "rowcount", 0) or 0) != 1:
         if commit:
