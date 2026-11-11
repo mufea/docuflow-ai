@@ -2348,7 +2348,16 @@ migrate, create jobs, or start Phase 10.4C.
 
 PHASE 10.4B IMPLEMENTATION: **MERGED**.
 PHASE 10.4B-SR3 DOCUMENTATION: **MERGED**.
-PHASE 10.4B-SR4 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4B-SR4 DOCUMENTATION: **MERGED** (PR
+[#72](https://github.com/mufea/docuflow-ai/pull/72);
+merge `56edeee4d40e850d29086caa065a9aa6d029c875`,
+`2026-11-11T09:34:04Z` / **11 Nov 2026, 16:34 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status.
+REPOSITORY CI: **SUCCESS** on `main` push
+[42996266546](https://github.com/mufea/docuflow-ai/actions/runs/42996266546)
+(Python `130441025488`, Web `130441025103`; `main` push completed
+**11 Nov 2026, 16:36 Asia/Jakarta**).
 PHASE 10.4B-S STAGING EXECUTION: **BLOCKED** / **NOT EXECUTED**.
 STAGING READINESS: **BLOCKED**.
 PHASE 10.4B-S DECISION: **BLOCKED**.
@@ -2356,6 +2365,42 @@ Independent re-probe **11 Nov 2026, 16:30 Asia/Jakarta**: documented
 staging API/web still HTTP 404 `x-render-routing: no-server`. B1–B4
 OPEN. B5 ACCEPTED. Runtime architecture remains **inline**
 (`JOB_BROKER=inline`); separate-worker recovery is **NOT APPLICABLE**.
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.4B-SR5: see below.
+
+## Phase 10.4B-SR5 — Post-merge reconciliation and blocker closure plan
+
+Documentation-only. Baseline `origin/main`
+**`56edeee4d40e850d29086caa065a9aa6d029c875`**. Report:
+`docs/reports/PHASE_10_4B_SR5_BLOCKER_CLOSURE_PLAN.md`.
+
+Corrects stale Phase 10.4B-SR4 **COMPLETE – UNMERGED**. Independently
+re-probes documented staging hosts. Produces a dependency-ordered owner
+closure plan. Does not apply Blueprints, deploy, migrate, create jobs,
+or start Phase 10.4C.
+
+PHASE 10.4B IMPLEMENTATION: **MERGED**.
+PHASE 10.4B-SR4 DOCUMENTATION: **MERGED**.
+PHASE 10.4B-SR5 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4B-S STAGING EXECUTION: **BLOCKED** / **NOT EXECUTED**.
+STAGING READINESS: **BLOCKED**.
+PHASE 10.4B-S DECISION: **BLOCKED**.
+Independent re-probe **11 Nov 2026, 16:42 Asia/Jakarta**: documented
+staging API/web still HTTP 404 `x-render-routing: no-server`. B1–B4
+OPEN. B5 ACCEPTED. Closure order: inspect workspace → B1 → B3 →
+`/health` `/ready` → B2 → B4 process. No application-code change
+required. Runtime architecture remains **inline**.
 STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
