@@ -29,7 +29,10 @@ other than a staging-service identity `SELECT` (not available here).
 | Evidence-update main CI | [43199979912](https://github.com/mufea/docuflow-ai/actions/runs/43199979912) **SUCCESS** (**12 Nov 2026, 17:26 Asia/Jakarta**) — repository CI, **not** runtime isolation |
 | Owner-evidence PR | [#83](https://github.com/mufea/docuflow-ai/pull/83) **MERGED** `4ae51235ae543ae1857e4c8010c43e62521af1f5` (**12 Nov 2026, 18:15 Asia/Jakarta**) |
 | PR #83 repository CI | [43206679114](https://github.com/mufea/docuflow-ai/actions/runs/43206679114) **SUCCESS** (**12 Nov 2026, 18:11 Asia/Jakarta**) — repository CI, **not** runtime isolation |
-| Post-merge `main` CI | [43207572179](https://github.com/mufea/docuflow-ai/actions/runs/43207572179) **SUCCESS** (**12 Nov 2026, 18:17 Asia/Jakarta**) — repository CI, **not** runtime isolation |
+| Post-merge `main` CI after #83 | [43207572179](https://github.com/mufea/docuflow-ai/actions/runs/43207572179) **SUCCESS** (**12 Nov 2026, 18:17 Asia/Jakarta**) — repository CI, **not** runtime isolation |
+| Recon PR | [#84](https://github.com/mufea/docuflow-ai/pull/84) **MERGED** `82d94f073224225ae8d862630c757de83926fb86` (**12 Nov 2026, 18:20 Asia/Jakarta**) |
+| PR #84 repository CI | [43207968097](https://github.com/mufea/docuflow-ai/actions/runs/43207968097) **SUCCESS** (**12 Nov 2026, 18:20 Asia/Jakarta**) — repository CI, **not** runtime isolation |
+| `main` CI after #84 | [43208360239](https://github.com/mufea/docuflow-ai/actions/runs/43208360239) **SUCCESS** (**12 Nov 2026, 18:22 Asia/Jakarta**) — repository CI, **not** runtime isolation |
 | Auditor | Cursor Agent (this workspace) |
 | Authorized owner | EDY ALAMSAH (**owner-reported**) |
 

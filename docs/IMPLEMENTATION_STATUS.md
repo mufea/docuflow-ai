@@ -2791,18 +2791,29 @@ merge `4ae51235ae543ae1857e4c8010c43e62521af1f5`,
 `2026-11-12T11:15:25Z` / **12 Nov 2026, 18:15 Asia/Jakarta**).
 The contemporaneous **COMPLETE – UNMERGED** line is superseded for
 **current** git status.
-PHASE 10.4B-SR7 POST-MERGE RECONCILIATION: **COMPLETE – UNMERGED**
-(this PR). Git-status only; runtime evidence is unchanged.
+PHASE 10.4B-SR7 POST-MERGE RECONCILIATION: **MERGED** (PR
+[#84](https://github.com/mufea/docuflow-ai/pull/84);
+merge `82d94f073224225ae8d862630c757de83926fb86`,
+`2026-11-12T11:20:50Z` / **12 Nov 2026, 18:20 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Git-status only; runtime evidence is unchanged.
 PR [#83](https://github.com/mufea/docuflow-ai/pull/83) repository CI:
 **SUCCESS** [43206679114](https://github.com/mufea/docuflow-ai/actions/runs/43206679114)
 (Python `131143478148`, Web `131143477591`; completed
-**12 Nov 2026, 18:11 Asia/Jakarta**). CI SUCCESS is not runtime
-isolation.
-`main` push CI after merge: **SUCCESS**
-[43207572179](https://github.com/mufea/docuflow-ai/actions/runs/43207572179)
-(Python `131146514839`, Web `131146515341`; `main` push completed
-**12 Nov 2026, 18:17 Asia/Jakarta**). Recorded separately from runtime
-evidence. CI SUCCESS is not runtime isolation.
+**12 Nov 2026, 18:11 Asia/Jakarta**).
+`main` push CI after PR [#83](https://github.com/mufea/docuflow-ai/pull/83):
+**SUCCESS** [43207572179](https://github.com/mufea/docuflow-ai/actions/runs/43207572179)
+(Python `131146514839`, Web `131146515341`; completed
+**12 Nov 2026, 18:17 Asia/Jakarta**).
+PR [#84](https://github.com/mufea/docuflow-ai/pull/84) repository CI:
+**SUCCESS** [43207968097](https://github.com/mufea/docuflow-ai/actions/runs/43207968097)
+(Python `131147937025`, Web `131147937375`; completed
+**12 Nov 2026, 18:20 Asia/Jakarta**).
+`main` push CI after PR [#84](https://github.com/mufea/docuflow-ai/pull/84):
+**SUCCESS** [43208360239](https://github.com/mufea/docuflow-ai/actions/runs/43208360239)
+(Python `131149202138`, Web `131149201922`; completed
+**12 Nov 2026, 18:22 Asia/Jakarta**). All repository CI is separate
+from runtime evidence. CI SUCCESS is not runtime isolation.
 CONFIGURATION ISOLATION: **PASS**.
 RUNTIME DATABASE ISOLATION: **PASS** for `docuflow-staging-api`
 (**OWNER-PROVIDED** Shell; database `docuflow_staging_db_ikpz`, user
