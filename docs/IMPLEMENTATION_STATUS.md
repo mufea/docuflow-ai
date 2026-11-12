@@ -2840,3 +2840,34 @@ R2 / OBJECT RESTORE: **NOT VERIFIED**.
 BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
 BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
 PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.4C-A: see below.
+
+## Phase 10.4C-A — Runtime isolation assurance
+
+Documentation-only Stage A. Baseline `origin/main`
+**`9b76e84cd888117f4dda23e39d552d416e8d2d56`**. Report:
+`docs/reports/PHASE_10_4C_A_RUNTIME_ISOLATION_ASSURANCE.md`.
+
+Read-only. Identity SQL and HeadBucket were **not** repeated.
+`audit_staging_blueprint()` on `infra/render.staging.yaml`: zero
+issues. No application code, Blueprint, environment variable,
+database data, or storage object was modified. Stage B was **not**
+started.
+
+PHASE 10.4C-A DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+CONFIGURATION ISOLATION (template): **PASS**.
+RUNTIME DATABASE ISOLATION: **PASS** for `docuflow-staging-api`
+(**OWNER-PROVIDED**). Cleanup: **NOT VERIFIED**.
+RUNTIME STORAGE ISOLATION: **PASS** API HeadBucket access to
+`docuflowai-staging` (**OWNER-PROVIDED**). Exclusive token scope:
+**NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+REPOSITORY CI SUCCESS: **YES** on `main` after PR
+[#85](https://github.com/mufea/docuflow-ai/pull/85)
+([43209567342](https://github.com/mufea/docuflow-ai/actions/runs/43209567342),
+**12 Nov 2026, 18:31 Asia/Jakarta**). CI SUCCESS is not isolation.
+FUNCTIONAL SMOKE: **NOT AUTHORIZED**.
+STAGING VERIFIED: **NOT VERIFIED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+SR6-D: **NO-GO**.
