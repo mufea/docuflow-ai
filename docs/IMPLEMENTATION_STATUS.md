@@ -2727,7 +2727,16 @@ LIVE DATABASE / STORAGE ISOLATION: **BLOCKED** (`/ready` is reachability,
 not identity).
 CREDENTIAL ROTATION: **BLOCKED** / **OWNER-REPORTED** only.
 FUNCTIONAL SMOKE: **PROHIBITED**.
-PHASE 10.4B-S SAFETY REPROBE: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4B-S SAFETY REPROBE: **MERGED** (PR
+[#81](https://github.com/mufea/docuflow-ai/pull/81);
+merge `7700188264fc151cad9e8cbf9505c1e4839f789d`,
+`2026-11-12T08:13:17Z` / **12 Nov 2026, 15:13 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status.
+REPOSITORY CI: **SUCCESS** on `main` push
+[43181164350](https://github.com/mufea/docuflow-ai/actions/runs/43181164350)
+(Python `131057208042`, Web `131057208379`; `main` push completed
+**12 Nov 2026, 15:15 Asia/Jakarta**).
 A0–A4 OWNERS: **UNASSIGNED**.
 A0–A4 APPROVALS: **PENDING**.
 SR6-D: **NO-GO**.
@@ -2736,6 +2745,44 @@ STAGING READINESS: **BLOCKED**.
 STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
+PHASE_9_15: **OPEN**.
+BACKUP_ASSURANCE: **INCOMPLETE**.
+BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
+OBSERVED_RPO: **NOT DETERMINABLE**.
+ALERTING: **NOT EXECUTED** / **NOT VERIFIED**.
+R2 / OBJECT RESTORE: **NOT VERIFIED**.
+BUSINESS_RTO_CAPABILITY: **NOT DEMONSTRATED**.
+BUSINESS_RPO_CAPABILITY: **NOT DEMONSTRATED**.
+PRODUCTION_DR_READINESS: **NOT DEMONSTRATED**.
+Phase 10.4B-SR7: see below.
+
+## Phase 10.4B-SR7 — Runtime database and object storage isolation
+
+Documentation-only. Baseline `origin/main`
+**`7700188264fc151cad9e8cbf9505c1e4839f789d`**. Report:
+`docs/reports/PHASE_10_4B_SR7_RUNTIME_ISOLATION_VERIFICATION.md`.
+
+Read-only. No Render Shell, no staging DSN, no R2 keys in this
+workspace. Identity SQL and HeadBucket **NOT RUN**. Ambient agent DSN
+identity is not staging and was not connected. Public GET `/health` and
+`/ready` on `350v` remain reachability only.
+
+PHASE 10.4B IMPLEMENTATION: **MERGED**.
+PHASE 10.4B-SR7 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+CONFIGURATION ISOLATION: **PASS** (template + owner-named identities
+are distinct; live env unread).
+RUNTIME DATABASE ISOLATION: **NOT VERIFIED**.
+RUNTIME STORAGE ISOLATION: **NOT VERIFIED**.
+OVERALL RUNTIME ISOLATION: **NOT VERIFIED**.
+STAGING GET `/health`: **PASS** (HTTP 200, **12 Nov 2026, 17:14 Asia/Jakarta**,
+cold-start ~24s).
+STAGING GET `/ready`: **PASS** (HTTP 200 `database=true` `storage=true`
+`broker=inline`, **12 Nov 2026, 17:15 Asia/Jakarta**).
+FUNCTIONAL SMOKE: **NOT AUTHORIZED**.
+STAGING VERIFIED: **NOT VERIFIED** / **NOT COMPLETE**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+DEPLOYMENT: **NOT DEPLOYED** / **NOT VERIFIED**.
+SR6-D: **NO-GO**.
 PHASE_9_15: **OPEN**.
 BACKUP_ASSURANCE: **INCOMPLETE**.
 BACKUP_ENABLEMENT / SCHEDULE: **UNKNOWN** / **NOT DISPLAYED**.
