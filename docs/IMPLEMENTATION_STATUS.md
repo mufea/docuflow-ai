@@ -2758,21 +2758,41 @@ Phase 10.4B-SR7: see below.
 
 ## Phase 10.4B-SR7 — Runtime database and object storage isolation
 
-Documentation-only. Baseline `origin/main`
-**`7700188264fc151cad9e8cbf9505c1e4839f789d`**. Report:
+Documentation-only. First-pass baseline `origin/main`
+**`7700188264fc151cad9e8cbf9505c1e4839f789d`**. Evidence-update
+baseline `origin/main`
+**`7628da1805f18052b154c6246ce6f3f4faa5022e`**. Report:
 `docs/reports/PHASE_10_4B_SR7_RUNTIME_ISOLATION_VERIFICATION.md`.
 
-Read-only. No Render Shell, no staging DSN, no R2 keys in this
-workspace. Identity SQL and HeadBucket **NOT RUN**. Ambient agent DSN
-identity is not staging and was not connected. Public GET `/health` and
-`/ready` on `350v` remain reachability only.
+Read-only. Agent workspace still has no Render Shell, no staging DSN,
+and no R2 keys. Agent-side identity SQL and HeadBucket remain **NOT
+RUN** and were **not** repeated. Owner-provided Render Shell
+screenshots record API database identity and one HeadBucket against
+`docuflowai-staging`. Ambient agent DSN identity is not staging and
+was not connected. Public GET `/health` and `/ready` on `350v` remain
+reachability only. Repository CI is recorded separately from runtime
+evidence. No application code, Blueprint, environment variable,
+database data, or storage object was modified.
 
 PHASE 10.4B IMPLEMENTATION: **MERGED**.
-PHASE 10.4B-SR7 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
-CONFIGURATION ISOLATION: **PASS** (template + owner-named identities
-are distinct; live env unread).
-RUNTIME DATABASE ISOLATION: **NOT VERIFIED**.
-RUNTIME STORAGE ISOLATION: **NOT VERIFIED**.
+PHASE 10.4B-SR7 DOCUMENTATION: **MERGED** (PR
+[#82](https://github.com/mufea/docuflow-ai/pull/82);
+merge `7628da1805f18052b154c6246ce6f3f4faa5022e`,
+`2026-11-12T10:23:41Z` / **12 Nov 2026, 17:23 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status.
+REPOSITORY CI: **SUCCESS** on `main` push
+[43199979912](https://github.com/mufea/docuflow-ai/actions/runs/43199979912)
+(Python `131120551275`, Web `131120551562`; `main` push completed
+**12 Nov 2026, 17:26 Asia/Jakarta**).
+PHASE 10.4B-SR7 OWNER EVIDENCE UPDATE: **COMPLETE – UNMERGED** (this PR).
+CONFIGURATION ISOLATION: **PASS**.
+RUNTIME DATABASE ISOLATION: **PASS** for `docuflow-staging-api`
+(**OWNER-PROVIDED** Shell; database `docuflow_staging_db_ikpz`, user
+`docuflow_staging_db_ikpz_user`). Cleanup: **NOT VERIFIED**.
+RUNTIME STORAGE ISOLATION: **PASS** API HeadBucket access to
+`docuflowai-staging` (**OWNER-PROVIDED**). Exclusive token scope:
+**NOT VERIFIED**.
 OVERALL RUNTIME ISOLATION: **NOT VERIFIED**.
 STAGING GET `/health`: **PASS** (HTTP 200, **12 Nov 2026, 17:14 Asia/Jakarta**,
 cold-start ~24s).
