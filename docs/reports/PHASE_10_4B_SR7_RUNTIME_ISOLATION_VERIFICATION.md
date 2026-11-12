@@ -32,7 +32,7 @@ other than a staging-service identity `SELECT` (not available here).
 | Post-merge `main` CI after #83 | [43207572179](https://github.com/mufea/docuflow-ai/actions/runs/43207572179) **SUCCESS** (**12 Nov 2026, 18:17 Asia/Jakarta**) — repository CI, **not** runtime isolation |
 | Recon PR | [#84](https://github.com/mufea/docuflow-ai/pull/84) **MERGED** `82d94f073224225ae8d862630c757de83926fb86` (**12 Nov 2026, 18:20 Asia/Jakarta**) |
 | PR #84 repository CI | [43207968097](https://github.com/mufea/docuflow-ai/actions/runs/43207968097) **SUCCESS** (**12 Nov 2026, 18:20 Asia/Jakarta**) — repository CI, **not** runtime isolation |
-| `main` CI after #84 | [43208360239](https://github.com/mufea/docuflow-ai/actions/runs/43208360239) **IN PROGRESS** at this write — repository CI, **not** runtime isolation |
+| `main` CI after #84 | [43208360239](https://github.com/mufea/docuflow-ai/actions/runs/43208360239) **SUCCESS** (**12 Nov 2026, 18:22 Asia/Jakarta**) — repository CI, **not** runtime isolation |
 | Auditor | Cursor Agent (this workspace) |
 | Authorized owner | EDY ALAMSAH (**owner-reported**) |
 

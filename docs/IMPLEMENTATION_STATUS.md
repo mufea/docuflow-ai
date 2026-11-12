@@ -2810,9 +2810,10 @@ PR [#84](https://github.com/mufea/docuflow-ai/pull/84) repository CI:
 (Python `131147937025`, Web `131147937375`; completed
 **12 Nov 2026, 18:20 Asia/Jakarta**).
 `main` push CI after PR [#84](https://github.com/mufea/docuflow-ai/pull/84):
-**IN PROGRESS** [43208360239](https://github.com/mufea/docuflow-ai/actions/runs/43208360239)
-at this write. All repository CI is separate from runtime evidence.
-CI SUCCESS is not runtime isolation.
+**SUCCESS** [43208360239](https://github.com/mufea/docuflow-ai/actions/runs/43208360239)
+(Python `131149202138`, Web `131149201922`; completed
+**12 Nov 2026, 18:22 Asia/Jakarta**). All repository CI is separate
+from runtime evidence. CI SUCCESS is not runtime isolation.
 CONFIGURATION ISOLATION: **PASS**.
 RUNTIME DATABASE ISOLATION: **PASS** for `docuflow-staging-api`
 (**OWNER-PROVIDED** Shell; database `docuflow_staging_db_ikpz`, user
