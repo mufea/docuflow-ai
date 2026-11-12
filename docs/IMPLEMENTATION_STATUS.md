@@ -2885,3 +2885,33 @@ FUNCTIONAL SMOKE: **NOT AUTHORIZED**.
 STAGING VERIFIED: **NOT VERIFIED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 SR6-D: **NO-GO**.
+Phase 10.4C-A1: see below.
+
+## Phase 10.4C-A1 — Runtime isolation evidence gap closure
+
+Documentation-only. Baseline `origin/main`
+**`5ed5520db9cfa065010b61b6260f12660f0b5ba9`**. Updates:
+`docs/reports/PHASE_10_4C_A_RUNTIME_ISOLATION_ASSURANCE.md` §13.
+
+Owner screenshots **12 Nov 2026, 20:52 Asia/Jakarta** (Gap 2) and
+**12 Nov 2026, 21:38 Asia/Jakarta** (Gap 1 labeled cleanup Shell).
+No application code, Blueprint, env, database, or object mutation.
+SR7 API identity SQL and HeadBucket were **not** repeated. Stage B
+was **not** started.
+
+PHASE 10.4C-A1 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+GAP 1 CLEANUP DB IDENTITY: **PASS** (**OWNER-PROVIDED**
+`docuflow-staging-cleanup` Shell; database
+`docuflow_staging_db_ikpz`, user `docuflow_staging_db_ikpz_user`,
+`10.26.149.13:5432`). Matches API identity.
+RUNTIME DATABASE ISOLATION: **PASS** for API and cleanup
+(**OWNER-PROVIDED**). Cleanup R2 live env: **NOT VERIFIED**.
+GAP 2 API R2 ENDPOINT + MASKED KEY: **PASS** (**OWNER-PROVIDED**
+`docuflow-staging-api` Shell; host
+`26d06bf0ca16ba951f1d19d5989e6663.r2.cloudflarestorage.com`; bucket
+`docuflowai-staging`; key masked `6c01…2307`).
+GAP 3 CLOUDFLARE TOKEN SCOPE: **NOT VERIFIED**.
+GAP 4 WORKSPACE EXCLUSIVITY: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
