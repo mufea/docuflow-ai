@@ -1,6 +1,7 @@
 # Phase 10.4B-S — Staging safety and configuration audit
 
-Read-only. Time: **12 Nov 2026, 14:51 Asia/Jakarta (WIB)**.
+Read-only. First pass: **12 Nov 2026, 14:51 Asia/Jakarta (WIB)**.
+Reprobe: **12 Nov 2026, 15:09 Asia/Jakarta (WIB)**.
 No application-code change. No Blueprint sync. No deploy, migrate,
 cleanup, job mutation, or live storage mutation.
 
@@ -12,11 +13,13 @@ remains historical.
 
 | Field | Value |
 | --- | --- |
-| Audit date | **12 Nov 2026, 14:51 Asia/Jakarta (WIB)** |
+| Audit date | **12 Nov 2026, 15:09 Asia/Jakarta (WIB)** (reprobe) |
+| First pass | **12 Nov 2026, 14:51 Asia/Jakarta (WIB)** |
 | Auditor | Cursor Agent (this workspace) |
 | Authorized owner | EDY ALAMSAH (**owner-reported**; not independently verified) |
-| Repository commit | `d10505d86cfa3ff2b04f55abe5e460ed3c6530f4` (`origin/main`) |
-| Target staging API | `https://docuflow-staging-api-35ov.onrender.com` (owner-provided) |
+| Repository commit | `d9ee5f84e7aae8bfadfcf55940df81d7f0072bd0` (`origin/main`) |
+| Target staging API | `https://docuflow-staging-api-350v.onrender.com` (owner-provided) |
+| Prior hostname | `https://docuflow-staging-api-35ov.onrender.com` (letter `o`; 404 no-server) |
 | Overall | **BLOCKED** |
 
 Scope: repository Blueprint and validators, targeted local tests, and
@@ -31,23 +34,26 @@ staging DSN, no storage credentials. Owner-provided screenshots are
 audit does **not** recommend `DOCUFLOW_ENV=staging`.
 
 Successful repository tests and GitHub CI are **not** staging
-verification. Public GET 404 is infrastructure unreadiness, not
-functional verification.
+verification. HTTP 200 `/health` and `/ready` are infrastructure
+readiness only. They do **not** prove production isolation or functional
+verification.
 
 ## 2. Repository baseline
 
-Working tree at audit start: clean. Local branch was
-`cursor/phase-10-4b-sr6-c2-post-merge-reconciliation-8f43` at
-`7517a6e21d00fab4067cb405078b4fc1f12c0c81` (1 commit behind
+Reprobe working tree: clean. Local branch was
+`cursor/phase-10-4b-s-staging-safety-audit-8f43` at
+`719a64181c1dcf92e9c3bb0e503ef4926452cc0c` (1 commit behind
 `origin/main`). One fetch of `origin/main` confirmed:
 
 | Field | Independent result |
 | --- | --- |
-| `origin/main` | `d10505d86cfa3ff2b04f55abe5e460ed3c6530f4` |
-| Subject | Merge pull request #79 |
-| Commit date | `2026-11-11 19:10:26 +0700` / **11 Nov 2026, 19:10 Asia/Jakarta** |
-| Owner-reported deploy SHA | `d10505d` — matches `origin/main`; **not** proof of a live Render deploy |
-| Main push CI | [43018051864](https://github.com/mufea/docuflow-ai/actions/runs/43018051864) **SUCCESS** (Python `130513989919`, Web `130513990270`; completed **11 Nov 2026, 19:12 Asia/Jakarta**) |
+| `origin/main` | `d9ee5f84e7aae8bfadfcf55940df81d7f0072bd0` |
+| Subject | Merge pull request #80 |
+| Commit date | `2026-11-12 15:02:32 +0700` / **12 Nov 2026, 15:02 Asia/Jakarta** |
+| PR #80 CI | [43178570667](https://github.com/mufea/docuflow-ai/actions/runs/43178570667) **SUCCESS** |
+| Main push CI | [43179741838](https://github.com/mufea/docuflow-ai/actions/runs/43179741838) **SUCCESS** (Python `131052542505`, Web `131052542881`; completed **12 Nov 2026, 15:04 Asia/Jakarta**) |
+| `src/` / `infra/` vs first-pass SHA `d10505d` | unchanged (docs-only merge) |
+| Owner-reported deploy SHA | `d10505d` — still **not** proven as the live Render process SHA |
 
 CI SUCCESS is **CI VERIFIED** for `main`. It is not **STAGING VERIFIED**.
 
@@ -72,7 +78,7 @@ Inspected `infra/render.staging.yaml` and reused
 | Production names | excluded | no `docuflow-api` / `docuflow-db` / Redis / worker | **PASS** | REPOSITORY VERIFIED |
 | Git branch | `main` | not in YAML (Render dashboard setting) | **BLOCKED** live; owner-reported | OWNER-REPORTED |
 | Blueprint name | `docuflowai-staging` | not in YAML | **BLOCKED** live; owner-reported | OWNER-REPORTED |
-| Live sync at `d10505d` | deployed | no dashboard; HTTP 404 no-server | **NOT VERIFIED** | OWNER-REPORTED |
+| Live sync at `d10505d` | deployed | API serves `/health`+`/ready` on `350v`; process SHA unread | **NOT VERIFIED** SHA / **PASS** HTTP | OWNER-REPORTED SHA; INDEPENDENTLY VERIFIED HTTP |
 
 S3 keys remain `sync: false` (owner-supplied). Cleanup copies S3 settings
 from `docuflow-staging-api`, not production service names.
@@ -85,11 +91,11 @@ Blueprint contract from live observation.
 | Check | Expected | Observed (redacted) | Result | Evidence |
 | --- | --- | --- | --- | --- |
 | Environment | `DOCUFLOW_ENV=production` fail-fast | Blueprint sets it; live env unread | **BLOCKED** live / **PASS** template | REPOSITORY VERIFIED template; live NOT VERIFIED |
-| Database | dedicated `docuflow-staging-db` | Blueprint `fromDatabase`; live DSN unread | **BLOCKED** live | `/ready` unreachable; no staging DSN |
-| Storage | dedicated staging bucket + keys | Blueprint `sync: false`; live unread | **BLOCKED** live | no bucket name; no object listing performed |
+| Database | dedicated `docuflow-staging-db` | Blueprint `fromDatabase`; `/ready` `database=true`; live DSN unread | **BLOCKED** isolation / **PASS** reachability | HTTP 200 does not prove staging vs production DB |
+| Storage | dedicated staging bucket + keys | Blueprint `sync: false`; `/ready` `storage=true`; live unread | **BLOCKED** isolation / **PASS** ping | no bucket name; no object listing performed |
 | AI | `mock` | Blueprint `mock`; live unread | **BLOCKED** live / **PASS** template | REPOSITORY VERIFIED template |
 | Email | `console` | Blueprint `console`; live unread | **BLOCKED** live / **PASS** template | REPOSITORY VERIFIED template |
-| Broker | `inline`; no paid worker | Blueprint inline, no worker | **BLOCKED** live / **PASS** template | REPOSITORY VERIFIED template |
+| Broker | `inline`; no paid worker | `/ready` `broker=inline`, `rq_workers=0` | **PASS** live JSON | INDEPENDENTLY VERIFIED; `redis:true` is inline no-ping |
 | Cookies | `COOKIE_SECURE=true` (forced when env=production) | Blueprint `true`; live unread | **BLOCKED** live / **PASS** template | REPOSITORY VERIFIED template |
 | CORS | staging web origin | Blueprint from `docuflow-staging-web` `RENDER_EXTERNAL_URL`; live web URL unknown | **BLOCKED** live | production hosts not in Blueprint |
 | Trusted hosts | `.onrender.com` | Blueprint value present | **PASS** template | REPOSITORY VERIFIED |
@@ -140,33 +146,44 @@ local loopback smoke `/health`+`/ready`, and `/ready` secret non-leak.
 `STAGING_PREFLIGHT=1` against ambient env. `scripts/staging_smoke.py`
 against live staging. Provider tests.
 
-Local tests: **PASS** / **LOCALLY VERIFIED**. Not staging runtime PASS.
+Local tests: **PASS** / **LOCALLY VERIFIED** (first pass). Reprobe did
+**not** re-run them: `src/` and `infra/` are unchanged vs `d10505d`.
+Not staging runtime PASS.
 
 ## 6. Read-only runtime results
 
-Before GET: `is_production_public_host("docuflow-staging-api-35ov.onrender.com")`
-is `False` (hostname contains `staging`).
-`smoke_target_errors(url, host)` is empty. Production hosts
-`docuflow-api.onrender.com`, `docuflow-web.onrender.com`, and
-`docuflowai.site` remain classified production and were **not** requested.
+Production hosts `docuflow-api.onrender.com`, `docuflow-web.onrender.com`,
+and `docuflowai.site` remain classified production and were **not**
+requested. Requests: unauthenticated GET, `--max-redirs 0`, no cookies.
 
-Requests: unauthenticated GET, `--max-redirs 0`, 25s timeout, no cookies.
+Hostname discrepancy: first-pass origin used letter `o` (`35ov`).
+Reprobe origin uses digit `0` (`350v`). They are different hosts.
+`is_production_public_host` is `False` for both (substring `staging`).
+
+### 6.1 First pass — `35ov` (letter o)
 
 | URL | Time (Asia/Jakarta) | HTTP | `x-render-routing` | Redirect | Body | Result |
 | --- | --- | --- | --- | --- | --- | --- |
-| `https://docuflow-staging-api-35ov.onrender.com/health` | 12 Nov 2026, 14:50:57 | 404 | `no-server` | none | `Not Found` (10 bytes, text/plain) | **FAIL** |
-| `https://docuflow-staging-api-35ov.onrender.com/ready` | 12 Nov 2026, 14:51:20 | 404 | `no-server` | none | `Not Found` (10 bytes, text/plain) | **FAIL** |
+| `https://docuflow-staging-api-35ov.onrender.com/health` | 12 Nov 2026, 14:50:57 | 404 | `no-server` | none | `Not Found` | **FAIL** |
+| `https://docuflow-staging-api-35ov.onrender.com/ready` | 12 Nov 2026, 14:51:20 | 404 | `no-server` | none | `Not Found` | **FAIL** |
 
-Elapsed ~0.10s each (Cloudflare edge). This is not a Free-plan cold start.
-No JSON `status`/`checks`/`broker` body. `redis: true` was **not** observed
-and would not prove a Redis server if `/ready` later returns it while
-`JOB_BROKER=inline` (`health.py` sets `checks["redis"]=True` without ping
-in inline mode).
+### 6.2 Reprobe — `350v` (digit 0) — current confirmed origin
 
-Owner-provided screenshots of a live deploy at `d10505d` are
-**OWNER-REPORTED** and contradicted by this GET. Historical 404s against
-`docuflow-staging-api.onrender.com` were **not** re-probed (not the
-confirmed origin). Staging web origin was not provided; web GET **NOT RUN**.
+Before GET: `smoke_target_errors(url, host)` is empty.
+
+| URL | Time (Asia/Jakarta) | HTTP | Redirect | Body (redacted) | Result |
+| --- | --- | --- | --- | --- | --- |
+| `https://docuflow-staging-api-350v.onrender.com/health` | 12 Nov 2026, 15:09:41 | 200 | none | `{"status":"ok","service":"docuflow-api"}` | **PASS** |
+| `https://docuflow-staging-api-350v.onrender.com/ready` | 12 Nov 2026, 15:09:50 | 200 | none | `status=ready`, `checks.database=true`, `checks.storage=true`, `checks.redis=true`, `broker=inline`, `rq_workers=0` | **PASS** |
+
+Elapsed 0.10s (`/health`) and 0.64s (`/ready`). No secret fragments.
+`checks.redis=true` with `broker=inline` is set without a Redis ping in
+`src/docuflow/api/routes/health.py`. It does **not** prove a Redis
+server exists or is required.
+
+Owner-reported deploy SHA `d10505d` remains **OWNER-REPORTED**. HTTP
+does not expose the running git SHA. Staging web origin was not
+provided; web GET **NOT RUN**.
 
 ## 7. Credential rotation evidence
 
@@ -193,8 +210,8 @@ Not used for this audit’s live checks.
 | Finding | Class |
 | --- | --- |
 | Staging Blueprint does not name production services, production public hosts, Redis, or a paid worker | REPOSITORY VERIFIED |
-| Public GET used a staging-named hostname and did not redirect to production | INDEPENDENTLY VERIFIED |
-| Live API/cleanup/database/storage isolation cannot be proven without env or a 200 `/ready` | BLOCKED |
+| Public GET used staging-named hostnames and did not redirect to production | INDEPENDENTLY VERIFIED |
+| Live `/ready` proves a DB and storage ping succeed; not which database or bucket | INDEPENDENTLY VERIFIED reachability; isolation BLOCKED |
 | Ambient Render-internal DSN is not staging and must not be used for migrate/smoke | INDEPENDENTLY VERIFIED identity; connect failed |
 | No screenshots present in this workspace to corroborate owner Render UI claims | NOT VERIFIED |
 
@@ -203,15 +220,17 @@ application data remains **prohibited** until this gate is PASS.
 
 ## 9. Open issues
 
-### S1 — Staging API hostname has no Render server
+### S1 — Wrong hostname `35ov` had no Render server — **CLOSED** for confirmed `350v`
 
-- Severity: **HIGH** (blocks all live staging verification)
-- Evidence: HTTP 404, `x-render-routing: no-server`, ~0.10s, **12 Nov 2026, 14:50–14:51 Asia/Jakarta**
-- Impact: `/health` and `/ready` FAIL; database/storage readiness NOT VERIFIED
-- Owner action: confirm in the staging Render workspace that
-  `docuflow-staging-api` exists and that
-  `docuflow-staging-api-35ov.onrender.com` is attached
-- Separate authorization: **yes** for any provision, sync, or deploy
+- Severity: **HIGH** on first pass; **CLOSED** on reprobe for `350v`
+- Evidence: `35ov` HTTP 404 `no-server` at 14:50–14:51; `350v` HTTP 200
+  `/health` and `/ready` at **12 Nov 2026, 15:09 Asia/Jakarta**
+- Impact: first-pass FAIL was a hostname transcription (`o` vs `0`), not
+  a missing stack
+- Owner action: use `docuflow-staging-api-350v.onrender.com` as the API
+  origin; do not treat `35ov` as live
+- Separate authorization: not required for further public GET `/health`
+  `/ready` on `350v`
 
 ### S2 — Live runtime configuration unread
 
@@ -224,9 +243,12 @@ application data remains **prohibited** until this gate is PASS.
 ### S3 — Live database isolation unproven
 
 - Severity: **HIGH**
-- Evidence: no staging DSN; `/ready` 404
-- Impact: cannot prove API/cleanup use `docuflow-staging-db`
-- Owner action: after S1 is live, owner-run identity check (`database_identity` / `STAGING_DATABASE_CONFIRM`) without pasting the DSN
+- Evidence: `/ready` `database=true` on `350v`; live DSN unread; no
+  `STAGING_DATABASE_CONFIRM`
+- Impact: cannot prove the reachable DB is `docuflow-staging-db` rather
+  than another Postgres
+- Owner action: owner-run identity check (`database_identity` /
+  `STAGING_DATABASE_CONFIRM`) without pasting the DSN
 - Separate authorization: **yes** for any SQL or migrate-verify that connects
 
 ### S4 — Live storage isolation unproven
@@ -259,28 +281,27 @@ application data remains **prohibited** until this gate is PASS.
 functional smoke testing.
 
 Rationale: Blueprint and local validators **PASS**. Independently
-verified public GET against the owner-provided staging API is HTTP 404
-`no-server`. Live configuration, database isolation, storage isolation,
-credential adoption, cleanup execution, and deploy identity are not
-independently verified. Functional smoke is **prohibited**.
+verified GET against `docuflow-staging-api-350v.onrender.com` is HTTP
+200 `/health` (`status=ok`) and HTTP 200 `/ready` (`status=ready`,
+`database=true`, `storage=true`, `broker=inline`, `rq_workers=0`).
+That is infrastructure readiness, not isolation. Live env values,
+database identity, storage bucket name, credential adoption, cleanup
+execution, and deploy SHA are not independently verified. Functional
+smoke is **prohibited**.
 
-Not **FAIL** for production-safety violation: the probed hostname is
+Not **FAIL** for production-safety violation: both probed hostnames are
 staging-classified and did not redirect to production. Not **PASS**:
-isolation of live resources is unproven and the API is not serving.
+isolation of live resources is unproven.
 
 ## 11. Next safe actions
 
-1. Owner confirms Render workspace and that
-   `docuflow-staging-api-35ov.onrender.com` is the live API (S1).
-2. If no-server persists, separately authorize Blueprint apply/sync or
-   deploy. Do not infer that authorization from this audit or from the
-   owner name.
-3. After unauthenticated GET `/health` and `/ready` return HTTP 200 with
-   `database`/`storage` true and `broker=inline`, record that evidence.
-4. Owner supplies redacted proof of staging DB identity, bucket **name**,
-   `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, and no payment keys (S2–S4).
-5. Only then request a **separate** authorization for mutating functional
-   smoke (`STAGING_SMOKE_MUTATIONS=1` is still not granted).
+1. Keep using `https://docuflow-staging-api-350v.onrender.com` as the
+   API origin. Do not use `35ov`.
+2. Owner supplies redacted proof of staging DB identity, bucket
+   **name**, `AI_PROVIDER=mock`, `EMAIL_BACKEND=console`, and no payment
+   keys (S2–S5). Do not paste DSNs or secrets into chat.
+3. Only then request a **separate** authorization for mutating
+   functional smoke (`STAGING_SMOKE_MUTATIONS=1` is still not granted).
 
 No speculative infrastructure changes. No Redis. No paid worker.
 )
