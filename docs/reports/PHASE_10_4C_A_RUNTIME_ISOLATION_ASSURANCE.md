@@ -34,7 +34,7 @@ Verified this pass (`git fetch origin main`):
 | Main CI after #85 | [43209567342](https://github.com/mufea/docuflow-ai/actions/runs/43209567342) **SUCCESS** (**12 Nov 2026, 18:31 Asia/Jakarta**) — repository CI, **not** runtime isolation |
 | Stage A docs PR | [#86](https://github.com/mufea/docuflow-ai/pull/86) **MERGED** `f0043ee4c41a95573310dcdeba496e748f5d792c` (**12 Nov 2026, 18:45 Asia/Jakarta**). Merge is git status, not isolation |
 | PR #86 repository CI | [43211699221](https://github.com/mufea/docuflow-ai/actions/runs/43211699221) **SUCCESS** (**12 Nov 2026, 18:46 Asia/Jakarta**) — repository CI, **not** runtime isolation |
-| `main` CI after #86 | [43211953700](https://github.com/mufea/docuflow-ai/actions/runs/43211953700) **IN PROGRESS** at recon write — repository CI, **not** runtime isolation |
+| `main` CI after #86 | [43211953700](https://github.com/mufea/docuflow-ai/actions/runs/43211953700) **SUCCESS** (**12 Nov 2026, 18:47 Asia/Jakarta**) — repository CI, **not** runtime isolation |
 | Auditor | Cursor Agent (this workspace) |
 | Authorized owner | EDY ALAMSAH (**owner-reported**) |
 | Working tree at start | clean at `origin/main` |
