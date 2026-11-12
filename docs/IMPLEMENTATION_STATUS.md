@@ -2702,18 +2702,32 @@ deploy, migrate, run cleanup, or start mutating smoke. Does **not**
 treat owner identity as mutation approval.
 
 PHASE 10.4B IMPLEMENTATION: **MERGED**.
-PHASE 10.4B-S SAFETY AUDIT: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4B-S SAFETY AUDIT: **MERGED** (PR
+[#80](https://github.com/mufea/docuflow-ai/pull/80);
+merge `d9ee5f84e7aae8bfadfcf55940df81d7f0072bd0`,
+`2026-11-12T08:02:32Z` / **12 Nov 2026, 15:02 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status.
+REPOSITORY CI: **SUCCESS** on `main` push
+[43179741838](https://github.com/mufea/docuflow-ai/actions/runs/43179741838)
+(Python `131052542505`, Web `131052542881`; `main` push completed
+**12 Nov 2026, 15:04 Asia/Jakarta**).
 OVERALL GATE: **BLOCKED**.
 BLUEPRINT `audit_staging_blueprint()`: **PASS** (repository).
-LOCAL TESTS: **PASS** (34 passed, exit 0; sqlite override; ambient DSN
-not reused after a failed import-time DNS error).
-STAGING GET `/health`: **FAIL** (HTTP 404 `x-render-routing: no-server`,
-**12 Nov 2026, 14:50 Asia/Jakarta**).
-STAGING GET `/ready`: **FAIL** (HTTP 404 `x-render-routing: no-server`,
-**12 Nov 2026, 14:51 Asia/Jakarta**).
-LIVE DATABASE / STORAGE ISOLATION: **BLOCKED**.
+LOCAL TESTS: **PASS** (34 passed, exit 0; not re-run — `src/`/`infra/`
+unchanged).
+STAGING GET `/health`: **PASS** on
+`https://docuflow-staging-api-350v.onrender.com/health` (HTTP 200
+`status=ok`, **12 Nov 2026, 15:09 Asia/Jakarta**). Prior `35ov` host
+HTTP 404 `no-server` remains historical.
+STAGING GET `/ready`: **PASS** on the `350v` origin (HTTP 200
+`status=ready`, `database=true`, `storage=true`, `broker=inline`,
+`rq_workers=0`, **12 Nov 2026, 15:09 Asia/Jakarta**).
+LIVE DATABASE / STORAGE ISOLATION: **BLOCKED** (`/ready` is reachability,
+not identity).
 CREDENTIAL ROTATION: **BLOCKED** / **OWNER-REPORTED** only.
 FUNCTIONAL SMOKE: **PROHIBITED**.
+PHASE 10.4B-S SAFETY REPROBE: **COMPLETE – UNMERGED** (this PR).
 A0–A4 OWNERS: **UNASSIGNED**.
 A0–A4 APPROVALS: **PENDING**.
 SR6-D: **NO-GO**.
