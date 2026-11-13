@@ -3376,7 +3376,14 @@ and PR [#98](https://github.com/mufea/docuflow-ai/pull/98). No GitHub
 Deployment records exist for `docuflow-staging-cleanup` or
 `docuflow-cleanup`. Commit inclusion is not runtime verification.
 
-PHASE 10.4C-A8 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A8 DOCUMENTATION: **MERGED** (PR
+[#101](https://github.com/mufea/docuflow-ai/pull/101);
+merge `381b20191c0fbab78b39eb309f3e8c37d2ebecf8`,
+`2026-11-13T15:16:19+07:00` / **13 Nov 2026, 15:16 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. A8 cleanup SHA **NOT VERIFIED** labels are
+updated for **header SHA only** by Phase 10.4C-A8R below. Successful
+OA-3 cron runs remain **NOT VERIFIED**.
 PR [#101](https://github.com/mufea/docuflow-ai/pull/101) repository CI:
 **SUCCESS** [43391386606](https://github.com/mufea/docuflow-ai/actions/runs/43391386606)
 (Python `131771883059`, Web `131771882603`; completed
@@ -3384,8 +3391,40 @@ PR [#101](https://github.com/mufea/docuflow-ai/pull/101) repository CI:
 and is not a deploy.
 STAGING API DEPLOY SHA: **VERIFIED** (`ec3d079`; includes #97/#98).
 PRODUCTION API DEPLOY SHA: **VERIFIED** (`ec3d079`; includes #97/#98).
-STAGING CLEANUP DEPLOY SHA: **NOT VERIFIED**.
-PRODUCTION CLEANUP DEPLOY SHA: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+CONTROL-XWS: **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C: **NOT COMPLETE**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+OA-5: **IN FORCE**.
+DEPLOY: **NOT AUTHORIZED**.
+LIVE CLEANUP: **NOT AUTHORIZED**.
+Phase 10.4C-A8R: see below.
+
+## Phase 10.4C-A8R — Cleanup owner evidence
+
+Documentation-only. Baseline `origin/main`
+**`381b20191c0fbab78b39eb309f3e8c37d2ebecf8`**. Report:
+`docs/reports/PHASE_10_4C_A8R_CLEANUP_OWNER_EVIDENCE.md`.
+Owner supplied **Runs** screenshots (not Deploys) at **15:19** and
+**15:27 Asia/Jakarta**. No Shell, logs, Trigger Run, cleanup
+execution, or live probe by this agent. Stage B was **not** started.
+
+Both `docuflow-staging-cleanup` and `docuflow-cleanup` headers show
+`381b201` **Latest**, which includes PR
+[#97](https://github.com/mufea/docuflow-ai/pull/97) and PR
+[#98](https://github.com/mufea/docuflow-ai/pull/98). Staging last
+successful run **13 Nov 2026, 14:00 Asia/Jakarta** (before OA-3
+merge 14:08); later scheduled Runs failed. Production last
+successful run **10 Nov 2026, 16:30 Asia/Jakarta**; a Manual run
+~15:26 failed. Failure cause **NOT VERIFIED**.
+
+PHASE 10.4C-A8R DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+STAGING CLEANUP HEADER SHA: **VERIFIED** (OWNER-PROVIDED `381b201`).
+PRODUCTION CLEANUP HEADER SHA: **VERIFIED** (OWNER-PROVIDED `381b201`).
+STAGING / PRODUCTION CLEANUP DEPLOY TIMESTAMP: **NOT VERIFIED**.
+STAGING / PRODUCTION CLEANUP SUCCESSFUL OA-3 RUN: **NOT VERIFIED**.
 RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
 CONTROL-XWS: **NOT VERIFIED**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
