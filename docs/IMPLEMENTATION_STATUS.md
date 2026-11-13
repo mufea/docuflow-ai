@@ -3023,3 +3023,34 @@ PRODUCTION VERIFIED: **NOT VERIFIED**.
 PHASE 10.4C-B: **NOT AUTHORIZED**.
 Phase 10.4C-A2 project-membership update: see §16 of
 `docs/reports/PHASE_10_4C_A_RUNTIME_ISOLATION_ASSURANCE.md`.
+
+## Phase 10.4C-A2 — Cleanup R2 env and workspace IDs
+
+Documentation-only. Baseline `origin/main`
+**`361575467d638725bc23082a2302777a6d589ee8`** (PR
+[#91](https://github.com/mufea/docuflow-ai/pull/91) **MERGED**
+`2026-11-13T02:36:23Z` / **13 Nov 2026, 09:36 Asia/Jakarta**).
+Owner screenshots **13 Nov 2026, 09:59–10:03 Asia/Jakarta**.
+No application, Blueprint, env, database, or object mutation.
+Cleanup was not executed. Secret key and extra Access Key ID digits
+were not recorded. Stage B was **not** started.
+
+PHASE 10.4C-A2 CLEANUP R2 / WORKSPACE-ID UPDATE: **COMPLETE – UNMERGED**
+(this PR).
+PR [#91](https://github.com/mufea/docuflow-ai/pull/91): **MERGED**
+`361575467d638725bc23082a2302777a6d589ee8`.
+CLEANUP R2 LIVE ENV: **PASS** (**OWNER-PROVIDED** `docuflow-staging-cleanup`
+Shell; `S3_BUCKET=docuflowai-staging`; `STORAGE_BACKEND=s3`; Cloudflare
+R2 `S3_ENDPOINT_URL`; key consistent with `6c01…2307`). HeadBucket
+not repeated. Cleanup not executed.
+GAP 4 WORKSPACE EXCLUSIVITY: **PASS** (unchanged; additional
+OWNER-PROVIDED workspace IDs `tea-d84phnqa8673blqsn0` vs
+`tea-d9f6cddc9c73dqpab0`).
+GAP 4 PROJECT MEMBERSHIP: **PASS** (unchanged; 10:01 project
+`DocuflowAI` “All services are up and running”).
+CROSS-WORKSPACE ACCESS ISOLATION: **NOT VERIFIED** (same owner Admin
+on both Hobby workspaces; 2FA/SSO not enforced; no env groups).
+RUNTIME ISOLATION VERIFIED: **NO**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.

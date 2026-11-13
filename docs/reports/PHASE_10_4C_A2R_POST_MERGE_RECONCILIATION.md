@@ -93,7 +93,7 @@ Limitations of this screenshot:
 
 | Gap | Evidence | Classification | Outstanding limitation |
 | --- | --- | --- | --- |
-| 1 Cleanup DB identity | A1 labeled `docuflow-staging-cleanup` Shell (`docuflow_staging_db_ikpz` / `docuflow_staging_db_ikpz_user` / `10.26.149.13:5432`) | **PASS** OWNER-PROVIDED (unchanged) | Identity SQL not repeated after 09:10 rebuild. Cleanup R2 live env unread. Cleanup not executed |
+| 1 Cleanup DB identity | A1 labeled `docuflow-staging-cleanup` Shell (`docuflow_staging_db_ikpz` / `docuflow_staging_db_ikpz_user` / `10.26.149.13:5432`) | **PASS** OWNER-PROVIDED (unchanged) | Identity SQL not repeated after 09:10 rebuild. Cleanup R2 live env later **PASS** in isolation report §17. Cleanup not executed |
 | 2 API R2 endpoint + masked key | A1 `docuflow-staging-api` Shell: `S3_BUCKET=docuflowai-staging`, host `26d06bf0ca16ba951f1d19d5989e6663.r2.cloudflarestorage.com`, key masked `6c01…2307` | **PASS** OWNER-PROVIDED (unchanged) | Cleanup env unread. Production negative access not tested |
 | 3 Cloudflare token scope | A2 Cloudflare screenshot: token `docuflowai-staging`; read/write/list; bucket `docuflowai-staging` only | **PASS** OWNER-PROVIDED (unchanged) | Dashboard intent, not a Production-bucket negative probe |
 | 4 Workspace exclusivity | 08:53–08:54 two workspace names; 09:10 Staging All 4 has no Production names | **PASS** OWNER-PROVIDED (unchanged) | Chrome names, not independently verified workspace ids |
