@@ -3567,7 +3567,13 @@ Corrects stale Phase 10.4C-A11 **COMPLETE – UNMERGED**. Owner-gated
 OA-A11-LOGS remains unfilled. Merge of the plan is not execution
 evidence and is not Category A approval.
 
-PHASE 10.4C-A12 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A12 DOCUMENTATION: **MERGED** (PR
+[#105](https://github.com/mufea/docuflow-ai/pull/105);
+merge `c31aeb453d86c9a29346aa9538f8545634d9c3c7`,
+`2026-11-13T17:49:00+07:00` / **13 Nov 2026, 17:49 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not authorize log inspection,
+cleanup, Category A, or Stage B.
 PR [#105](https://github.com/mufea/docuflow-ai/pull/105) repository CI:
 **SUCCESS** [43411393282](https://github.com/mufea/docuflow-ai/actions/runs/43411393282)
 on `cc5c2e4` (Python `131838406613`, Web `131838406965`; completed
@@ -3585,3 +3591,38 @@ PHASE 10.4C-B: **NOT AUTHORIZED**.
 OA-5: **IN FORCE**.
 DEPLOY: **NOT AUTHORIZED**.
 LIVE CLEANUP: **NOT AUTHORIZED**.
+Phase 10.4C-A12 evidence ledger: see below.
+
+## Phase 10.4C-A12 — Owner evidence ledger and authorization readiness
+
+Documentation-only. Baseline `origin/main`
+**`c31aeb453d86c9a29346aa9538f8545634d9c3c7`**. Report:
+`docs/reports/PHASE_10_4C_A12_OWNER_EVIDENCE_LEDGER.md`.
+No application, Blueprint, env, database, storage, deploy, cleanup,
+log, Shell, or live probe. Stage B was **not** started.
+APPLICATION CODE CHANGES: **NONE**.
+
+Corrects stale Phase 10.4C-A12 **COMPLETE – UNMERGED** after PR
+[#105](https://github.com/mufea/docuflow-ai/pull/105). Records the
+owner action register. Does **not** fill OA-A11-LOGS, approve
+Category A, verify OA-3 execution, or authorize Phase 10.4C-B.
+
+PHASE 10.4C-A12 EVIDENCE LEDGER: **COMPLETE – UNMERGED** (this PR).
+PR [#106](https://github.com/mufea/docuflow-ai/pull/106) repository CI:
+**SUCCESS** [43413392721](https://github.com/mufea/docuflow-ai/actions/runs/43413392721)
+on `1f11f57` (Python `131845203657`, Web `131845203008`; completed
+**13 Nov 2026, 18:01 Asia/Jakarta**). Repository CI is not isolation
+and is not a deploy.
+OA-A11-LOGS: **UNFILLED**.
+CATEGORY A: **NOT APPROVED**.
+OA-3 EXECUTION: **NOT VERIFIED**.
+CONTROL-XWS: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C: **NOT COMPLETE**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+OA-5: **IN FORCE**.
+DEPLOY: **NOT AUTHORIZED**.
+LIVE CLEANUP: **NOT AUTHORIZED**.
+OWNER ACTIONS: **OPEN**.
