@@ -3178,6 +3178,10 @@ Cloudflare token inspection, or live probe was authorized or
 performed. Stage B was **not** started.
 
 PHASE 10.4C-A4 OA-1 RECORD: **COMPLETE – UNMERGED** (this PR).
+PR [#96](https://github.com/mufea/docuflow-ai/pull/96) repository CI:
+**SUCCESS** [43377234803](https://github.com/mufea/docuflow-ai/actions/runs/43377234803)
+(Python `131726469791`, Web `131726469400`; completed
+**13 Nov 2026, 13:15 Asia/Jakarta**). Repository CI is not isolation.
 OA-1: **PROVIDED** (Option A).
 CONTROL-XWS: **NOT VERIFIED** (accepted residual).
 G2 / live probes: **NOT AUTHORIZED**.
