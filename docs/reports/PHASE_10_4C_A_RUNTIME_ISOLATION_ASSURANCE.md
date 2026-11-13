@@ -5,7 +5,9 @@ A1 gap-closure update: **12 Nov 2026, 20:52 Asia/Jakarta (WIB)**
 (Gap 2) and **12 Nov 2026, 21:38 Asia/Jakarta (WIB)** (Gap 1 labeled
 cleanup Shell).
 A2 topology evidence update: **13 Nov 2026, 08:46 Asia/Jakarta (WIB)**
-(Gap 4 Render projects; Gap 3 Cloudflare token screenshot).
+(Gap 3 token; Gap 4 then **NOT MET** same workspace) and
+**13 Nov 2026, 08:53–08:54 Asia/Jakarta (WIB)** (Gap 4 separate
+workspaces **PASS**, OWNER-PROVIDED).
 No application-code change. No Blueprint sync. No deploy, migrate,
 cleanup, object write, or functional smoke. SR7 API identity SQL and
 HeadBucket were **not** repeated. Stage B is **NOT AUTHORIZED** and
@@ -149,13 +151,16 @@ the **template**. Live risk paths:
    read/write/list on bucket `docuflowai-staging` only (**PASS**,
    OWNER-PROVIDED dashboard intent). Production negative access was
    **not** tested.
-3. Staging and Production sharing a Render workspace. A2 owner
-   dashboard screenshots confirm both projects live in workspace
-   `docuflowai`. Separate **projects**: CONFIRMED. Separate
-   **workspaces**: NOT CONFIRMED. Workspace exclusivity: **NOT MET**.
-   Cross-project service, database, and secret restrictions remain
-   **NOT VERIFIED**. Shared membership is not itself a demonstrated
-   runtime breach. Unauthorized Production access was **not** observed.
+3. Staging and Production sharing a Render workspace. A2 08:46
+   owner inventory recorded both projects in workspace `docuflowai`
+   (**NOT MET** at that time; preserved in §14.1). A2 08:53–08:54
+   screenshots show Production in workspace `docuflowai` (project
+   `Docuflow AI`) and Staging in workspace `docuflowai staging`
+   (ungrouped services). Separate **workspaces**: CONFIRMED
+   (OWNER-PROVIDED). Workspace exclusivity: **PASS** (OWNER-PROVIDED).
+   Cross-workspace service, database, and secret restrictions remain
+   **NOT VERIFIED**. Unauthorized Production access was **not**
+   observed. Agent did not independently verify Render configuration.
 4. Cleanup cron using a drifted env that the API identity query did not
    observe. A1 labeled cleanup Shell matches API DB identity; cleanup
    R2 live env remains unread.
@@ -213,11 +218,15 @@ Blueprints declare separate service names. They do not encode Render
 workspace id. Private Postgres `ipAllowList: []` is private-network
 only.
 
-A2 owner Render dashboard screenshots (**13 Nov 2026, 08:46
-Asia/Jakarta**, OWNER-PROVIDED) show workspace `docuflowai` holding
-separate Production and Staging **projects**, both in Oregon, with
-distinct service inventories (see §14). Workspace exclusivity
-(dedicated staging workspace / SR6 A0): **NOT MET**. Cross-project
+A2 08:46 OWNER-PROVIDED inventory recorded both projects in
+workspace `docuflowai` (Gap 4 **NOT MET** at that time; §14.1).
+
+A2 08:53–08:54 OWNER-PROVIDED screenshots show two workspaces
+(§14.5): `docuflowai` (Production project `Docuflow AI`, All 6
+services, Oregon) and `docuflowai staging` (no project yet;
+ungrouped All 3 staging services, Oregon). Workspace exclusivity
+(dedicated staging workspace / SR6 A0): **PASS** (OWNER-PROVIDED).
+Staging All (3) lists no Production service names. Cross-workspace
 network and permission isolation: **NOT VERIFIED**. Agent did not
 open the Render dashboard and does not independently verify live
 Render configuration.
@@ -234,12 +243,17 @@ re-run):
   staging API Shell (names/host only).
 - A2 Cloudflare dashboard: R2 user token `docuflowai-staging` limited
   to bucket `docuflowai-staging` (read/write/list).
-- A2 Render project inventories in workspace `docuflowai` (Production
-  and Staging). Workspace exclusivity is **NOT MET**.
+- A2 08:46 Render inventories in shared workspace `docuflowai`
+  (historical; Gap 4 was **NOT MET**).
+- A2 08:53–08:54 screenshots of workspace `docuflowai` (Production)
+  and workspace `docuflowai staging` (Staging All 3). Gap 4 is
+  **PASS** (OWNER-PROVIDED).
 
 Still open without Production probes:
 
-- Cross-project service, database, and secret access restrictions.
+- Cross-workspace service, database, and secret access restrictions.
+- Current location of `docuflow-staging-cleanup` (not in Staging
+  All 3). A1 identity PASS is historical.
 - Cleanup live R2 env / HeadBucket.
 - Render resource id for the observed Postgres IP.
 
@@ -258,10 +272,10 @@ ambiguous, or would require a forbidden Production probe.
 | R2 credentials | Staging credential-to-bucket mapping | **PASS** API masked key present (`6c01…2307`). Exclusive Cloudflare scope: **PASS** OWNER-PROVIDED (token `docuflowai-staging`, bucket `docuflowai-staging` only). Production negative access: **NOT VERIFIED** | OWNER-PROVIDED API Shell (A1) + Cloudflare token screenshot (A2) |
 | R2 endpoint | Correct account and endpoint | **PASS** API host `26d06bf0ca16ba951f1d19d5989e6663.r2.cloudflarestorage.com` (Cloudflare R2) | OWNER-PROVIDED API Shell (A1); no second HeadBucket |
 | Environment configuration | No Production fallback | Template: **PASS** (no production `fromDatabase` / `fromService`). Live dashboard drift: **NOT VERIFIED**. Code default bucket `docuflow-documents` is a fallback **if** `S3_BUCKET` unset; live API name is owner-confirmed staging | REPOSITORY VERIFIED template; live partial |
-| Cleanup isolation | Staging-only target configuration | **PASS** for DB identity (same as API). Cleanup R2 env/HeadBucket: **NOT VERIFIED**. Template copies staging API S3 vars | OWNER-PROVIDED cleanup Shell DB; template S3 |
+| Cleanup isolation | Staging-only target configuration | **PASS** for DB identity at A1 (same as API). Cleanup R2 env/HeadBucket: **NOT VERIFIED**. A2 08:54 Staging All (3) does not list `docuflow-staging-cleanup` (current location **NOT VERIFIED**) | OWNER-PROVIDED cleanup Shell DB; later inventory gap |
 | Job processing | Correct broker and execution boundary | **PASS** as architecture for inline API jobs (same process as API). Historical `/ready` `broker=inline`. Not a second DB/bucket proof | REPOSITORY VERIFIED + historical INDEPENDENTLY VERIFIED `/ready` |
-| Service configuration | Staging resources mapped correctly | **PASS** for Blueprint names. Live API on `350v`. Live cleanup DB identity **PASS**. A2 inventories show distinct Production vs Staging project services. Cleanup bucket live: **NOT VERIFIED** | REPOSITORY VERIFIED + OWNER-PROVIDED Shells and dashboards |
-| Production separation | Evidence of prevented unintended access | **NOT VERIFIED**. Separate projects CONFIRMED. Shared workspace exclusivity **NOT MET**. Negative Production tests were not run and must not be run | OWNER-PROVIDED topology; limitation |
+| Service configuration | Staging resources mapped correctly | **PASS** for Blueprint names. Live API on `350v`. A2 08:54 Staging workspace lists api/db/web. Cleanup current service **NOT VERIFIED** in that list | REPOSITORY VERIFIED + OWNER-PROVIDED dashboards |
+| Production separation | Evidence of prevented unintended access | Workspace exclusivity **PASS** (OWNER-PROVIDED A2 08:53–08:54). Cross-workspace access **NOT VERIFIED**. Negative Production tests were not run and must not be run | OWNER-PROVIDED topology; limitation |
 
 `audit_staging_blueprint()` on current `infra/render.staging.yaml`:
 **PASS** (zero issues). That is configuration isolation of the
@@ -281,7 +295,7 @@ ambiguous, or would require a forbidden Production probe.
 | Cleanup runtime identity | **PASS** OWNER-PROVIDED A1 labeled `docuflow-staging-cleanup` Shell (**12 Nov 2026, 21:38 Asia/Jakarta**). Earlier unlabeled SQL remains historical |
 | API R2 endpoint host + masked Access Key ID | **OWNER-PROVIDED** A1 (`docuflow-staging-api` Shell) |
 | R2 token exclusive scope | **PASS** OWNER-PROVIDED A2 Cloudflare screenshot (token `docuflowai-staging`; read/write/list; bucket `docuflowai-staging` only). Token/secret values not recorded. Production negative access **NOT VERIFIED** |
-| Render workspace exclusivity | **NOT MET** OWNER-PROVIDED A2 (workspace `docuflowai` holds both Production and Staging projects). Separate projects CONFIRMED. Cross-project access **NOT VERIFIED** |
+| Render workspace exclusivity | **PASS** OWNER-PROVIDED A2 08:53–08:54 (Production workspace `docuflowai`; Staging workspace `docuflowai staging`; Staging All 3 has no Production names). 08:46 same-workspace record remains historical. Cross-workspace access **NOT VERIFIED** |
 
 This agent did **not** independently execute identity SQL or HeadBucket.
 
@@ -292,10 +306,11 @@ This agent did **not** independently execute identity SQL or HeadBucket.
 2. Staging R2 token dashboard scope is `docuflowai-staging` only
    (A2 OWNER-PROVIDED). Live Production-bucket access was not
    negatively tested.
-3. Staging and Production share Render workspace `docuflowai`
-   (A2 OWNER-PROVIDED). Separate projects CONFIRMED. Cross-project
-   access restrictions **NOT VERIFIED**. Shared membership is not a
-   demonstrated breach.
+3. Workspace exclusivity is **PASS** as of A2 08:53–08:54
+   (OWNER-PROVIDED separate workspaces). Cross-workspace access
+   restrictions remain **NOT VERIFIED**. `docuflow-staging-cleanup`
+   is not in Staging All (3); current cleanup location is
+   **NOT VERIFIED**. The 08:46 shared-workspace record is historical.
 4. Live env can drift from Blueprint without this repository noticing.
 5. No object-key prefix; a wrong bucket name selects a whole bucket.
 6. `is_production_bucket()` does not default-flag `docuflowai-documents`.
@@ -332,32 +347,32 @@ cross-environment paths are proven impossible.
 | CONFIGURATION ISOLATION (template) | **PASS** |
 | RUNTIME DATABASE ISOLATION | **PASS** API and cleanup (**OWNER-PROVIDED** A1). Cleanup R2 live env **NOT VERIFIED** |
 | RUNTIME STORAGE ISOLATION | **PASS** API HeadBucket access (**OWNER-PROVIDED**). Exclusive token dashboard scope **PASS** (OWNER-PROVIDED A2). Production negative access **NOT VERIFIED** |
-| WORKSPACE EXCLUSIVITY | **NOT MET** (OWNER-PROVIDED A2; shared workspace `docuflowai`) |
-| CROSS-PROJECT ACCESS ISOLATION | **NOT VERIFIED** |
+| WORKSPACE EXCLUSIVITY | **PASS** (OWNER-PROVIDED A2 08:53–08:54; workspaces `docuflowai` and `docuflowai staging`) |
+| CROSS-WORKSPACE ACCESS ISOLATION | **NOT VERIFIED** |
 | RUNTIME ISOLATION VERIFIED | **NO** — overall **NOT VERIFIED** |
 | FUNCTIONAL STAGING VERIFIED | **NO** — Stage B **NOT AUTHORIZED** / **NOT EXECUTED** |
 | PRODUCTION VERIFIED | **NO** |
 
 Stage A does **not** authorize Stage B.
 
-Critical remaining dimensions: workspace exclusivity **NOT MET**,
-cross-project access **NOT VERIFIED**, cleanup R2 live env, database
-Render resource mapping, and prevented Production access. Stage B
-preconditions require either those items to become PASS or
-**explicit owner acceptance** of each remaining limitation.
+Critical remaining dimensions: cross-workspace access **NOT VERIFIED**,
+current cleanup service location (not in Staging All 3), cleanup R2
+live env, database Render resource mapping, and prevented Production
+access. Stage B preconditions require either those items to become
+PASS or **explicit owner acceptance** of each remaining limitation.
 
 ## 10. Recommended next actions
 
 Owner decision only (do not auto-start Stage B):
 
-1. Review this report, including A2 topology (**NOT MET** workspace
-   exclusivity) and Gap 3 token scope (**PASS**, OWNER-PROVIDED).
-2. Remaining read-only options: cross-project permission evidence, or
-   written acceptance of a shared Render workspace. Cleanup live R2
-   env is still unread. Do not probe Production. Do not run cleanup.
-3. If remaining **NOT VERIFIED** / **NOT MET** items are accepted in
-   writing, issue a **separate** Stage B authorization that names the
-   exact tests.
+1. Review this report, including A2 Gap 4 workspace exclusivity
+   (**PASS**, OWNER-PROVIDED separate workspaces) and Gap 3 token
+   scope (**PASS**, OWNER-PROVIDED).
+2. Remaining read-only options: confirm where `docuflow-staging-cleanup`
+   now lives; cleanup live R2 env; optional cross-workspace permission
+   evidence. Do not probe Production. Do not run cleanup.
+3. If remaining **NOT VERIFIED** items are accepted in writing, issue a
+   **separate** Stage B authorization that names the exact tests.
 4. Until that authorization exists, functional smoke remains
    **NOT AUTHORIZED**. Phase 10.4C-B / Stage B is **NOT AUTHORIZED**.
 
@@ -468,10 +483,10 @@ Different names do not prove the workspace contains no
 `docuflow-api` / `docuflow-db`. Workspace name `docuflowai` is not
 itself a dedicated-staging proof.
 
-A2 (**13 Nov 2026, 08:46 Asia/Jakarta**): **NOT MET**
-(OWNER-PROVIDED). Production and Staging are separate projects in
-the **same** workspace `docuflowai`. See §14.1. A1 classification is
-preserved as historical.
+A2 08:46: **NOT MET** (OWNER-PROVIDED same workspace `docuflowai`;
+§14.1). A2 08:53–08:54: **PASS** (OWNER-PROVIDED separate workspaces
+`docuflowai` and `docuflowai staging`; §14.5). A1 **NOT VERIFIED**
+and A2 08:46 **NOT MET** are preserved as historical.
 
 ### 13.5 A1 / A2 risk reassessment
 
@@ -479,7 +494,7 @@ preserved as historical.
 | --- | --- | --- |
 | 1 | Cleanup may use a different DB/bucket than the API | DB **closed** at A1 (same identity as API). Cleanup bucket live: still unread |
 | 2 | Staging R2 token may reach `docuflowai-documents` | Dashboard scope **PASS** (OWNER-PROVIDED A2). Production negative probe **not** run |
-| 3 | Shared Render workspace | Exclusivity **NOT MET** (shared `docuflowai`). Cross-project access **NOT VERIFIED** |
+| 3 | Shared Render workspace | Exclusivity **PASS** as of 08:53–08:54 (workspaces `docuflowai` vs `docuflowai staging`). 08:46 **NOT MET** is historical. Cross-workspace access **NOT VERIFIED**. Cleanup not in Staging All 3 |
 | 4 | Unset `S3_BUCKET` defaults to `docuflow-documents` | **Source risk**. Live API bucket reconfirmed staging |
 | 5 | `is_production_bucket()` omits `docuflowai-documents` | **Source risk** — no code change |
 | 6 | Cleanup CLI has no API fail-fast | **Source risk** — no code change |
@@ -506,13 +521,19 @@ not probe Production.
 
 ## 14. Phase 10.4C-A2 — Render project topology evidence
 
-Time: **13 Nov 2026, 08:46 Asia/Jakarta (WIB)**. Evidence class:
-**OWNER-PROVIDED** screenshots. Agent did not open Render or
-Cloudflare dashboards. No Production probe. No application or
-infrastructure change. Token values, secret keys, and DSNs are
-**not** recorded.
+Time: **13 Nov 2026, 08:46 Asia/Jakarta (WIB)** (token + same-workspace
+inventory) and **13 Nov 2026, 08:53–08:54 Asia/Jakarta (WIB)**
+(separate-workspace screenshots). Evidence class: **OWNER-PROVIDED**
+screenshots. Agent did not open Render or Cloudflare dashboards. No
+Production probe. No application or infrastructure change. Token
+values, secret keys, and DSNs are **not** recorded.
 
-### 14.1 Render workspace and project inventories
+### 14.1 Render workspace and project inventories (08:46, historical)
+
+Owner-described topology at **13 Nov 2026, 08:46 Asia/Jakarta**.
+Current Gap 4 uses §14.5, not this inventory. This subsection is
+preserved so the earlier same-workspace **NOT MET** is not silently
+overwritten.
 
 | Field | Owner-provided observation |
 | --- | --- |
@@ -542,12 +563,12 @@ Staging project (workspace `docuflowai`):
 | `docuflow-staging-db` | Available |
 | `docuflow-staging-cleanup` | Successful run |
 
-Record:
+Record (08:46 snapshot only):
 
 - Production and Staging are separate projects.
 - Both projects share workspace `docuflowai`.
 - Production and Staging service inventories are visibly distinct.
-- Workspace exclusivity is **NOT MET**.
+- Workspace exclusivity is **NOT MET** at 08:46.
 - Cross-project resource isolation remains **NOT VERIFIED**.
 - No Production probes were performed.
 - No application or infrastructure changes were performed.
@@ -590,27 +611,91 @@ staging token is restricted to `docuflowai-staging`. Production
 negative-access testing was **not** performed and must not be
 performed. A1 Gap 3 remains historically **NOT VERIFIED**.
 
-### 14.3 Gap 4 reassessment — **NOT MET** (OWNER-PROVIDED)
+### 14.3 Gap 4 reassessment — 08:46 **NOT MET** (historical)
 
-A1 Gap 4 was **NOT VERIFIED** (incomplete service list). A2 owner
-inventories show Production services (`docuflow-api`, `docuflow-web`,
-`docuflow-db`, plus suspended `docuflow-cleanup` / `docuflow-redis` /
-`docuflow-worker`) and Staging services in one workspace.
+A1 Gap 4 was **NOT VERIFIED** (incomplete service list). A2 08:46
+owner inventory showed Production and Staging in one workspace
+`docuflowai`. Classification at that time: **NOT MET**. Current
+classification is §14.5.
 
-Classification: **NOT MET** — workspace exclusivity (dedicated
-staging workspace) is not met. This is not a FAIL of runtime
-database or R2 identity. Cross-project access isolation stays
-**NOT VERIFIED**.
+### 14.4 A2 decision (08:46 snapshot, historical)
 
-### 14.4 A2 decision
+08:46 table. Current labels are in §14.5.
 
-| Label | Result |
+| Label | 08:46 result |
 | --- | --- |
 | Gap 1 cleanup DB identity | **PASS** (A1 OWNER-PROVIDED; unchanged) |
 | Gap 2 API R2 endpoint + masked key | **PASS** (A1 OWNER-PROVIDED; unchanged) |
 | Gap 3 Cloudflare token scope | **PASS** (OWNER-PROVIDED A2) |
-| Gap 4 workspace exclusivity | **NOT MET** (OWNER-PROVIDED A2) |
+| Gap 4 workspace exclusivity | **NOT MET** at 08:46 |
 | Cross-project access isolation | **NOT VERIFIED** |
+| RUNTIME ISOLATION VERIFIED | **NO** — overall **NOT VERIFIED** |
+| FUNCTIONAL STAGING VERIFIED | **NO** — Stage B **NOT AUTHORIZED** |
+| PRODUCTION VERIFIED | **NO** |
+| Phase 10.4C-B | **NOT AUTHORIZED** |
+
+### 14.5 Separate-workspace screenshots — Gap 4 **PASS** (OWNER-PROVIDED)
+
+Time: **13 Nov 2026, 08:53–08:54 Asia/Jakarta**. Evidence class:
+**OWNER-PROVIDED** Render dashboard screenshots. Agent did not open
+Render. No Production probe. No application or infrastructure change.
+
+Owner statement: Production and Staging are now in different
+workspaces.
+
+Production screenshot (phone clock **8:53 AM**; workspace chrome
+`docuflowai`; project `Docuflow AI`; environment Production;
+All 6 / Services 6):
+
+| Service | Owner-provided status |
+| --- | --- |
+| `docuflow-api` | Deployed; Python 3; oregon |
+| `docuflow-cleanup` | Suspended by you; Python 3; oregon |
+| `docuflow-db` | Available; PostgreSQL 16; oregon |
+| `docuflow-redis` | Suspended by you; runtime shown Valley 8; oregon |
+| `docuflow-web` | Deployed; Node; oregon |
+| `docuflow-worker` | Suspended by you; Python 3; oregon |
+
+No staging-named services appear in this Production All 6 list.
+
+Staging screenshot (workspace chrome `docuflowai staging`; Projects
+empty / “Create your first project”; Ungrouped Services Active 3,
+Suspended 0, **All 3**):
+
+| Service | Owner-provided status |
+| --- | --- |
+| `docuflow-staging-api` | Deployed; Python 3; oregon |
+| `docuflow-staging-db` | Available; PostgreSQL 16; oregon |
+| `docuflow-staging-web` | Deployed; Node; oregon |
+
+No Production-named services appear in this Staging All 3 list.
+`docuflow-staging-cleanup` is **not** in the All 3 list. A1 labeled
+cleanup Shell identity remains historical **PASS**. Current cleanup
+service location is **NOT VERIFIED**. This is not treated as proof
+that cleanup was deleted.
+
+| Claim | Result |
+| --- | --- |
+| Separate workspaces | CONFIRMED (OWNER-PROVIDED): `docuflowai` vs `docuflowai staging` |
+| Staging workspace contains Production services | Not listed in All 3 |
+| Dedicated staging workspace / Gap 4 | **PASS** (OWNER-PROVIDED) |
+| Independent verification of Render configuration | **NOT** claimed |
+| Cross-workspace access restrictions | **NOT VERIFIED** |
+| Staging ability to access Production resources | **NOT VERIFIED** |
+| Actual unauthorized Production access | **NOT OBSERVED** |
+
+Separate workspaces are **not** complete runtime isolation. Overall
+runtime isolation remains **NOT VERIFIED**.
+
+Current A2 decision:
+
+| Label | Result |
+| --- | --- |
+| Gap 1 cleanup DB identity | **PASS** (A1 OWNER-PROVIDED; unchanged). Current cleanup service location **NOT VERIFIED** |
+| Gap 2 API R2 endpoint + masked key | **PASS** (A1 OWNER-PROVIDED; unchanged) |
+| Gap 3 Cloudflare token scope | **PASS** (OWNER-PROVIDED A2; unchanged) |
+| Gap 4 workspace exclusivity | **PASS** (OWNER-PROVIDED A2 08:53–08:54) |
+| Cross-workspace access isolation | **NOT VERIFIED** |
 | RUNTIME ISOLATION VERIFIED | **NO** — overall **NOT VERIFIED** |
 | FUNCTIONAL STAGING VERIFIED | **NO** — Stage B **NOT AUTHORIZED** |
 | PRODUCTION VERIFIED | **NO** |

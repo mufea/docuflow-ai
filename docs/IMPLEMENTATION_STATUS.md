@@ -2924,9 +2924,9 @@ GAP 3 CLOUDFLARE TOKEN SCOPE: **PASS** (**OWNER-PROVIDED** A2;
 token `docuflowai-staging`; read/write/list; bucket
 `docuflowai-staging` only). A1-time classification was
 **NOT VERIFIED**. Production negative access: **NOT VERIFIED**.
-GAP 4 WORKSPACE EXCLUSIVITY: **NOT MET** (**OWNER-PROVIDED** A2;
-workspace `docuflowai` holds Production and Staging projects).
-A1-time classification was **NOT VERIFIED**.
+GAP 4 WORKSPACE EXCLUSIVITY: **PASS** (**OWNER-PROVIDED** A2
+08:53–08:54; workspaces `docuflowai` vs `docuflowai staging`).
+A1-time **NOT VERIFIED** and A2 08:46 **NOT MET** are historical.
 RUNTIME ISOLATION VERIFIED: **NO**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
@@ -2939,20 +2939,25 @@ Documentation-only. Baseline `origin/main`
 `docs/reports/PHASE_10_4C_A_RUNTIME_ISOLATION_ASSURANCE.md` §14
 and related §4–10 / §13 notes. No new assessment report.
 
-Owner screenshots **13 Nov 2026, 08:46 Asia/Jakarta**: Render
-Production and Staging project inventories in workspace
-`docuflowai`, plus Cloudflare R2 token `docuflowai-staging` scoped
-to bucket `docuflowai-staging`. No application code, Blueprint, env,
-database, or object mutation. No Production probe. Token values and
-secret keys were not recorded. Stage B was **not** started.
+Owner screenshots **13 Nov 2026, 08:46 Asia/Jakarta**: Cloudflare R2
+token `docuflowai-staging` scoped to bucket `docuflowai-staging`,
+plus a same-workspace inventory later superseded. Further owner
+screenshots **13 Nov 2026, 08:53–08:54 Asia/Jakarta**: Production
+workspace `docuflowai` (project `Docuflow AI`, All 6) and Staging
+workspace `docuflowai staging` (ungrouped All 3). No application
+code, Blueprint, env, database, or object mutation. No Production
+probe. Token values and secret keys were not recorded. Stage B was
+**not** started.
 
-PHASE 10.4C-A2 DOCUMENTATION: **COMPLETE – UNMERGED** (no PR;
-PR creation **NOT AUTHORIZED** this pass).
-GAP 1 CLEANUP DB IDENTITY: **PASS** (unchanged).
+PHASE 10.4C-A2 DOCUMENTATION: **COMPLETE – UNMERGED**.
+GAP 1 CLEANUP DB IDENTITY: **PASS** (A1 unchanged). Current cleanup
+service location: **NOT VERIFIED** (not in Staging All 3).
 GAP 2 API R2 ENDPOINT + MASKED KEY: **PASS** (unchanged).
-GAP 3 CLOUDFLARE TOKEN SCOPE: **PASS** (**OWNER-PROVIDED**).
-GAP 4 WORKSPACE EXCLUSIVITY: **NOT MET** (**OWNER-PROVIDED**).
-CROSS-PROJECT ACCESS ISOLATION: **NOT VERIFIED**.
+GAP 3 CLOUDFLARE TOKEN SCOPE: **PASS** (**OWNER-PROVIDED**; unchanged).
+GAP 4 WORKSPACE EXCLUSIVITY: **PASS** (**OWNER-PROVIDED** 08:53–08:54;
+workspaces `docuflowai` vs `docuflowai staging`). 08:46
+**NOT MET** is historical.
+CROSS-WORKSPACE ACCESS ISOLATION: **NOT VERIFIED**.
 RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
