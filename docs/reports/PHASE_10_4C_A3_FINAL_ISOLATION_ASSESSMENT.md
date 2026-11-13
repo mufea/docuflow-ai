@@ -52,6 +52,7 @@ Verified this pass (`git fetch origin main`;
 | Commit date | `2026-11-13 10:31:10 +0700` / **13 Nov 2026, 10:31 Asia/Jakarta** |
 | Open PRs at start | none targeting `main` |
 | `main` CI after #93 | [43359503777](https://github.com/mufea/docuflow-ai/actions/runs/43359503777) **SUCCESS** — repository CI, **not** runtime isolation |
+| PR [#94](https://github.com/mufea/docuflow-ai/pull/94) CI | [43361630872](https://github.com/mufea/docuflow-ai/actions/runs/43361630872) **SUCCESS** (Python `131676255789`, Web `131676255941`; completed **13 Nov 2026, 10:52 Asia/Jakarta**) — repository CI, **not** runtime isolation |
 | Auditor | Cursor Agent (this workspace) |
 | Authorized owner | EDY ALAMSAH (**owner-reported**) |
 | Working tree at start | clean at `origin/main` |
@@ -282,6 +283,7 @@ Allowed local / repository checks only:
 | `git fetch origin main` + ancestor of `e62962b` | exact match |
 | Open PRs targeting `main` | none at assessment start |
 | `main` CI after PR #93 | SUCCESS (repository CI) |
+| PR #94 CI [43361630872](https://github.com/mufea/docuflow-ai/actions/runs/43361630872) | SUCCESS (Python + Web; not isolation) |
 | `is_production_bucket` local invocations | Risk A FAIL reproduced |
 | `audit_staging_blueprint(infra/render.staging.yaml)` | 0 errors, 0 warnings (template only) |
 | Read-only inspection of cleanup / storage / db / config | Risk B FAIL; C/D PARTIALLY VERIFIED |
