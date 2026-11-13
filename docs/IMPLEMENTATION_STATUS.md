@@ -2951,13 +2951,24 @@ Blueprint, env, database, or object mutation. No Production probe.
 Cleanup was not executed. Token values and secret keys were not
 recorded. Stage B was **not** started.
 
-PHASE 10.4C-A2 DOCUMENTATION: **COMPLETE – UNMERGED** (PR
-[#89](https://github.com/mufea/docuflow-ai/pull/89)).
-PR [#89](https://github.com/mufea/docuflow-ai/pull/89) repository CI
-on `0a17661`: **SUCCESS**
+PHASE 10.4C-A2 DOCUMENTATION: **MERGED** (PR
+[#89](https://github.com/mufea/docuflow-ai/pull/89);
+merge `3e807db52939a21a02ca4c2cd09c99bf295b44ea`,
+`2026-11-13T02:15:24Z` / **13 Nov 2026, 09:15 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not change runtime classifications
+and does **not** authorize Stage B.
+PR [#89](https://github.com/mufea/docuflow-ai/pull/89) last head CI
+on `8f75e95bc358e3b23848ec32f74b75b6807dddda`: **SUCCESS**
+[43350648569](https://github.com/mufea/docuflow-ai/actions/runs/43350648569)
+(Python `131640613986`, Web `131640614262`).
+Earlier head `0a17661` CI **SUCCESS**
 [43348503917](https://github.com/mufea/docuflow-ai/actions/runs/43348503917)
-(completed **13 Nov 2026, 08:58 Asia/Jakarta**). Repository CI is
-not isolation.
+(**13 Nov 2026, 08:58 Asia/Jakarta**).
+`main` push CI after PR [#89](https://github.com/mufea/docuflow-ai/pull/89):
+**SUCCESS** [43350850093](https://github.com/mufea/docuflow-ai/actions/runs/43350850093)
+(Python `131641266729`, Web `131641267229`; completed
+**13 Nov 2026, 09:17 Asia/Jakarta**). Repository CI is not isolation.
 GAP 1 CLEANUP DB IDENTITY: **PASS** (A1 unchanged).
 STAGING CLEANUP SERVICE LOCATION: **PASS** (**OWNER-PROVIDED** 09:10
 All 4). 08:54 All 3 omission is historical. Successful build is not
@@ -2966,6 +2977,37 @@ GAP 2 API R2 ENDPOINT + MASKED KEY: **PASS** (unchanged).
 GAP 3 CLOUDFLARE TOKEN SCOPE: **PASS** (**OWNER-PROVIDED**; unchanged).
 GAP 4 WORKSPACE EXCLUSIVITY: **PASS** (**OWNER-PROVIDED** 08:53–08:54;
 reconfirmed 09:10 All 4). 08:46 **NOT MET** is historical.
+GAP 4 PROJECT MEMBERSHIP: **NOT VERIFIED** (09:10 project `staging`
+has no active services; inventory is ungrouped).
+GAP 4 AS COMPLETE ISOLATION CONTROL: **PARTIALLY VERIFIED**.
+CROSS-WORKSPACE ACCESS ISOLATION: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+Phase 10.4C-A2R: see below.
+
+## Phase 10.4C-A2R — Post-merge documentation reconciliation
+
+Documentation-only. Baseline `origin/main`
+**`3e807db52939a21a02ca4c2cd09c99bf295b44ea`**. Report:
+`docs/reports/PHASE_10_4C_A2R_POST_MERGE_RECONCILIATION.md`.
+
+Corrects stale Phase 10.4C-A2 **COMPLETE – UNMERGED** after PR
+[#89](https://github.com/mufea/docuflow-ai/pull/89). Records
+project-membership and cross-workspace limits. No application code,
+Blueprint, env, database, or object mutation. No Production probe.
+Stage B was **not** started.
+
+PHASE 10.4C-A2R DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A2 DOCUMENTATION: **MERGED** (PR
+[#89](https://github.com/mufea/docuflow-ai/pull/89), `3e807db`).
+GAP 1 CLEANUP DB IDENTITY: **PASS** (unchanged).
+GAP 2 API R2 ENDPOINT + MASKED KEY: **PASS** (unchanged).
+GAP 3 CLOUDFLARE TOKEN SCOPE: **PASS** (unchanged).
+GAP 4 WORKSPACE EXCLUSIVITY: **PASS** (**OWNER-PROVIDED**; unchanged).
+GAP 4 PROJECT MEMBERSHIP: **NOT VERIFIED**.
+GAP 4 AS COMPLETE ISOLATION CONTROL: **PARTIALLY VERIFIED**.
 CROSS-WORKSPACE ACCESS ISOLATION: **NOT VERIFIED**.
 RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
