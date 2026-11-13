@@ -32,7 +32,8 @@ PRODUCTION_SERVICE_NAMES = {
     "docuflow-worker",
 }
 STAGING_FORBIDDEN_SERVICE_NAMES = PRODUCTION_SERVICE_NAMES | {"docuflow-staging-redis"}
-DEFAULT_PRODUCTION_BUCKETS = {"docuflow-documents"}
+# Legacy Settings default plus the owner-recorded live Production bucket.
+DEFAULT_PRODUCTION_BUCKETS = {"docuflow-documents", "docuflowai-documents"}
 PRODUCTION_PUBLIC_HOSTS = {"docuflow-api", "docuflow-web"}
 PRODUCTION_PUBLIC_CUSTOM_DOMAINS = (
     "docuflowai.site",

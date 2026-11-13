@@ -283,7 +283,7 @@ DSNs, or unmasked credentials.
 | --- | --- | --- | --- | --- | --- | --- |
 | OA-0 | Optional: confirm workspace IDs unchanged | Detect topology drift | Settings screenshot showing IDs only | Env, DNS, membership | PENDING (optional; current IDs already recorded) | G0/G1 |
 | OA-1 | Written choice: (a) accept CONTROL-XWS as **NOT VERIFIED**, or (b) complementary Production token bucket-name screenshot proving it does not list `docuflowai-staging` | Overall isolation cannot become PASS while CONTROL-XWS is open unless owner accepts the residual | Dated written statement in chat/PR, **or** Cloudflare permission UI with token value hidden | Tokens, keys, buckets, Render env | **PROVIDED** — Option A; see §10 | G1 |
-| OA-2 | Authorize or decline a **separate** source PR to default-flag `docuflowai-documents` | RISK-A remains **FAIL** | “APPROVE OA-2” or “DECLINE OA-2” in writing | Live env; no deploy from the code PR until separately approved | **PENDING** | G3 |
+| OA-2 | Authorize or decline a **separate** source PR to default-flag `docuflowai-documents` | RISK-A default helper omitted the live Production bucket name | “APPROVE OA-2” or “DECLINE OA-2” in writing | Live env; no deploy from the code PR until separately approved | **PROVIDED** — APPROVE; see §11 | G3 |
 | OA-3 | Authorize or decline a **separate** source PR for cleanup fail-fast / bucket reject / dry-run | RISK-B remains **FAIL** | “APPROVE OA-3” or “DECLINE OA-3” | No live cleanup; no Production bucket | **PENDING** | G4 |
 | OA-4 | Optional: Production dashboard name-only reconfirm of Postgres database **name** and `S3_BUCKET` **name** | Strengthens RISK-C/D name distinctness without connecting | Cropped service Info / env **name** rows; no DSN, no secret | Databases, objects, cleanup | PENDING (optional) | identity only |
 | OA-5 | Standing prohibition: no live probes, Shell, SQL, HeadBucket, cleanup, deploy, or secret paste unless a later message names the exact action and says APPROVE | Prevent implied authorization | Do nothing | All live resources | **PENDING** (in force as prohibition) | all live gates |
@@ -298,8 +298,10 @@ following are true:
    supply complementary token-scope evidence). **Recorded 13 Nov
    2026, 13:12 Asia/Jakarta: Option A. See §10.**
 2. Owner has recorded OA-2 and OA-3 as APPROVE or DECLINE.
-   Decline leaves RISK-A / RISK-B as documented source **FAIL**s;
-   that is allowed, but must be explicit.
+   **OA-2 APPROVE recorded 13 Nov 2026, 13:50 Asia/Jakarta; see
+   §11.** OA-3 remains **PENDING**. Decline of OA-3 would leave
+   RISK-B as a documented source **FAIL**; that is allowed, but
+   must be explicit.
 3. Owner sends a separate message that names Phase 10.4C-B and
    the exact Staging tests permitted.
 4. Those tests remain Staging-only: no Production HTTP, Shell,
@@ -364,6 +366,56 @@ Phase 10.4C-B.
 | Phase 10.4C | **NOT COMPLETE** |
 
 Safety declaration for this recording:
+
+- No Production probes were performed.
+- No Production or Staging Shell commands were executed.
+- No live database connections were made.
+- No cleanup operation was executed.
+- No storage objects were read, written, or deleted.
+- No migrations were executed.
+- No restore or export operations were performed.
+- No credentials or DSNs were exposed.
+- No infrastructure or application configuration was changed.
+- No deployment was performed.
+- Phase 10.4C-B was not authorized or executed.
+
+## 11. OA-2 source fix — Production bucket helper
+
+Time: **13 Nov 2026, 13:50 Asia/Jakarta (WIB)**. Owner EDY ALAMSAH
+authorized OA-2. Source and unit tests only. No live env, Render
+change, deploy, or probe.
+
+Change: `DEFAULT_PRODUCTION_BUCKETS` now includes both the legacy
+Settings default `docuflow-documents` and the owner-recorded live
+Production bucket `docuflowai-documents`. `is_production_bucket()`
+and `is_forbidden_live_test_bucket()` therefore default-flag the
+live Production name. Call sites remain confined to
+`staging_checks.py` (preflight / `validate_staging_configuration`).
+Cleanup CLI still does **not** call this helper (Risk B / OA-3).
+
+Preserved: empty-name `False`; case normalization; optional
+`production_bucket` kwarg; Staging names `docuflow-staging` and
+`docuflowai-staging` remain non-production.
+
+Local tests (SQLite `DATABASE_URL`; no live resources):
+`test_production_resource_reuse_is_detected`,
+`test_staging_config_rejects_production_reuse_and_rq`, and
+`test_phase910_provisioning.py` — **7 passed**.
+
+| Label | Result |
+| --- | --- |
+| OA-2 | **PROVIDED** (APPROVE; this source PR) |
+| RISK-A default helper | **PASS** (repository; unit tests) |
+| RISK-B cleanup CLI | **FAIL** (unchanged; OA-3 **PENDING**) |
+| Overall runtime isolation | **NOT VERIFIED** |
+| Phase 10.4C-B | **NOT AUTHORIZED** |
+| Deploy of this helper | **NOT AUTHORIZED** by this PR |
+
+A3 historical **FAIL** at SHA `e62962b` / `d61ea1a` is preserved.
+This section records the later source closure of the default
+identifier only.
+
+Safety declaration for OA-2 implementation:
 
 - No Production probes were performed.
 - No Production or Staging Shell commands were executed.
