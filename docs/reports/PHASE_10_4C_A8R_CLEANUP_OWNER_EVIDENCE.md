@@ -50,6 +50,12 @@ classified cleanup SHAs as **NOT VERIFIED** because GitHub
 Deployments has **no** cleanup records. That GitHub gap remains.
 This pass adds **OWNER-PROVIDED** header SHAs only.
 
+PR [#102](https://github.com/mufea/docuflow-ai/pull/102) repository
+CI: **SUCCESS**
+[43393620601](https://github.com/mufea/docuflow-ai/actions/runs/43393620601)
+(Python `131779188696`, Web `131779188984`; **13 Nov 2026, 15:31
+Asia/Jakarta**). Repository CI is not isolation and is not a deploy.
+
 ## 3. Evidence class
 
 | Item | Class |
