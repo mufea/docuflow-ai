@@ -243,3 +243,18 @@ Owner-provided success tokens recorded in
 | OA-A12-XWS | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
 | OA-A12-ISO | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
 | OA-6 | **NOT AUTHORIZED** | **NOT AUTHORIZED** | Unchanged |
+
+## 10. Post-A17 amendment (14 Nov 2026, 06:39 Asia/Jakarta)
+
+Owner A17 prompt recorded in
+`docs/reports/PHASE_10_4C_A17_OA11_LOGS_CLOSURE.md`. A16 file is
+**not** on `main`.
+
+| ID | After attribution | After A17 | Note |
+| --- | --- | --- | --- |
+| OA-A12-CAT-A | **APPROVED** | **APPROVED** | Unchanged |
+| OA-A11-LOGS | **PARTIALLY VERIFIED** | **PARTIALLY VERIFIED** | Manual vs Scheduled split; not closed |
+| OA-A12-OA3 | **NOT VERIFIED** | **NOT VERIFIED** | Run-specific SHA still missing |
+| OA-A12-XWS | **NOT VERIFIED** | **NOT VERIFIED** | Cron success is not isolation |
+| OA-A12-ISO | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
+| OA-6 | **NOT AUTHORIZED** | **NOT AUTHORIZED** | Unchanged |
