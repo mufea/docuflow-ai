@@ -46,8 +46,9 @@ agent conversation at **13 Nov 2026, 20:20 Asia/Jakarta**.
 | --- | --- | --- |
 | Decision | **APPROVED — READ-ONLY RENDER CRON LOG INSPECTION ONLY** | **APPROVED** |
 | Owner / Approver | EDY ALAMSAH | **ACCURATE** |
-| Written date | `13 Nov 2027, 20:20` | **RECORDED AS WRITTEN** (year disagrees with conversation clock) |
-| Conversation timestamp | **13 Nov 2026, 20:20 Asia/Jakarta** | Contemporaneous delivery |
+| Written date (first message) | `13 Nov 2027, 20:20` | **SUPERSEDED** (year disagreed with conversation clock) |
+| Written date (re-confirmation) | `13 Nov 2026, 20:20` | **AUTHORITATIVE** |
+| Conversation timestamps | **13 Nov 2026, 20:20** then **20:30 Asia/Jakarta** | Contemporaneous delivery |
 | Signature | `Confirmed` | Attributable written confirmation |
 | Scope | Read-only Render cron log inspection for OA-A11-LOGS evidence collection only | **ACCURATE** |
 | OA-6 / Phase 10.4C-B | Explicitly **not** granted | **ACCURATE** |
@@ -55,9 +56,11 @@ agent conversation at **13 Nov 2026, 20:20 Asia/Jakarta**.
 | Exactly one target service | **NOT CHECKED** | **INCOMPLETE** vs A11 §7 |
 | Window Start / End | Not named beyond “relevant OA-3 execution window” | **INCOMPLETE** vs A11 §7 |
 
-The 2027 year is recorded verbatim. It is treated as a typographical
-disagreement with the conversation clock (**13 Nov 2026, 20:20
-Asia/Jakarta**), not as a future-dated grant and not as an expiry.
+The first owner-written year **2027** is retained as a historical
+verbatim record. The owner re-sent the same approval at **13 Nov
+2026, 20:30 Asia/Jakarta** with written date **13 Nov 2026, 20:20**.
+That later message is the authoritative written date. It is not a
+new grant, not Category B, and not OA-6.
 
 Without an owner-supplied expiry, this Category A window is **not**
 an open-ended live-access grant. It covers this inspection attempt
@@ -97,8 +100,8 @@ OA-A11-LOGS — Category A read-only log inspection
 Status: APPROVED (authorization) / LOG ARTIFACTS UNFILLED
 
 Approver: EDY ALAMSAH
-Date (Asia/Jakarta): written 13 Nov 2027, 20:20;
-  conversation clock 13 Nov 2026, 20:20
+Date (Asia/Jakarta): 13 Nov 2026, 20:20
+  (re-confirmed 13 Nov 2026, 20:30; first write 13 Nov 2027 superseded)
 Expires at (Asia/Jakarta): NOT PROVIDED
   (attempt bounded to this Category A collection)
 
@@ -142,7 +145,7 @@ This agent environment:
 
 | Check | Result |
 | --- | --- |
-| `RENDER_API_KEY` | **UNSET** |
+| `RENDER_API_KEY` | **UNSET** (20:25 and 20:30 re-check) |
 | `RENDER_TOKEN` / `RENDER_API_TOKEN` | **UNSET** |
 | Render CLI (`render`) | **absent** |
 | Dashboard session | **none** |
@@ -150,7 +153,8 @@ This agent environment:
 | Fabricated log lines | **none** |
 
 No Render Logs tab was opened. No log line was copied. No secret
-was requested or printed.
+was requested or printed. The 20:30 re-confirmation did not add
+credentials or redacted log lines.
 
 This is an **access gap**, not a Category A rejection. Approval
 exists; attributable log artifacts do not.
@@ -216,3 +220,20 @@ Stage B stay prohibited.
 - Phase 10.4C-B was not authorized or executed.
 - OA-5 was **not** weakened beyond the named Category A logs exception.
 - No log evidence was manufactured.
+
+## 9. Owner re-confirmation
+
+At **13 Nov 2026, 20:30 Asia/Jakarta** EDY ALAMSAH re-sent the
+Category A form with written date **13 Nov 2026, 20:20**, signature
+`Confirmed`, and the same exclusions (no OA-6 / Phase 10.4C-B).
+
+| Check | Result |
+| --- | --- |
+| Decision | Unchanged **APPROVED — READ-ONLY RENDER CRON LOG INSPECTION ONLY** |
+| Written date | **13 Nov 2026, 20:20** (authoritative; 2027 superseded) |
+| Second access check | `RENDER_API_KEY` still **UNSET**; Render CLI still absent |
+| OA-A11-LOGS artifacts | Still **UNFILLED** |
+| OA-3 / CONTROL-XWS / isolation | Still **NOT VERIFIED** |
+
+This is not a second grant of live access. The collection window
+remains this Category A attempt only.

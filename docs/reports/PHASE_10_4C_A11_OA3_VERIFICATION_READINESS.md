@@ -273,8 +273,9 @@ OA-5: remains IN FORCE except this named Category A window
 
 Later record (do **not** treat the block above as filled): Category A
 was **APPROVED** by EDY ALAMSAH in a later owner message (conversation
-clock **13 Nov 2026, 20:20 Asia/Jakarta**; written date **13 Nov 2027,
-20:20**) for read-only Render cron log inspection only. See
+clock **13 Nov 2026, 20:20 Asia/Jakarta**; re-confirmed **20:30** with
+written date **13 Nov 2026, 20:20**; earlier 2027 write superseded)
+for read-only Render cron log inspection only. See
 `docs/reports/PHASE_10_4C_A14_CATEGORY_A_APPROVAL.md`. Log artifacts
 remain **UNFILLED**. This §7 template is not rewritten.
 

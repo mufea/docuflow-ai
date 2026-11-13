@@ -212,4 +212,6 @@ message. It does **not** rewrite the A12-time snapshot in §§2–6.
 Authoritative A14 report:
 `docs/reports/PHASE_10_4C_A14_CATEGORY_A_APPROVAL.md`.
 Inspection attempt: `RENDER_API_KEY` **UNSET**; logs **not**
-retrieved; no fabricated lines.
+retrieved; no fabricated lines. Owner re-confirmation at **13 Nov
+2026, 20:30 Asia/Jakarta** set written date **13 Nov 2026, 20:20**
+(2027 superseded) and did not supply log artifacts.
