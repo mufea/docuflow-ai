@@ -3693,7 +3693,13 @@ Corrects stale A13 **COMPLETE – UNMERGED**. Log artifacts were
 (re-checked **20:30**). OA-A11-LOGS log lines remain **UNFILLED**.
 Category A approval is not OA-3 execution proof.
 
-PHASE 10.4C-A14 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A14 DOCUMENTATION: **MERGED** (PR
+[#108](https://github.com/mufea/docuflow-ai/pull/108);
+merge `75c789c96e2bdb0df209ab2ba6a0621aa655d923`,
+`2026-11-13T13:35:44Z` / **13 Nov 2026, 20:35 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not fill OA-A11-LOGS success
+tokens, verify OA-3 execution, or authorize Stage B.
 PR [#108](https://github.com/mufea/docuflow-ai/pull/108) repository CI:
 **SUCCESS** [43434467955](https://github.com/mufea/docuflow-ai/actions/runs/43434467955)
 on `8adb824` (Python `131915897233`, Web `131915897899`; completed
@@ -3701,8 +3707,8 @@ on `8adb824` (Python `131915897233`, Web `131915897899`; completed
 [43433058072](https://github.com/mufea/docuflow-ai/actions/runs/43433058072).
 Repository CI is not isolation and is not a deploy.
 CATEGORY A: **APPROVED** (read-only Render cron logs only).
-OA-A11-LOGS: **UNFILLED** (authorization recorded; log artifacts
-missing).
+OA-A11-LOGS: **PARTIAL** after A15 (Production fail-fast line;
+success tokens still missing).
 OA-3 EXECUTION: **NOT VERIFIED**.
 CONTROL-XWS: **NOT VERIFIED**.
 RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
@@ -3714,4 +3720,39 @@ OA-5: **IN FORCE** (named Category A logs exception only).
 DEPLOY: **NOT AUTHORIZED**.
 LIVE CLEANUP: **NOT AUTHORIZED**.
 CATEGORY B: **NOT AUTHORIZED**.
-OWNER ACTIONS: **REQUIRED** / **OPEN** (log artifacts).
+OWNER ACTIONS: **REQUIRED** / **OPEN**.
+Phase 10.4C-A15: see below.
+
+## Phase 10.4C-A15 — Production cron cleanup_config fail-fast
+
+Documentation-only. Baseline `origin/main`
+**`75c789c96e2bdb0df209ab2ba6a0621aa655d923`**. Report:
+`docs/reports/PHASE_10_4C_A15_PROD_CLEANUP_CONFIG.md`.
+No application, Blueprint, env, database, storage, deploy, Shell,
+CONTROL-XWS, or Stage B.
+APPLICATION CODE CHANGES: **NONE**.
+
+Records owner-provided Production cron log
+(`cleanup_config DOCUFLOW_SECRET_KEY must be a unique value of at
+least 32 characters.`). Fail-fast ran; OA-3 success remains
+**NOT VERIFIED**. Blueprint `docuflow-cleanup` omits
+`DOCUFLOW_SECRET_KEY`. This PR does **not** edit env or relax
+validation.
+
+PHASE 10.4C-A15 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+CATEGORY A: **APPROVED** (read-only Render cron logs only).
+OA-A11-LOGS: **PARTIAL** (Production fail-fast line recorded;
+`cleanup_cli_ok` / `cleanup_finished aborted=False` **UNFILLED**).
+OA-3 EXECUTION: **NOT VERIFIED** (fail-fast; not success).
+CONTROL-XWS: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C: **NOT COMPLETE**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+OA-5: **IN FORCE**.
+DEPLOY: **NOT AUTHORIZED**.
+LIVE CLEANUP: **NOT AUTHORIZED**.
+CATEGORY B: **NOT AUTHORIZED**.
+OWNER ACTIONS: **REQUIRED** / **OPEN** (unique cron secret, then
+success log).

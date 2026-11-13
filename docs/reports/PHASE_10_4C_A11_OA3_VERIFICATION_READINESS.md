@@ -298,6 +298,8 @@ Do not diagnose red Runs as OA-3 fail-fast without the
 ## 9. Outstanding evidence gaps
 
 1. OA-3 successful post-change execution: **NOT VERIFIED**.
+   Later owner log (A15): Production `cleanup_config` fail-fast on
+   `DOCUFLOW_SECRET_KEY`; success tokens still absent.
 2. Application execution id: **UNAVAILABLE**.
 3. Git SHA inside cleanup logs: **UNAVAILABLE**.
 4. Cleanup GitHub Deployments: **none**.
