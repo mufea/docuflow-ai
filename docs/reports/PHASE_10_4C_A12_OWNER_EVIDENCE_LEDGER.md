@@ -215,3 +215,17 @@ Inspection attempt: `RENDER_API_KEY` **UNSET**; logs **not**
 retrieved; no fabricated lines. Owner re-confirmation at **13 Nov
 2026, 20:30 Asia/Jakarta** set written date **13 Nov 2026, 20:20**
 (2027 superseded) and did not supply log artifacts.
+
+## 8. Post-A15 amendment (13 Nov 2026, 20:48 Asia/Jakarta)
+
+Owner-provided Production cron line recorded in
+`docs/reports/PHASE_10_4C_A15_PROD_CLEANUP_CONFIG.md`.
+
+| ID | A14 status | A15 status | Note |
+| --- | --- | --- | --- |
+| OA-A12-CAT-A | **APPROVED** | **APPROVED** | Unchanged |
+| OA-A11-LOGS | **UNFILLED** | **PARTIAL** | Fail-fast line; success tokens still missing |
+| OA-A12-OA3 | **NOT VERIFIED** | **NOT VERIFIED** | `cleanup_config` ran; body did not |
+| OA-A12-XWS | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
+| OA-A12-ISO | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
+| OA-6 | **NOT AUTHORIZED** | **NOT AUTHORIZED** | Unchanged |
