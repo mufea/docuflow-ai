@@ -742,11 +742,43 @@ PR [#89](https://github.com/mufea/docuflow-ai/pull/89) **MERGED**
 A2 classifications in §14.6 are unchanged except this recon adds:
 
 - Project membership of the four staging services: **NOT VERIFIED**
-  (09:10 project `staging` has no active services; inventory is
-  ungrouped).
+  at A2R time (09:10 ungrouped / empty project `staging`). Current:
+  **PASS** in §16 (09:29 project `DocuflowAI`).
 - Gap 4 as a complete isolation control: **PARTIALLY VERIFIED**.
   Workspace exclusivity **PASS** is not runtime isolation **PASS**.
 - Cross-workspace access remains **NOT VERIFIED**.
 - Phase 10.4C-B remains **NOT AUTHORIZED**.
 
 Full recon: `docs/reports/PHASE_10_4C_A2R_POST_MERGE_RECONCILIATION.md`.
+
+## 16. Staging project membership — **PASS** (OWNER-PROVIDED)
+
+Time: **13 Nov 2026, 09:29 Asia/Jakarta** (phone clock **9:29 AM**).
+Evidence class: **OWNER-PROVIDED** Render dashboard screenshot.
+Agent did not open Render. Cleanup was **not** executed.
+
+Workspace chrome: `docuflowai staging`. Sidebar/project:
+`DocuflowAI`. Environment heading: **Staging**. All 4 / Services 4 /
+Env Groups 0.
+
+| Service | Owner-provided status |
+| --- | --- |
+| `docuflow-staging-api` | Deployed; Python 3; oregon |
+| `docuflow-staging-cleanup` | Successful build; Python 3; oregon |
+| `docuflow-staging-db` | Available; PostgreSQL 16; oregon |
+| `docuflow-staging-web` | Deployed; Node; oregon |
+
+No Production-named services appear in this Staging All 4. The 09:10
+ungrouped inventory and empty project named `staging` remain
+historical. Current project chrome is `DocuflowAI` (not that empty
+`staging` project). This recon does not independently verify a
+rename versus a new project.
+
+| Claim | Result |
+| --- | --- |
+| Project membership of the four staging services | **PASS** (OWNER-PROVIDED; shown in project `DocuflowAI`, environment Staging) |
+| Gap 4 workspace exclusivity | **PASS** (unchanged; workspace still `docuflowai staging`) |
+| Cross-workspace access | **NOT VERIFIED** |
+| Successful build = cleanup run | **NO** |
+| RUNTIME ISOLATION VERIFIED | **NO** |
+| Phase 10.4C-B | **NOT AUTHORIZED** |

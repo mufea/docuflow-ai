@@ -2977,8 +2977,9 @@ GAP 2 API R2 ENDPOINT + MASKED KEY: **PASS** (unchanged).
 GAP 3 CLOUDFLARE TOKEN SCOPE: **PASS** (**OWNER-PROVIDED**; unchanged).
 GAP 4 WORKSPACE EXCLUSIVITY: **PASS** (**OWNER-PROVIDED** 08:53–08:54;
 reconfirmed 09:10 All 4). 08:46 **NOT MET** is historical.
-GAP 4 PROJECT MEMBERSHIP: **NOT VERIFIED** (09:10 project `staging`
-has no active services; inventory is ungrouped).
+GAP 4 PROJECT MEMBERSHIP: **PASS** (**OWNER-PROVIDED** 09:29; project
+`DocuflowAI`, environment Staging). 09:10 **NOT VERIFIED** ungrouped
+inventory is historical.
 GAP 4 AS COMPLETE ISOLATION CONTROL: **PARTIALLY VERIFIED**.
 CROSS-WORKSPACE ACCESS ISOLATION: **NOT VERIFIED**.
 RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
@@ -2999,17 +3000,26 @@ project-membership and cross-workspace limits. No application code,
 Blueprint, env, database, or object mutation. No Production probe.
 Stage B was **not** started.
 
-PHASE 10.4C-A2R DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A2R DOCUMENTATION: **MERGED** (PR
+[#90](https://github.com/mufea/docuflow-ai/pull/90);
+merge `eda7c6c80e33664f23157a715140e1761a43e0d2`,
+`2026-11-13T02:26:25Z` / **13 Nov 2026, 09:26 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does **not** authorize Stage B.
 PHASE 10.4C-A2 DOCUMENTATION: **MERGED** (PR
 [#89](https://github.com/mufea/docuflow-ai/pull/89), `3e807db`).
 GAP 1 CLEANUP DB IDENTITY: **PASS** (unchanged).
 GAP 2 API R2 ENDPOINT + MASKED KEY: **PASS** (unchanged).
 GAP 3 CLOUDFLARE TOKEN SCOPE: **PASS** (unchanged).
 GAP 4 WORKSPACE EXCLUSIVITY: **PASS** (**OWNER-PROVIDED**; unchanged).
-GAP 4 PROJECT MEMBERSHIP: **NOT VERIFIED**.
+GAP 4 PROJECT MEMBERSHIP: **PASS** (**OWNER-PROVIDED** 09:29; project
+`DocuflowAI`, environment Staging, All 4). 09:10 ungrouped / empty
+project `staging` is historical.
 GAP 4 AS COMPLETE ISOLATION CONTROL: **PARTIALLY VERIFIED**.
 CROSS-WORKSPACE ACCESS ISOLATION: **NOT VERIFIED**.
 RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 PHASE 10.4C-B: **NOT AUTHORIZED**.
+Phase 10.4C-A2 project-membership update: see §16 of
+`docs/reports/PHASE_10_4C_A_RUNTIME_ISOLATION_ASSURANCE.md`.

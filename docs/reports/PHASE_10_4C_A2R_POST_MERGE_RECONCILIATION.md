@@ -97,7 +97,7 @@ Limitations of this screenshot:
 | 2 API R2 endpoint + masked key | A1 `docuflow-staging-api` Shell: `S3_BUCKET=docuflowai-staging`, host `26d06bf0ca16ba951f1d19d5989e6663.r2.cloudflarestorage.com`, key masked `6c01…2307` | **PASS** OWNER-PROVIDED (unchanged) | Cleanup env unread. Production negative access not tested |
 | 3 Cloudflare token scope | A2 Cloudflare screenshot: token `docuflowai-staging`; read/write/list; bucket `docuflowai-staging` only | **PASS** OWNER-PROVIDED (unchanged) | Dashboard intent, not a Production-bucket negative probe |
 | 4 Workspace exclusivity | 08:53–08:54 two workspace names; 09:10 Staging All 4 has no Production names | **PASS** OWNER-PROVIDED (unchanged) | Chrome names, not independently verified workspace ids |
-| 4 Project membership | 09:10 project `staging` has no active services; services are ungrouped | **NOT VERIFIED** | Ungrouped ≠ project membership |
+| 4 Project membership | 09:10 ungrouped / empty project `staging` was **NOT VERIFIED**. 09:29 screenshot shows all four services in project `DocuflowAI`, environment Staging | **PASS** OWNER-PROVIDED (09:29). 09:10 remains historical | Not a cross-workspace permission proof. Empty project `staging` vs `DocuflowAI` is not independently explained |
 | 4 Cross-workspace access | No permission, network, or negative-access evidence | **NOT VERIFIED** | Separate workspaces are not proof that Staging cannot reach Production resources |
 | 4 as a complete isolation control | Topology plus inventory only | **PARTIALLY VERIFIED** | Workspace exclusivity PASS does not equal runtime isolation PASS |
 
@@ -108,8 +108,9 @@ historical.
 ## E. Remaining risks
 
 1. Cross-workspace access isolation is **NOT VERIFIED**.
-2. Project membership of the four staging services is **NOT VERIFIED**
-   (ungrouped; project `staging` empty).
+2. Project membership of the four staging services is **PASS** as of
+   09:29 (OWNER-PROVIDED project `DocuflowAI`, environment Staging).
+   The 09:10 ungrouped / empty `staging` project record is historical.
 3. Overall runtime isolation is **NOT VERIFIED**.
 4. Functional Staging verification is **NOT VERIFIED**. Stage B is
    **NOT AUTHORIZED**.
@@ -136,7 +137,7 @@ This phase:
 | Label | Result |
 | --- | --- |
 | PHASE 10.4C-A2 DOCUMENTATION | **MERGED** (PR #89, `3e807db`) |
-| PHASE 10.4C-A2R DOCUMENTATION | **COMPLETE – UNMERGED** (this PR) |
+| PHASE 10.4C-A2R DOCUMENTATION | **MERGED** (PR #90, `eda7c6c`) |
 | RUNTIME ISOLATION VERIFIED | **NO** |
 | FUNCTIONAL STAGING VERIFIED | **NO** |
 | PRODUCTION VERIFIED | **NO** |
