@@ -31,11 +31,12 @@ only. Corrected in `IMPLEMENTATION_STATUS.md` by this PR. Owner
 evidence rows are **not** closed by that merge-status correction.
 
 PR [#108](https://github.com/mufea/docuflow-ai/pull/108) head CI on
-`6ca7892`: **SUCCESS**
-[43433058072](https://github.com/mufea/docuflow-ai/actions/runs/43433058072)
-(Python `131911131162`, Web `131911131420`; completed **13 Nov 2026,
-20:24 Asia/Jakarta**). Repository CI is not isolation and is not a
-deploy.
+`8adb824`: **SUCCESS**
+[43434467955](https://github.com/mufea/docuflow-ai/actions/runs/43434467955)
+(Python `131915897233`, Web `131915897899`; completed **13 Nov 2026,
+20:33 Asia/Jakarta**). Prior head `6ca7892`: **SUCCESS**
+[43433058072](https://github.com/mufea/docuflow-ai/actions/runs/43433058072).
+Repository CI is not isolation and is not a deploy.
 
 ## 2. Category A approval record
 
