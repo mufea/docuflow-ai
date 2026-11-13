@@ -109,7 +109,7 @@ CI SUCCESS is **not** isolation. MERGED is **not** DEPLOYED.
 | Staging R2 bucket + endpoint | `STORAGE_BACKEND=s3`; `S3_BUCKET=docuflowai-staging`; R2 host; key mask `6c01…2307` on API and cleanup `echo` | OWNER-PROVIDED | Live env **names** point at Staging bucket | HeadBucket; exclusive access; Production denial | RISK-C | Do **not** HeadBucket Production |
 | Production R2 bucket | Owner-recorded name `docuflowai-documents` | OWNER-PROVIDED | Distinct **name** from Staging | Staging credentials cannot access it | CONTROL-XWS / RISK-A | OA-2 (source); OA-1/OA-4 (token scope). Negative HeadBucket **BLOCKED** |
 | Cloudflare Staging token scope | Token named for `docuflowai-staging`; read/write/list; bucket `docuflowai-staging` only | OWNER-PROVIDED | Staging token UI shows one bucket | Production token exclusivity; runtime AWS SigV4 behavior | Complementary Production token screenshot | OA-1 |
-| Cleanup execution boundary | Staging cron `python -m docuflow.migrate && python -m docuflow.cleanup`; `CLEANUP_INTERVAL_SECONDS=0`; CLI has no fail-fast / dry-run | REPOSITORY-DERIVED + OWNER-PROVIDED env | Template and env **intent** | Safe live run; Production-bucket reject | RISK-B **FAIL** | OA-3; live cleanup **BLOCKED** |
+| Cleanup execution boundary | Staging cron `python -m docuflow.migrate && python -m docuflow.cleanup`; `CLEANUP_INTERVAL_SECONDS=0`; CLI fail-fast / `--dry-run` added in OA-3 (repository) | REPOSITORY-DERIVED + OWNER-PROVIDED env | Template and env **intent**; unit-tested refusal | Live cron / Shell run; deployed code | RISK-B source **PASS** (OA-3); live **BLOCKED** | OA-3 **PROVIDED**; live cleanup **BLOCKED** |
 | Credentials / secret scope | Distinct Access Key ID mask on Staging; secrets not in repo | OWNER-PROVIDED | Staging key is not printed; token UI scoped | Keys cannot call Production; no shared secret | CONTROL-XWS | Never send unmasked secrets (OA-5) |
 | Cross-workspace access paths | Same solo Admin; Hobby; no env groups; no app allow-list; Settings inject `DATABASE_URL` / `S3_BUCKET` | OWNER-PROVIDED + REPOSITORY-DERIVED | Shared Admin expected; isolation is env injection | Workspaces cannot reach each other | CONTROL-XWS **NOT VERIFIED** | OA-1; negative probes **BLOCKED** |
 | Source Production-bucket helper | `DEFAULT_PRODUCTION_BUCKETS={"docuflow-documents"}`; `is_production_bucket("docuflowai-documents")` is `False` | REPOSITORY-DERIVED | Default helper misses the live Production bucket name | That Staging currently points at Production (it does not, per owner env) | RISK-A **FAIL** | OA-2 (separate code PR if authorized) |
@@ -196,7 +196,8 @@ mutates; dry-run path does not invoke `storage.delete`.
 **FAIL:** CLI still mutates with default/Production bucket.
 **Live cleanup remains BLOCKED** even after a source fix until a
 later owner authorization names Staging-only dry-run.
-**Not authorized now.** Requires OA-3.
+**Authorized and implemented** in this OA-3 source PR. See §12.
+Live cleanup is still **BLOCKED**.
 
 #### G5 — Negative Production storage or database access — **BLOCKED**
 
@@ -213,8 +214,10 @@ cross-workspace resource access.
 
 **Proposed test (rejected):** run `python -m docuflow.cleanup` on
 Staging or Production.
-**Why BLOCKED:** the CLI is mutating (Risk B). Dry-run does not
-exist. `Successful build` is not a run.
+**Why BLOCKED:** live cleanup mutates jobs and storage.
+`--dry-run` now exists in source (OA-3) but was **not** invoked
+on Render. `Successful build` is not a run. A merged code PR does
+not authorize live cleanup.
 **No live cleanup.**
 
 #### G7 — Phase 10.4C-B functional Staging tests — **NOT AUTHORIZED**
@@ -284,7 +287,7 @@ DSNs, or unmasked credentials.
 | OA-0 | Optional: confirm workspace IDs unchanged | Detect topology drift | Settings screenshot showing IDs only | Env, DNS, membership | PENDING (optional; current IDs already recorded) | G0/G1 |
 | OA-1 | Written choice: (a) accept CONTROL-XWS as **NOT VERIFIED**, or (b) complementary Production token bucket-name screenshot proving it does not list `docuflowai-staging` | Overall isolation cannot become PASS while CONTROL-XWS is open unless owner accepts the residual | Dated written statement in chat/PR, **or** Cloudflare permission UI with token value hidden | Tokens, keys, buckets, Render env | **PROVIDED** — Option A; see §10 | G1 |
 | OA-2 | Authorize or decline a **separate** source PR to default-flag `docuflowai-documents` | RISK-A default helper omitted the live Production bucket name | “APPROVE OA-2” or “DECLINE OA-2” in writing | Live env; no deploy from the code PR until separately approved | **PROVIDED** — APPROVE; see §11 | G3 |
-| OA-3 | Authorize or decline a **separate** source PR for cleanup fail-fast / bucket reject / dry-run | RISK-B remains **FAIL** | “APPROVE OA-3” or “DECLINE OA-3” | No live cleanup; no Production bucket | **PENDING** | G4 |
+| OA-3 | Authorize or decline a **separate** source PR for cleanup fail-fast / bucket reject / dry-run | RISK-B remains **FAIL** until source fix | “APPROVE OA-3” or “DECLINE OA-3” | No live cleanup; no Production bucket | **PROVIDED** — APPROVE; see §12 | G4 |
 | OA-4 | Optional: Production dashboard name-only reconfirm of Postgres database **name** and `S3_BUCKET` **name** | Strengthens RISK-C/D name distinctness without connecting | Cropped service Info / env **name** rows; no DSN, no secret | Databases, objects, cleanup | PENDING (optional) | identity only |
 | OA-5 | Standing prohibition: no live probes, Shell, SQL, HeadBucket, cleanup, deploy, or secret paste unless a later message names the exact action and says APPROVE | Prevent implied authorization | Do nothing | All live resources | **PENDING** (in force as prohibition) | all live gates |
 | OA-6 | Do **not** authorize Phase 10.4C-B until this plan and A3 classifications are accepted | Stage B is functional Staging testing, not isolation closure | Explicit “APPROVE Phase 10.4C-B” naming allowed Staging tests | Production; cleanup; migrations unless named | **PENDING** — currently **NOT AUTHORIZED** | G7 |
@@ -299,9 +302,9 @@ following are true:
    2026, 13:12 Asia/Jakarta: Option A. See §10.**
 2. Owner has recorded OA-2 and OA-3 as APPROVE or DECLINE.
    **OA-2 APPROVE recorded 13 Nov 2026, 13:50 Asia/Jakarta; see
-   §11.** OA-3 remains **PENDING**. Decline of OA-3 would leave
-   RISK-B as a documented source **FAIL**; that is allowed, but
-   must be explicit.
+   §11.** **OA-3 APPROVE recorded 13 Nov 2026, 13:57
+   Asia/Jakarta; see §12.** Recording APPROVE is not a live
+   cleanup authorization.
 3. Owner sends a separate message that names Phase 10.4C-B and
    the exact Staging tests permitted.
 4. Those tests remain Staging-only: no Production HTTP, Shell,
@@ -389,9 +392,9 @@ Change: `DEFAULT_PRODUCTION_BUCKETS` now includes both the legacy
 Settings default `docuflow-documents` and the owner-recorded live
 Production bucket `docuflowai-documents`. `is_production_bucket()`
 and `is_forbidden_live_test_bucket()` therefore default-flag the
-live Production name. Call sites remain confined to
+live Production name. Call sites at OA-2 merge were confined to
 `staging_checks.py` (preflight / `validate_staging_configuration`).
-Cleanup CLI still does **not** call this helper (Risk B / OA-3).
+OA-3 later wired the helper into cleanup validation (see §12).
 
 Preserved: empty-name `False`; case normalization; optional
 `production_bucket` kwarg; Staging names `docuflow-staging` and
@@ -411,7 +414,7 @@ isolation and **not** a deploy.
 | --- | --- |
 | OA-2 | **PROVIDED** (APPROVE; this source PR) |
 | RISK-A default helper | **PASS** (repository; unit tests) |
-| RISK-B cleanup CLI | **FAIL** (unchanged; OA-3 **PENDING**) |
+| RISK-B cleanup CLI | **FAIL** at OA-2 merge; source **PASS** after OA-3 (§12). Live cleanup **BLOCKED** |
 | Overall runtime isolation | **NOT VERIFIED** |
 | Phase 10.4C-B | **NOT AUTHORIZED** |
 | Deploy of this helper | **NOT AUTHORIZED** by this PR |
@@ -421,6 +424,100 @@ This section records the later source closure of the default
 identifier only.
 
 Safety declaration for OA-2 implementation:
+
+- No Production probes were performed.
+- No Production or Staging Shell commands were executed.
+- No live database connections were made.
+- No cleanup operation was executed.
+- No storage objects were read, written, or deleted.
+- No migrations were executed.
+- No restore or export operations were performed.
+- No credentials or DSNs were exposed.
+- No infrastructure or application configuration was changed.
+- No deployment was performed.
+- Phase 10.4C-B was not authorized or executed.
+
+## 12. OA-3 source fix — cleanup CLI safety hardening
+
+Time: **13 Nov 2026, 13:57 Asia/Jakarta (WIB)**. Owner EDY ALAMSAH
+authorized OA-3. Source and local unit tests only. No Render Shell,
+live cleanup, database/storage access, migration, deploy, or
+Production/Staging configuration change.
+
+A merged code PR does **not** authorize live cleanup execution.
+
+### Change
+
+`src/docuflow/cleanup.py`:
+
+- Fail-fast `validate_cleanup_configuration()`:
+  production-readiness errors when `DOCUFLOW_ENV` is production
+  (Blueprint value for both Staging and Production);
+  empty `S3_BUCKET` rejected; S3 keys required for `s3`.
+- Known Production buckets (`docuflow-documents`,
+  `docuflowai-documents` via `is_production_bucket()`) are
+  **refused only in an isolated/Staging context**
+  (`RENDER_SERVICE_NAME`, public API/web host, or database
+  identity containing `staging` or `test`). Production cron
+  `docuflow-cleanup` with `docuflowai-documents` still validates.
+- `--dry-run` validates and exits. It does not create an engine,
+  open a session, build storage, call `run_runtime_cleanup`, or
+  invoke `storage.delete`.
+- Unsafe configuration raises `CleanupConfigError` before any
+  factory; `main()` returns `1`.
+
+`src/docuflow/jobs/scheduler.py`: in-process
+`CleanupScheduler.run_once` uses the same validator and returns
+without opening a session when configuration is unsafe.
+
+Blueprints, startCommand, env, and Render services were **not**
+changed.
+
+### Call sites and deployment entry points inspected (read-only)
+
+| Entry | Path | OA-3 effect |
+| --- | --- | --- |
+| Module CLI | `python -m docuflow.cleanup` → `main()` | fail-fast + `--dry-run` |
+| Console script | `docuflow-cleanup` → `docuflow.cleanup:main` (`pyproject.toml`) | same `main()` |
+| Production cron | `infra/render.yaml` `docuflow-cleanup` `python -m docuflow.migrate && python -m docuflow.cleanup` | **unchanged**; Production bucket still allowed |
+| Staging cron | `infra/render.staging.yaml` `docuflow-staging-cleanup` same startCommand | **unchanged**; Production bucket refused after deploy of this code |
+| API in-process | `src/docuflow/main.py` `CleanupScheduler` (`CLEANUP_INTERVAL_SECONDS=0` in both Blueprints) | shares validator |
+| Worker in-process | `src/docuflow/worker.py` `CleanupScheduler` (no Staging worker; Production worker suspended) | shares validator |
+| `run_runtime_cleanup` | `src/docuflow/jobs/retention.py`; tests only besides CLI/scheduler | mutating core; not invoked by `--dry-run` |
+| GitHub Actions | `.github/` | **no** cleanup job |
+
+### Local tests
+
+SQLite `DATABASE_URL`; `DOCUFLOW_ENV=test`; no live resources.
+`tests/test_phase104c_cleanup_cli.py` plus
+`tests/test_phase91_cleanup.py` — **20 passed** (11 new + 9
+existing). Dry-run test asserts `storage_factory`,
+`engine_factory`, `run_cleanup`, and `storage.delete` are never
+called.
+
+### Residual
+
+Source RISK-B is closed in the repository. Runtime isolation
+remains **NOT VERIFIED**. Deploy of this code is **NOT
+AUTHORIZED**. Live `--dry-run` or mutating cleanup on Staging or
+Production is **NOT AUTHORIZED**. Isolation still depends on env
+injection (`S3_BUCKET`, `DATABASE_URL`, Render service name).
+Phase 10.4C-B remains **NOT AUTHORIZED**.
+
+| Label | Result |
+| --- | --- |
+| OA-3 | **PROVIDED** (APPROVE; this source PR) |
+| RISK-B cleanup CLI | **PASS** (repository; unit tests) |
+| RISK-A default helper | **PASS** (repository; OA-2 merged `cf0d615`) |
+| Live cleanup | **BLOCKED** / **NOT AUTHORIZED** |
+| Overall runtime isolation | **NOT VERIFIED** |
+| Phase 10.4C-B | **NOT AUTHORIZED** |
+| Deploy of this CLI | **NOT AUTHORIZED** by this PR |
+
+A3 historical RISK-B **FAIL** at SHA `e62962b` / `d61ea1a` is
+preserved. This section records the later source closure.
+
+Safety declaration for OA-3 implementation:
 
 - No Production probes were performed.
 - No Production or Staging Shell commands were executed.
