@@ -3035,8 +3035,12 @@ No application, Blueprint, env, database, or object mutation.
 Cleanup was not executed. Secret key and extra Access Key ID digits
 were not recorded. Stage B was **not** started.
 
-PHASE 10.4C-A2 CLEANUP R2 / WORKSPACE-ID UPDATE: **COMPLETE – UNMERGED**
-(this PR).
+PHASE 10.4C-A2 CLEANUP R2 / WORKSPACE-ID UPDATE: **MERGED** (PR
+[#92](https://github.com/mufea/docuflow-ai/pull/92);
+merge `4524ef00adf1842bade6086c7542190114453c85`,
+`2026-11-13T03:10:58Z` / **13 Nov 2026, 10:10 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does **not** authorize Stage B.
 PR [#91](https://github.com/mufea/docuflow-ai/pull/91): **MERGED**
 `361575467d638725bc23082a2302777a6d589ee8`.
 CLEANUP R2 LIVE ENV: **PASS** (**OWNER-PROVIDED** `docuflow-staging-cleanup`
@@ -3050,6 +3054,26 @@ GAP 4 PROJECT MEMBERSHIP: **PASS** (unchanged; 10:01 project
 `DocuflowAI` “All services are up and running”).
 CROSS-WORKSPACE ACCESS ISOLATION: **NOT VERIFIED** (same owner Admin
 on both Hobby workspaces; 2FA/SSO not enforced; no env groups).
+RUNTIME ISOLATION VERIFIED: **NO**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+
+## Phase 10.4C-A2 — Team Members inventory
+
+Documentation-only. Baseline `origin/main`
+**`4524ef00adf1842bade6086c7542190114453c85`**. Owner Team Members
+screenshots **13 Nov 2026, 10:21 Asia/Jakarta** for workspaces
+`docuflowai` and `docuflowai staging`. Member email is not recorded.
+No application, Blueprint, env, database, or object mutation.
+Stage B was **not** started.
+
+PHASE 10.4C-A2 TEAM-MEMBERS UPDATE: **COMPLETE – UNMERGED** (this PR).
+RENDER TEAM MEMBERSHIP: **OWNER-PROVIDED** — one Admin on
+`docuflowai`; one Admin on `docuflowai staging`; no additional
+members shown. Shared solo-owner Admin is expected and is not a
+runtime breach.
+CROSS-WORKSPACE ACCESS ISOLATION: **NOT VERIFIED**.
 RUNTIME ISOLATION VERIFIED: **NO**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.

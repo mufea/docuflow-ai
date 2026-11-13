@@ -839,6 +839,27 @@ Also observed (OWNER-PROVIDED; not isolation PASS/FAIL):
   expected and is **not** a demonstrated runtime breach. It also
   does **not** prove cross-workspace access is impossible.
 
+### 17.3 Team Members — OWNER-PROVIDED membership inventory
+
+Time: **13 Nov 2026, 10:21 Asia/Jakarta**. Workspace Settings →
+Team Members. Member email addresses are **not** copied into this
+repository.
+
+| Workspace chrome | Members shown | Role |
+| --- | --- | --- |
+| `docuflowai` | 1 (`MEMBER EMAIL` count 1; listed as you) | Admin |
+| `docuflowai staging` | 1 (`MEMBER EMAIL` count 1; listed as you) | Admin |
+
+Classification: **OWNER-PROVIDED** inventory — each Hobby workspace
+has a single Admin and no additional members in the screenshot.
+This matches the earlier “same owner Admin on both” observation
+with dedicated Team Members chrome.
+
+This is **not** cross-workspace access isolation. A shared human
+Admin is expected for a solo owner. It does **not** prove Staging
+services cannot reach Production resources. Hobby “Upgrade” for
+unlimited members is plan chrome, not a security control.
+
 Cross-workspace access isolation remains **NOT VERIFIED**. Overall
 runtime isolation remains **NOT VERIFIED**. Phase 10.4C-B remains
 **NOT AUTHORIZED**.
