@@ -2944,19 +2944,28 @@ token `docuflowai-staging` scoped to bucket `docuflowai-staging`,
 plus a same-workspace inventory later superseded. Further owner
 screenshots **13 Nov 2026, 08:53–08:54 Asia/Jakarta**: Production
 workspace `docuflowai` (project `Docuflow AI`, All 6) and Staging
-workspace `docuflowai staging` (ungrouped All 3). No application
-code, Blueprint, env, database, or object mutation. No Production
-probe. Token values and secret keys were not recorded. Stage B was
-**not** started.
+workspace `docuflowai staging` (ungrouped All 3). Owner screenshot
+**13 Nov 2026, 09:10 Asia/Jakarta**: Staging All 4 includes
+`docuflow-staging-cleanup` (Successful build). No application code,
+Blueprint, env, database, or object mutation. No Production probe.
+Cleanup was not executed. Token values and secret keys were not
+recorded. Stage B was **not** started.
 
-PHASE 10.4C-A2 DOCUMENTATION: **COMPLETE – UNMERGED**.
-GAP 1 CLEANUP DB IDENTITY: **PASS** (A1 unchanged). Current cleanup
-service location: **NOT VERIFIED** (not in Staging All 3).
+PHASE 10.4C-A2 DOCUMENTATION: **COMPLETE – UNMERGED** (PR
+[#89](https://github.com/mufea/docuflow-ai/pull/89)).
+PR [#89](https://github.com/mufea/docuflow-ai/pull/89) repository CI
+on `0a17661`: **SUCCESS**
+[43348503917](https://github.com/mufea/docuflow-ai/actions/runs/43348503917)
+(completed **13 Nov 2026, 08:58 Asia/Jakarta**). Repository CI is
+not isolation.
+GAP 1 CLEANUP DB IDENTITY: **PASS** (A1 unchanged).
+STAGING CLEANUP SERVICE LOCATION: **PASS** (**OWNER-PROVIDED** 09:10
+All 4). 08:54 All 3 omission is historical. Successful build is not
+a cleanup run.
 GAP 2 API R2 ENDPOINT + MASKED KEY: **PASS** (unchanged).
 GAP 3 CLOUDFLARE TOKEN SCOPE: **PASS** (**OWNER-PROVIDED**; unchanged).
 GAP 4 WORKSPACE EXCLUSIVITY: **PASS** (**OWNER-PROVIDED** 08:53–08:54;
-workspaces `docuflowai` vs `docuflowai staging`). 08:46
-**NOT MET** is historical.
+reconfirmed 09:10 All 4). 08:46 **NOT MET** is historical.
 CROSS-WORKSPACE ACCESS ISOLATION: **NOT VERIFIED**.
 RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
