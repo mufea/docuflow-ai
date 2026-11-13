@@ -2899,7 +2899,17 @@ No application code, Blueprint, env, database, or object mutation.
 SR7 API identity SQL and HeadBucket were **not** repeated. Stage B
 was **not** started.
 
-PHASE 10.4C-A1 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A1 DOCUMENTATION: **MERGED** (PR
+[#88](https://github.com/mufea/docuflow-ai/pull/88);
+merge `8874ed1b5c39b2919db11e4fa822660e7f239e25`,
+`2026-11-12T14:40:50Z` / **12 Nov 2026, 21:40 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not change runtime classifications
+and does **not** authorize Stage B.
+`main` push CI after PR [#88](https://github.com/mufea/docuflow-ai/pull/88):
+**SUCCESS** [43239711365](https://github.com/mufea/docuflow-ai/actions/runs/43239711365)
+(completed **12 Nov 2026, 21:42 Asia/Jakarta**). Repository CI is
+not isolation.
 GAP 1 CLEANUP DB IDENTITY: **PASS** (**OWNER-PROVIDED**
 `docuflow-staging-cleanup` Shell; database
 `docuflow_staging_db_ikpz`, user `docuflow_staging_db_ikpz_user`,
@@ -2910,8 +2920,40 @@ GAP 2 API R2 ENDPOINT + MASKED KEY: **PASS** (**OWNER-PROVIDED**
 `docuflow-staging-api` Shell; host
 `26d06bf0ca16ba951f1d19d5989e6663.r2.cloudflarestorage.com`; bucket
 `docuflowai-staging`; key masked `6c01…2307`).
-GAP 3 CLOUDFLARE TOKEN SCOPE: **NOT VERIFIED**.
-GAP 4 WORKSPACE EXCLUSIVITY: **NOT VERIFIED**.
+GAP 3 CLOUDFLARE TOKEN SCOPE: **PASS** (**OWNER-PROVIDED** A2;
+token `docuflowai-staging`; read/write/list; bucket
+`docuflowai-staging` only). A1-time classification was
+**NOT VERIFIED**. Production negative access: **NOT VERIFIED**.
+GAP 4 WORKSPACE EXCLUSIVITY: **NOT MET** (**OWNER-PROVIDED** A2;
+workspace `docuflowai` holds Production and Staging projects).
+A1-time classification was **NOT VERIFIED**.
 RUNTIME ISOLATION VERIFIED: **NO**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
+Phase 10.4C-A2: see below.
+
+## Phase 10.4C-A2 — Render topology evidence reconciliation
+
+Documentation-only. Baseline `origin/main`
+**`8874ed1b5c39b2919db11e4fa822660e7f239e25`**. Updates:
+`docs/reports/PHASE_10_4C_A_RUNTIME_ISOLATION_ASSURANCE.md` §14
+and related §4–10 / §13 notes. No new assessment report.
+
+Owner screenshots **13 Nov 2026, 08:46 Asia/Jakarta**: Render
+Production and Staging project inventories in workspace
+`docuflowai`, plus Cloudflare R2 token `docuflowai-staging` scoped
+to bucket `docuflowai-staging`. No application code, Blueprint, env,
+database, or object mutation. No Production probe. Token values and
+secret keys were not recorded. Stage B was **not** started.
+
+PHASE 10.4C-A2 DOCUMENTATION: **COMPLETE – UNMERGED** (no PR;
+PR creation **NOT AUTHORIZED** this pass).
+GAP 1 CLEANUP DB IDENTITY: **PASS** (unchanged).
+GAP 2 API R2 ENDPOINT + MASKED KEY: **PASS** (unchanged).
+GAP 3 CLOUDFLARE TOKEN SCOPE: **PASS** (**OWNER-PROVIDED**).
+GAP 4 WORKSPACE EXCLUSIVITY: **NOT MET** (**OWNER-PROVIDED**).
+CROSS-PROJECT ACCESS ISOLATION: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
