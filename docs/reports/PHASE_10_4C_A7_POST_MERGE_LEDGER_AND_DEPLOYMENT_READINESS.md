@@ -127,6 +127,17 @@ That current-status label is stale and is corrected by this phase.
 | GitHub Actions | Repository CI on named SHAs | Isolation, deploy, or cleanup run |
 | OWNER-PROVIDED A3 inventory | Topology names/status at capture time | Current deployed commit |
 
+### 4.5 This documentation PR
+
+| Layer | Result |
+| --- | --- |
+| PR | [#100](https://github.com/mufea/docuflow-ai/pull/100) on `e3e840c` |
+| PR-head CI | [43388760245](https://github.com/mufea/docuflow-ai/actions/runs/43388760245) **SUCCESS** (Python `131763376233`, Web `131763376684`; **13 Nov 2026, 14:53 Asia/Jakarta**) |
+| Isolation / deploy | still **NOT VERIFIED** / **NOT AUTHORIZED** |
+
+Repository CI on this documentation branch is not isolation and is
+not a live deploy.
+
 ## 5. Deployment readiness
 
 No Render dashboard, Shell, API, database, or storage was accessed.
