@@ -3143,7 +3143,13 @@ No application, Blueprint, env, database, storage, deploy, cleanup,
 or live probe. Stage B was **not** started. Phase 10.4C is **not**
 complete because a plan is not verification.
 
-PHASE 10.4C-A4 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A4 DOCUMENTATION: **MERGED** (PR
+[#95](https://github.com/mufea/docuflow-ai/pull/95);
+merge `2d753e6b38de50bcb68e4ccb4b258ea407c708ca`,
+`2026-11-13T04:33:18Z` / **13 Nov 2026, 11:33 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not change runtime
+classifications and does **not** authorize Stage B.
 PR [#95](https://github.com/mufea/docuflow-ai/pull/95) repository CI:
 **SUCCESS** [43364445655](https://github.com/mufea/docuflow-ai/actions/runs/43364445655)
 (Python `131685423904`, Web `131685423613`; completed
@@ -3155,6 +3161,27 @@ PRODUCTION BUCKET PROTECTION: **FAIL** (source; unchanged).
 CLEANUP CLI SAFETY: **FAIL** (source; unchanged).
 STORAGE BOUNDARY: **PARTIALLY VERIFIED** (unchanged).
 DATABASE BOUNDARY: **PARTIALLY VERIFIED** (unchanged).
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C: **NOT COMPLETE**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+Phase 10.4C-A4 OA-1: see below.
+
+## Phase 10.4C-A4 — OA-1 Option A acceptance
+
+Documentation-only. Baseline `origin/main`
+**`2d753e6b38de50bcb68e4ccb4b258ea407c708ca`**. Owner EDY ALAMSAH
+accepted OA-1 Option A on **13 Nov 2026, 13:12 Asia/Jakarta**.
+CONTROL-XWS remains **NOT VERIFIED**. No Production access test,
+Cloudflare token inspection, or live probe was authorized or
+performed. Stage B was **not** started.
+
+PHASE 10.4C-A4 OA-1 RECORD: **COMPLETE – UNMERGED** (this PR).
+OA-1: **PROVIDED** (Option A).
+CONTROL-XWS: **NOT VERIFIED** (accepted residual).
+G2 / live probes: **NOT AUTHORIZED**.
+OA-2 / OA-3: **PENDING**.
 RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.

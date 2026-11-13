@@ -282,7 +282,7 @@ DSNs, or unmasked credentials.
 | ID | Decision or evidence required | Why | Safe way to provide | Must remain untouched | Status | Gate |
 | --- | --- | --- | --- | --- | --- | --- |
 | OA-0 | Optional: confirm workspace IDs unchanged | Detect topology drift | Settings screenshot showing IDs only | Env, DNS, membership | PENDING (optional; current IDs already recorded) | G0/G1 |
-| OA-1 | Written choice: (a) accept CONTROL-XWS as **NOT VERIFIED**, or (b) complementary Production token bucket-name screenshot proving it does not list `docuflowai-staging` | Overall isolation cannot become PASS while CONTROL-XWS is open unless owner accepts the residual | Dated written statement in chat/PR, **or** Cloudflare permission UI with token value hidden | Tokens, keys, buckets, Render env | **PENDING** | G1 / G2 |
+| OA-1 | Written choice: (a) accept CONTROL-XWS as **NOT VERIFIED**, or (b) complementary Production token bucket-name screenshot proving it does not list `docuflowai-staging` | Overall isolation cannot become PASS while CONTROL-XWS is open unless owner accepts the residual | Dated written statement in chat/PR, **or** Cloudflare permission UI with token value hidden | Tokens, keys, buckets, Render env | **PROVIDED** — Option A; see §10 | G1 |
 | OA-2 | Authorize or decline a **separate** source PR to default-flag `docuflowai-documents` | RISK-A remains **FAIL** | “APPROVE OA-2” or “DECLINE OA-2” in writing | Live env; no deploy from the code PR until separately approved | **PENDING** | G3 |
 | OA-3 | Authorize or decline a **separate** source PR for cleanup fail-fast / bucket reject / dry-run | RISK-B remains **FAIL** | “APPROVE OA-3” or “DECLINE OA-3” | No live cleanup; no Production bucket | **PENDING** | G4 |
 | OA-4 | Optional: Production dashboard name-only reconfirm of Postgres database **name** and `S3_BUCKET` **name** | Strengthens RISK-C/D name distinctness without connecting | Cropped service Info / env **name** rows; no DSN, no secret | Databases, objects, cleanup | PENDING (optional) | identity only |
@@ -295,7 +295,8 @@ Phase 10.4C-B stays **NOT AUTHORIZED** until **all** of the
 following are true:
 
 1. Owner has recorded OA-1 (accept residual CONTROL-XWS **or**
-   supply complementary token-scope evidence).
+   supply complementary token-scope evidence). **Recorded 13 Nov
+   2026, 13:12 Asia/Jakarta: Option A. See §10.**
 2. Owner has recorded OA-2 and OA-3 as APPROVE or DECLINE.
    Decline leaves RISK-A / RISK-B as documented source **FAIL**s;
    that is allowed, but must be explicit.
@@ -315,7 +316,7 @@ Merging this planning PR does **not** satisfy items 1–4.
 | --- | --- |
 | Is the verification **plan** ready for owner review? | **YES** |
 | Is any runtime isolation probe authorized now? | **NO-GO** |
-| Can CONTROL-XWS be proven without Production access? | **NO** — negative tests are **BLOCKED**; owner decision OA-1 required |
+| Can CONTROL-XWS be proven without Production access? | **NO** — negative tests are **BLOCKED**; OA-1 Option A **PROVIDED** (residual accepted) |
 | Can RISK-A / RISK-B be closed without code changes? | **NO** — they are source defects; live tests are the wrong tool |
 | Overall runtime isolation | **NOT VERIFIED** |
 | Phase 10.4C complete? | **NO** |
@@ -323,3 +324,51 @@ Merging this planning PR does **not** satisfy items 1–4.
 
 Stop after this planning deliverable. Wait for explicit owner
 authorization before any runtime verification.
+
+## 10. OA-1 owner decision — Option A **PROVIDED**
+
+Time: **13 Nov 2026, 13:12 Asia/Jakarta (WIB)**. Documentation only.
+Owner / Approver: EDY ALAMSAH (message recorded in this repository).
+Baseline at recording: `origin/main`
+`2d753e6b38de50bcb68e4ccb4b258ea407c708ca` (Merge PR #95).
+
+Owner statement (recorded, not paraphrased as a stronger claim):
+
+- OA-1: **ACCEPT OPTION A**.
+- CONTROL-XWS (cross-workspace access isolation) is accepted as
+  **NOT VERIFIED**.
+- No additional Production access test, Cloudflare token
+  inspection, or live probe is authorized.
+- Overall runtime isolation remains **NOT VERIFIED**.
+
+Gate G1 is **closed as a decision record**. Gate G2 is **not**
+taken. CONTROL-XWS classification is **unchanged**: **NOT
+VERIFIED**. This acceptance does **not** convert overall isolation
+to PASS. It does **not** authorize OA-2, OA-3, live probes, or
+Phase 10.4C-B.
+
+| Label | Result |
+| --- | --- |
+| OA-1 | **PROVIDED** (Option A) |
+| CONTROL-XWS | **NOT VERIFIED** (accepted residual) |
+| G2 Production token screenshot | **NOT AUTHORIZED** |
+| G5 / G6 live negative tests | **BLOCKED** (unchanged) |
+| OA-2 / OA-3 | **PENDING** |
+| OA-5 live-probe prohibition | in force |
+| OA-6 / Phase 10.4C-B | **NOT AUTHORIZED** |
+| Overall runtime isolation | **NOT VERIFIED** |
+| Phase 10.4C | **NOT COMPLETE** |
+
+Safety declaration for this recording:
+
+- No Production probes were performed.
+- No Production or Staging Shell commands were executed.
+- No live database connections were made.
+- No cleanup operation was executed.
+- No storage objects were read, written, or deleted.
+- No migrations were executed.
+- No restore or export operations were performed.
+- No credentials or DSNs were exposed.
+- No infrastructure or application configuration was changed.
+- No deployment was performed.
+- Phase 10.4C-B was not authorized or executed.
