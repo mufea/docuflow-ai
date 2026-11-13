@@ -3482,7 +3482,13 @@ Owner-reported cleanup SHA remains `381b201` (Staging Auto-Deploy
 ~15:17; Production **Resumed** ~15:27). Post-#102 cleanup SHA
 **NOT VERIFIED**. Last successful crons still predate OA-3.
 
-PHASE 10.4C-A10 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A10 DOCUMENTATION: **MERGED** (PR
+[#103](https://github.com/mufea/docuflow-ai/pull/103);
+merge `1cdf250b8206973865ee14d8b4a099375e6522e1`,
+`2026-11-13T16:44:50+07:00` / **13 Nov 2026, 16:44 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not authorize log inspection,
+cleanup, or Stage B.
 PR [#103](https://github.com/mufea/docuflow-ai/pull/103) repository CI:
 **SUCCESS** [43403099428](https://github.com/mufea/docuflow-ai/actions/runs/43403099428)
 on `467ae37` (Python `131810621108`, Web `131810620550`; completed
@@ -3504,3 +3510,34 @@ PHASE 10.4C-B: **NOT AUTHORIZED**.
 OA-5: **IN FORCE**.
 DEPLOY: **NOT AUTHORIZED**.
 LIVE CLEANUP: **NOT AUTHORIZED**.
+Phase 10.4C-A11: see below.
+
+## Phase 10.4C-A11 — Owner-gated OA-3 verification readiness
+
+Documentation-only plan. Baseline `origin/main`
+**`1cdf250b8206973865ee14d8b4a099375e6522e1`**. Report:
+`docs/reports/PHASE_10_4C_A11_OA3_VERIFICATION_READINESS.md`.
+No application, Blueprint, env, database, storage, deploy, cleanup,
+log, Shell, or live probe. Stage B was **not** started.
+APPLICATION CODE CHANGES: **NONE**.
+
+Defines Category A (read-only cron logs; **NOT APPROVED**) versus
+Category B (Trigger Run, Shell, `--dry-run`, deploy; **NOT
+AUTHORIZED**). Category A does not imply Category B. Source has no
+cleanup execution id or git SHA in logs. Success markers are
+`cleanup_cli_ok` / `cleanup_finished`. OA-3 execution remains
+**NOT VERIFIED**.
+
+PHASE 10.4C-A11 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+OA-A11-LOGS: **NOT APPROVED**.
+OA-3 EXECUTION: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+CONTROL-XWS: **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C: **NOT COMPLETE**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+OA-5: **IN FORCE**.
+DEPLOY: **NOT AUTHORIZED**.
+LIVE CLEANUP: **NOT AUTHORIZED**.
+CATEGORY A LOG INSPECTION: **NOT AUTHORIZED**.
