@@ -3099,11 +3099,20 @@ No application, Blueprint, env, database, storage, deploy, or
 cleanup mutation. Stage B was **not** started. Phase 10.4C is
 **not** complete because this assessment exists.
 
-PHASE 10.4C-A3 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A3 DOCUMENTATION: **MERGED** (PR
+[#94](https://github.com/mufea/docuflow-ai/pull/94);
+merge `d61ea1ae3de086fa118eef192bdbba4512dfbcaa`,
+`2026-11-13T03:54:32Z` / **13 Nov 2026, 10:54 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not change runtime
+classifications and does **not** authorize Stage B.
 PR [#94](https://github.com/mufea/docuflow-ai/pull/94) repository CI:
 **SUCCESS** [43361630872](https://github.com/mufea/docuflow-ai/actions/runs/43361630872)
 (Python `131676255789`, Web `131676255941`; completed
 **13 Nov 2026, 10:52 Asia/Jakarta**). Repository CI is not isolation.
+`main` push CI after PR [#94](https://github.com/mufea/docuflow-ai/pull/94):
+**SUCCESS** [43362033546](https://github.com/mufea/docuflow-ai/actions/runs/43362033546).
+Repository CI is not isolation.
 RENDER WORKSPACE SEPARATION: **PASS** (OWNER-PROVIDED).
 STAGING SERVICE MEMBERSHIP: **PASS** (OWNER-PROVIDED).
 TEAM MEMBERSHIP INVENTORY: **PASS** (OWNER-PROVIDED).
@@ -3117,6 +3126,35 @@ bucket reject, no dry-run).
 STORAGE BOUNDARY: **PARTIALLY VERIFIED**.
 DATABASE BOUNDARY: **PARTIALLY VERIFIED**.
 CROSS-WORKSPACE ACCESS ISOLATION: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C: **NOT COMPLETE**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+Phase 10.4C-A4: see below.
+
+## Phase 10.4C-A4 — Owner-gated isolation verification plan
+
+Documentation-only planning. Baseline `origin/main`
+**`d61ea1ae3de086fa118eef192bdbba4512dfbcaa`** (expected SHA;
+exact match). Report:
+`docs/reports/PHASE_10_4C_A4_OWNER_GATED_VERIFICATION_PLAN.md`.
+No application, Blueprint, env, database, storage, deploy, cleanup,
+or live probe. Stage B was **not** started. Phase 10.4C is **not**
+complete because a plan is not verification.
+
+PHASE 10.4C-A4 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PR [#95](https://github.com/mufea/docuflow-ai/pull/95) repository CI:
+**SUCCESS** [43364445655](https://github.com/mufea/docuflow-ai/actions/runs/43364445655)
+(Python `131685423904`, Web `131685423613`; completed
+**13 Nov 2026, 11:18 Asia/Jakarta**). Repository CI is not isolation.
+VERIFICATION PLAN: **READY** for owner review.
+RUNTIME VERIFICATION: **NO-GO** — not authorized.
+CROSS-WORKSPACE ACCESS ISOLATION: **NOT VERIFIED**.
+PRODUCTION BUCKET PROTECTION: **FAIL** (source; unchanged).
+CLEANUP CLI SAFETY: **FAIL** (source; unchanged).
+STORAGE BOUNDARY: **PARTIALLY VERIFIED** (unchanged).
+DATABASE BOUNDARY: **PARTIALLY VERIFIED** (unchanged).
 RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
