@@ -2899,7 +2899,17 @@ No application code, Blueprint, env, database, or object mutation.
 SR7 API identity SQL and HeadBucket were **not** repeated. Stage B
 was **not** started.
 
-PHASE 10.4C-A1 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A1 DOCUMENTATION: **MERGED** (PR
+[#88](https://github.com/mufea/docuflow-ai/pull/88);
+merge `8874ed1b5c39b2919db11e4fa822660e7f239e25`,
+`2026-11-12T14:40:50Z` / **12 Nov 2026, 21:40 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not change runtime classifications
+and does **not** authorize Stage B.
+`main` push CI after PR [#88](https://github.com/mufea/docuflow-ai/pull/88):
+**SUCCESS** [43239711365](https://github.com/mufea/docuflow-ai/actions/runs/43239711365)
+(completed **12 Nov 2026, 21:42 Asia/Jakarta**). Repository CI is
+not isolation.
 GAP 1 CLEANUP DB IDENTITY: **PASS** (**OWNER-PROVIDED**
 `docuflow-staging-cleanup` Shell; database
 `docuflow_staging_db_ikpz`, user `docuflow_staging_db_ikpz_user`,
@@ -2910,8 +2920,54 @@ GAP 2 API R2 ENDPOINT + MASKED KEY: **PASS** (**OWNER-PROVIDED**
 `docuflow-staging-api` Shell; host
 `26d06bf0ca16ba951f1d19d5989e6663.r2.cloudflarestorage.com`; bucket
 `docuflowai-staging`; key masked `6c01…2307`).
-GAP 3 CLOUDFLARE TOKEN SCOPE: **NOT VERIFIED**.
-GAP 4 WORKSPACE EXCLUSIVITY: **NOT VERIFIED**.
+GAP 3 CLOUDFLARE TOKEN SCOPE: **PASS** (**OWNER-PROVIDED** A2;
+token `docuflowai-staging`; read/write/list; bucket
+`docuflowai-staging` only). A1-time classification was
+**NOT VERIFIED**. Production negative access: **NOT VERIFIED**.
+GAP 4 WORKSPACE EXCLUSIVITY: **PASS** (**OWNER-PROVIDED** A2
+08:53–08:54; workspaces `docuflowai` vs `docuflowai staging`).
+A1-time **NOT VERIFIED** and A2 08:46 **NOT MET** are historical.
 RUNTIME ISOLATION VERIFIED: **NO**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
+Phase 10.4C-A2: see below.
+
+## Phase 10.4C-A2 — Render topology evidence reconciliation
+
+Documentation-only. Baseline `origin/main`
+**`8874ed1b5c39b2919db11e4fa822660e7f239e25`**. Updates:
+`docs/reports/PHASE_10_4C_A_RUNTIME_ISOLATION_ASSURANCE.md` §14
+and related §4–10 / §13 notes. No new assessment report.
+
+Owner screenshots **13 Nov 2026, 08:46 Asia/Jakarta**: Cloudflare R2
+token `docuflowai-staging` scoped to bucket `docuflowai-staging`,
+plus a same-workspace inventory later superseded. Further owner
+screenshots **13 Nov 2026, 08:53–08:54 Asia/Jakarta**: Production
+workspace `docuflowai` (project `Docuflow AI`, All 6) and Staging
+workspace `docuflowai staging` (ungrouped All 3). Owner screenshot
+**13 Nov 2026, 09:10 Asia/Jakarta**: Staging All 4 includes
+`docuflow-staging-cleanup` (Successful build). No application code,
+Blueprint, env, database, or object mutation. No Production probe.
+Cleanup was not executed. Token values and secret keys were not
+recorded. Stage B was **not** started.
+
+PHASE 10.4C-A2 DOCUMENTATION: **COMPLETE – UNMERGED** (PR
+[#89](https://github.com/mufea/docuflow-ai/pull/89)).
+PR [#89](https://github.com/mufea/docuflow-ai/pull/89) repository CI
+on `0a17661`: **SUCCESS**
+[43348503917](https://github.com/mufea/docuflow-ai/actions/runs/43348503917)
+(completed **13 Nov 2026, 08:58 Asia/Jakarta**). Repository CI is
+not isolation.
+GAP 1 CLEANUP DB IDENTITY: **PASS** (A1 unchanged).
+STAGING CLEANUP SERVICE LOCATION: **PASS** (**OWNER-PROVIDED** 09:10
+All 4). 08:54 All 3 omission is historical. Successful build is not
+a cleanup run.
+GAP 2 API R2 ENDPOINT + MASKED KEY: **PASS** (unchanged).
+GAP 3 CLOUDFLARE TOKEN SCOPE: **PASS** (**OWNER-PROVIDED**; unchanged).
+GAP 4 WORKSPACE EXCLUSIVITY: **PASS** (**OWNER-PROVIDED** 08:53–08:54;
+reconfirmed 09:10 All 4). 08:46 **NOT MET** is historical.
+CROSS-WORKSPACE ACCESS ISOLATION: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
