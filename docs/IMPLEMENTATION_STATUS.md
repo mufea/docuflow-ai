@@ -3608,6 +3608,11 @@ owner action register. Does **not** fill OA-A11-LOGS, approve
 Category A, verify OA-3 execution, or authorize Phase 10.4C-B.
 
 PHASE 10.4C-A12 EVIDENCE LEDGER: **COMPLETE – UNMERGED** (this PR).
+PR [#106](https://github.com/mufea/docuflow-ai/pull/106) repository CI:
+**SUCCESS** [43413392721](https://github.com/mufea/docuflow-ai/actions/runs/43413392721)
+on `1f11f57` (Python `131845203657`, Web `131845203008`; completed
+**13 Nov 2026, 18:01 Asia/Jakarta**). Repository CI is not isolation
+and is not a deploy.
 OA-A11-LOGS: **UNFILLED**.
 CATEGORY A: **NOT APPROVED**.
 OA-3 EXECUTION: **NOT VERIFIED**.
