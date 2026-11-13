@@ -194,3 +194,22 @@ documentation merges.
 - Phase 10.4C-B was not authorized or executed.
 - Category A was **not** approved or executed.
 - OA-5 was **not** modified.
+
+## 7. Post-A14 amendment (13 Nov 2026, 20:25 Asia/Jakarta)
+
+This section updates the living register after a later owner
+message. It does **not** rewrite the A12-time snapshot in §§2–6.
+
+| ID | A12 status | A14 status | Note |
+| --- | --- | --- | --- |
+| OA-A12-CAT-A | **NOT APPROVED** | **APPROVED** | Read-only cron logs only; EDY ALAMSAH `Confirmed` |
+| OA-A11-LOGS | **UNFILLED** | **UNFILLED** | Authorization recorded; log artifacts still missing |
+| OA-A12-OA3 | **NOT VERIFIED** | **NOT VERIFIED** | No post-window success log collected |
+| OA-A12-XWS | **NOT VERIFIED** | **NOT VERIFIED** | Not in Category A scope |
+| OA-A12-ISO | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
+| OA-6 | **NOT AUTHORIZED** | **NOT AUTHORIZED** | Owner explicitly withheld 10.4C-B |
+
+Authoritative A14 report:
+`docs/reports/PHASE_10_4C_A14_CATEGORY_A_APPROVAL.md`.
+Inspection attempt: `RENDER_API_KEY` **UNSET**; logs **not**
+retrieved; no fabricated lines.

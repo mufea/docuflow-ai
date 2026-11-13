@@ -49,6 +49,13 @@ ledger section) plus
 `docs/reports/PHASE_10_4C_A12_OWNER_EVIDENCE_LEDGER.md`.
 No later document on `main` already marks the ledger **MERGED**.
 
+Later git status (not an A13-time claim): PR
+[#107](https://github.com/mufea/docuflow-ai/pull/107) **MERGED**
+`fbcd8ad` (**13 Nov 2026, 20:10 Asia/Jakarta**). The A13
+**COMPLETE – UNMERGED** merge-status is therefore stale. Category A
+and OA-A11-LOGS rows above remain the A13-time classification;
+see A14 for the later approval.
+
 PR [#107](https://github.com/mufea/docuflow-ai/pull/107) head CI on
 `e78d637`: **SUCCESS**
 [43415684635](https://github.com/mufea/docuflow-ai/actions/runs/43415684635)
