@@ -729,3 +729,24 @@ Current A2 decision:
 | Phase 10.4C-B | **NOT AUTHORIZED** |
 
 Do not convert overall isolation into PASS. Do not start Stage B.
+
+## 15. Phase 10.4C-A2R — post-merge reconciliation
+
+Time: **13 Nov 2026, 09:22 Asia/Jakarta**. Documentation only.
+PR [#89](https://github.com/mufea/docuflow-ai/pull/89) **MERGED**
+`3e807db52939a21a02ca4c2cd09c99bf295b44ea`
+(`2026-11-13T02:15:24Z` / **13 Nov 2026, 09:15 Asia/Jakarta**).
+`main` CI [43350850093](https://github.com/mufea/docuflow-ai/actions/runs/43350850093)
+**SUCCESS**. Repository CI is not isolation.
+
+A2 classifications in §14.6 are unchanged except this recon adds:
+
+- Project membership of the four staging services: **NOT VERIFIED**
+  (09:10 project `staging` has no active services; inventory is
+  ungrouped).
+- Gap 4 as a complete isolation control: **PARTIALLY VERIFIED**.
+  Workspace exclusivity **PASS** is not runtime isolation **PASS**.
+- Cross-workspace access remains **NOT VERIFIED**.
+- Phase 10.4C-B remains **NOT AUTHORIZED**.
+
+Full recon: `docs/reports/PHASE_10_4C_A2R_POST_MERGE_RECONCILIATION.md`.
