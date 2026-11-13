@@ -47,6 +47,7 @@ Verified this pass (`git fetch origin main`;
 | Commit date | `2026-11-13 10:54:32 +0700` / **13 Nov 2026, 10:54 Asia/Jakarta** |
 | Merged by | `mufea` |
 | `main` CI after #94 | [43362033546](https://github.com/mufea/docuflow-ai/actions/runs/43362033546) **SUCCESS** — repository CI, **not** isolation |
+| PR [#95](https://github.com/mufea/docuflow-ai/pull/95) CI | [43364445655](https://github.com/mufea/docuflow-ai/actions/runs/43364445655) **SUCCESS** (Python `131685423904`, Web `131685423613`; completed **13 Nov 2026, 11:18 Asia/Jakarta**) — repository CI, **not** isolation |
 | Auditor | Cursor Agent (this workspace) |
 | Authorized owner | EDY ALAMSAH (**owner-reported**) |
 | Working tree at start | clean at expected baseline after branch create |
