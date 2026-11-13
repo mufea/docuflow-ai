@@ -3786,8 +3786,13 @@ SOURCE-CONSISTENT. Service identity, Scheduled trigger, and SHA on
 that Run are **not** independently established. OA-A11-LOGS is
 **not** closed as VERIFIED. OA-3 remains **NOT VERIFIED**.
 
-PHASE 10.4C-A15 ATTRIBUTION DOCUMENTATION: **COMPLETE – UNMERGED**
-(this PR).
+PHASE 10.4C-A15 ATTRIBUTION DOCUMENTATION: **MERGED** (PR
+[#110](https://github.com/mufea/docuflow-ai/pull/110);
+merge `5ca8867de870a784bf34225e5a15ac01624a4eb8`,
+`2026-11-13T14:19:53Z` / **13 Nov 2026, 21:19 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not close OA-A11-LOGS as
+VERIFIED, verify OA-3 execution, or authorize Stage B.
 CATEGORY A: **APPROVED** (read-only Render cron logs only).
 OA-A11-LOGS: **PARTIALLY VERIFIED** / **NOT VERIFIED** as closed.
 OA-3 EXECUTION: **NOT VERIFIED**.
@@ -3801,5 +3806,39 @@ OA-5: **IN FORCE**.
 DEPLOY: **NOT AUTHORIZED**.
 LIVE CLEANUP: **NOT AUTHORIZED**.
 CATEGORY B: **NOT AUTHORIZED**.
-OWNER ACTIONS: **REQUIRED** / **OPEN** (Runs row + SHA on the
-14:02 UTC Run; no new execution required).
+OWNER ACTIONS: **REQUIRED** / **OPEN**.
+Phase 10.4C-A17: see below.
+
+## Phase 10.4C-A17 — OA-A11-LOGS closure and OA-3 evidence assessment
+
+Documentation-only. Baseline `origin/main`
+**`5ca8867de870a784bf34225e5a15ac01624a4eb8`** (**exact match**).
+Report: `docs/reports/PHASE_10_4C_A17_OA11_LOGS_CLOSURE.md`.
+No application, Blueprint, env, database, storage, deploy, Shell,
+CONTROL-XWS, OA-3 execution, or Stage B.
+APPLICATION CODE CHANGES: **NONE**.
+
+Records A17 owner prompt: 14:02 UTC is **Manual supporting
+evidence**; Production `docuflow-cleanup`; OWNER-CONFIRMED secret
+restore; OWNER-CONFIRMED Scheduled Run ~21:30 Asia/Jakarta with
+success tokens. A16 report is **not** in the repository. Run-specific
+deploy SHA remains **NOT VERIFIED**. OA-A11-LOGS is **not** closed
+as VERIFIED. OA-3 remains **NOT VERIFIED**. Cron SUCCESS is not
+OA-3 completion and is not isolation.
+
+PHASE 10.4C-A17 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+CATEGORY A: **APPROVED** (read-only Render cron logs only).
+OA-A11-LOGS: **PARTIALLY VERIFIED**.
+OA-3 EXECUTION: **NOT VERIFIED**.
+CONTROL-XWS: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C: **NOT COMPLETE**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+OA-5: **IN FORCE**.
+DEPLOY: **NOT AUTHORIZED**.
+LIVE CLEANUP: **NOT AUTHORIZED**.
+CATEGORY B: **NOT AUTHORIZED**.
+OWNER ACTIONS: **REQUIRED** / **OPEN** (Run-specific SHA for the
+21:30 Scheduled Run; no new execution required).
