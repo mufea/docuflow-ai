@@ -9,7 +9,8 @@ A2 topology evidence update: **13 Nov 2026, 08:46 Asia/Jakarta (WIB)**
 **13 Nov 2026, 08:53–08:54 Asia/Jakarta (WIB)** (Gap 4 separate
 workspaces **PASS**, OWNER-PROVIDED) and **13 Nov 2026, 09:10
 Asia/Jakarta (WIB)** (`docuflow-staging-cleanup` listed in Staging
-All 4).
+All 4) and **13 Nov 2026, 09:59–10:03 Asia/Jakarta (WIB)** (cleanup
+R2 env **PASS**; distinct workspace IDs).
 No application-code change. No Blueprint sync. No deploy, migrate,
 cleanup, object write, or functional smoke. SR7 API identity SQL and
 HeadBucket were **not** repeated. Stage B is **NOT AUTHORIZED** and
@@ -256,11 +257,16 @@ re-run):
 - A2 09:10 Staging All 4 includes `docuflow-staging-cleanup`
   (Successful build). Current cleanup **service location** **PASS**.
   That is not a new identity SQL and is not a cleanup run.
+- A2 10:03 cleanup Shell: live `S3_BUCKET=docuflowai-staging`,
+  `STORAGE_BACKEND=s3`, Cloudflare R2 `S3_ENDPOINT_URL` host matching
+  the API. See §17. Cleanup was **not** executed.
+- A2 09:59–10:01 Workspace Settings: distinct Render workspace IDs
+  for `docuflowai` and `docuflowai staging`. See §17.
 
 Still open without Production probes:
 
 - Cross-workspace service, database, and secret access restrictions.
-- Cleanup live R2 env / HeadBucket.
+- Cleanup HeadBucket (env names **PASS**; object ping not repeated).
 - Render resource id for the observed Postgres IP.
 
 ## 5. Isolation assurance matrix
@@ -274,11 +280,11 @@ ambiguous, or would require a forbidden Production probe.
 | --- | --- | --- | --- |
 | PostgreSQL identity | Runtime database and user | **PASS** API and cleanup (`docuflow_staging_db_ikpz` / `docuflow_staging_db_ikpz_user` / `10.26.149.13:5432`) | OWNER-PROVIDED Shells (API SR7; cleanup A1 labeled) |
 | Database endpoint | Staging-specific endpoint/resource mapping | **NOT VERIFIED** as Render resource. Observed `10.26.149.13:5432` (OWNER-PROVIDED). Template `fromDatabase: docuflow-staging-db` is **REPOSITORY VERIFIED** only | OWNER-PROVIDED IP; template ≠ live mapping |
-| R2 bucket | Runtime bucket identity | **PASS** for API access to `docuflowai-staging`. Cleanup: **NOT VERIFIED** | OWNER-PROVIDED HeadBucket + `S3_BUCKET` name |
+| R2 bucket | Runtime bucket identity | **PASS** API HeadBucket and cleanup live `S3_BUCKET=docuflowai-staging`. Cleanup HeadBucket not repeated | OWNER-PROVIDED API HeadBucket + cleanup Shell env |
 | R2 credentials | Staging credential-to-bucket mapping | **PASS** API masked key present (`6c01…2307`). Exclusive Cloudflare scope: **PASS** OWNER-PROVIDED (token `docuflowai-staging`, bucket `docuflowai-staging` only). Production negative access: **NOT VERIFIED** | OWNER-PROVIDED API Shell (A1) + Cloudflare token screenshot (A2) |
 | R2 endpoint | Correct account and endpoint | **PASS** API host `26d06bf0ca16ba951f1d19d5989e6663.r2.cloudflarestorage.com` (Cloudflare R2) | OWNER-PROVIDED API Shell (A1); no second HeadBucket |
 | Environment configuration | No Production fallback | Template: **PASS** (no production `fromDatabase` / `fromService`). Live dashboard drift: **NOT VERIFIED**. Code default bucket `docuflow-documents` is a fallback **if** `S3_BUCKET` unset; live API name is owner-confirmed staging | REPOSITORY VERIFIED template; live partial |
-| Cleanup isolation | Staging-only target configuration | **PASS** for DB identity at A1 (same as API). A2 09:10 service location **PASS** (listed in Staging All 4). Cleanup R2 env/HeadBucket: **NOT VERIFIED**. Successful build is not a cleanup run | OWNER-PROVIDED Shell DB + 09:10 dashboard |
+| Cleanup isolation | Staging-only target configuration | **PASS** DB identity (A1). Service location **PASS** (09:10/09:29). Live R2 env **PASS** (10:03 `S3_BUCKET=docuflowai-staging`). Cleanup not executed. HeadBucket not repeated | OWNER-PROVIDED Shells and dashboards |
 | Job processing | Correct broker and execution boundary | **PASS** as architecture for inline API jobs (same process as API). Historical `/ready` `broker=inline`. Not a second DB/bucket proof | REPOSITORY VERIFIED + historical INDEPENDENTLY VERIFIED `/ready` |
 | Service configuration | Staging resources mapped correctly | **PASS** for Blueprint names. Live API on `350v`. A2 09:10 Staging All 4: api, cleanup, db, web. No Production names | REPOSITORY VERIFIED + OWNER-PROVIDED dashboards |
 | Production separation | Evidence of prevented unintended access | Workspace exclusivity **PASS** (OWNER-PROVIDED A2 08:53–08:54). Cross-workspace access **NOT VERIFIED**. Negative Production tests were not run and must not be run | OWNER-PROVIDED topology; limitation |
@@ -308,8 +314,9 @@ This agent did **not** independently execute identity SQL or HeadBucket.
 
 ## 7. Remaining risks
 
-1. Cleanup cron DB identity now matches the API. Cleanup bucket live
-   values remain unread (template copies API S3 vars).
+1. Cleanup cron DB identity matches the API. Cleanup live R2 env
+   now matches the API bucket name (`docuflowai-staging`, §17).
+   Cleanup HeadBucket was not repeated. Cleanup was not executed.
 2. Staging R2 token dashboard scope is `docuflowai-staging` only
    (A2 OWNER-PROVIDED). Live Production-bucket access was not
    negatively tested.
@@ -353,7 +360,8 @@ cross-environment paths are proven impossible.
 | IMPLEMENTATION COMPLETE | **MERGED** for Phase 10.4B heartbeat work; this pass is documentation |
 | REPOSITORY CI SUCCESS | **YES** on `main` after #85 — not isolation |
 | CONFIGURATION ISOLATION (template) | **PASS** |
-| RUNTIME DATABASE ISOLATION | **PASS** API and cleanup (**OWNER-PROVIDED** A1). Cleanup R2 live env **NOT VERIFIED** |
+| RUNTIME DATABASE ISOLATION | **PASS** API and cleanup (**OWNER-PROVIDED** A1) |
+| CLEANUP R2 LIVE ENV | **PASS** (`S3_BUCKET=docuflowai-staging`, `STORAGE_BACKEND=s3`, R2 endpoint; OWNER-PROVIDED 10:03). HeadBucket not repeated |
 | RUNTIME STORAGE ISOLATION | **PASS** API HeadBucket access (**OWNER-PROVIDED**). Exclusive token dashboard scope **PASS** (OWNER-PROVIDED A2). Production negative access **NOT VERIFIED** |
 | WORKSPACE EXCLUSIVITY | **PASS** (OWNER-PROVIDED A2 08:53–08:54; workspaces `docuflowai` and `docuflowai staging`) |
 | CROSS-WORKSPACE ACCESS ISOLATION | **NOT VERIFIED** |
@@ -364,10 +372,10 @@ cross-environment paths are proven impossible.
 Stage A does **not** authorize Stage B.
 
 Critical remaining dimensions: cross-workspace access **NOT VERIFIED**,
-cleanup R2 live env, database Render resource mapping, and prevented
-Production access. Stage B preconditions require either those items
-to become PASS or **explicit owner acceptance** of each remaining
-limitation.
+database Render resource mapping, cleanup HeadBucket not repeated,
+and prevented Production access. Stage B preconditions require
+either those items to become PASS or **explicit owner acceptance**
+of each remaining limitation.
 
 ## 10. Recommended next actions
 
@@ -376,9 +384,8 @@ Owner decision only (do not auto-start Stage B):
 1. Review this report, including A2 Gap 4 workspace exclusivity
    (**PASS**, OWNER-PROVIDED separate workspaces) and Gap 3 token
    scope (**PASS**, OWNER-PROVIDED).
-2. Remaining read-only options: cleanup live R2 env; optional
-   cross-workspace permission evidence. Do not probe Production. Do
-   not run cleanup.
+2. Remaining read-only options: optional cross-workspace permission
+   evidence. Do not probe Production. Do not run cleanup.
 3. If remaining **NOT VERIFIED** items are accepted in writing, issue a
    **separate** Stage B authorization that names the exact tests.
 4. Until that authorization exists, functional smoke remains
@@ -782,3 +789,56 @@ rename versus a new project.
 | Successful build = cleanup run | **NO** |
 | RUNTIME ISOLATION VERIFIED | **NO** |
 | Phase 10.4C-B | **NOT AUTHORIZED** |
+
+## 17. Cleanup R2 env and distinct workspace IDs (OWNER-PROVIDED)
+
+Time: **13 Nov 2026, 09:59–10:03 Asia/Jakarta**. Evidence class:
+**OWNER-PROVIDED** screenshots. Agent did not open Render. Cleanup
+was **not** executed (`echo` only). Access Key ID digits beyond the
+already recorded mask `6c01…2307`, secret keys, and owner email are
+**not** copied into this repository.
+
+### 17.1 Cleanup Shell R2 env — **PASS**
+
+Service chrome: `docuflow-staging-cleanup` in workspace
+`docuflowai staging`. Observed prints:
+
+| Field | Observed |
+| --- | --- |
+| `S3_BUCKET` | `docuflowai-staging` |
+| `STORAGE_BACKEND` | `s3` |
+| `S3_ENDPOINT` | empty (unset name; live var is `S3_ENDPOINT_URL`) |
+| `S3_ENDPOINT_URL` host | Cloudflare R2; prefix matches API host `26d06bf0ca16ba951f1d19d5989e6663.r2.cloudflarestorage.com` |
+| `S3_ACCESS_KEY_ID` | present; consistent with masked `6c01…2307` (no extra digits recorded) |
+
+Classification: **PASS** — cleanup process env names the staging
+bucket and a Cloudflare R2 endpoint, consistent with the API.
+This is **not** a HeadBucket repeat and **not** a cleanup job run.
+
+### 17.2 Distinct Render workspace IDs
+
+Workspace Settings screenshots (Hobby plan both). IDs are dashboard
+identifiers, not credentials.
+
+| Workspace name | Workspace ID (OWNER-PROVIDED) | Phone clock |
+| --- | --- | --- |
+| `docuflowai` | `tea-d84phnqa8673blqsn0` | 9:59 AM |
+| `docuflowai staging` | `tea-d9f6cddc9c73dqpab0` | 10:00 AM |
+
+The IDs differ. This supports Gap 4 workspace exclusivity **PASS**
+with a second artifact class (settings ID, not only chrome names).
+It is **not** independent verification by this agent.
+
+Also observed (OWNER-PROVIDED; not isolation PASS/FAIL):
+
+- Staging Projects: project `DocuflowAI` “All services are up and
+  running” (10:01 AM).
+- Environment Groups: none in either workspace.
+- 2FA and Google SSO: not enforced on either Hobby workspace.
+- Same owner is Admin on both workspaces. Shared human admin is
+  expected and is **not** a demonstrated runtime breach. It also
+  does **not** prove cross-workspace access is impossible.
+
+Cross-workspace access isolation remains **NOT VERIFIED**. Overall
+runtime isolation remains **NOT VERIFIED**. Phase 10.4C-B remains
+**NOT AUTHORIZED**.
