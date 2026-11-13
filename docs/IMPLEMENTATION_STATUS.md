@@ -3244,16 +3244,49 @@ env, Render, deploy, cleanup execution, or probe. Stage B was
 **not** started. A merged code PR does **not** authorize live
 cleanup.
 
-PHASE 10.4C-A4 OA-3 IMPLEMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A4 OA-3 IMPLEMENTATION: **MERGED** (PR
+[#98](https://github.com/mufea/docuflow-ai/pull/98);
+merge `e9453bc1436a66459d4ba6eab954ef5c70624392`,
+`2026-11-13T14:08:28+07:00` / **13 Nov 2026, 14:08 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not change runtime isolation,
+is not a deploy, and does **not** authorize live cleanup.
 PR [#98](https://github.com/mufea/docuflow-ai/pull/98) repository CI:
 **SUCCESS** [43382801577](https://github.com/mufea/docuflow-ai/actions/runs/43382801577)
 (Python `131744268966`, Web `131744268833`; completed
 **13 Nov 2026, 14:03 Asia/Jakarta**). Repository CI is not isolation
-and is not a deploy. A merged code PR does **not** authorize live
-cleanup.
+and is not a deploy.
 OA-3: **PROVIDED** (APPROVE).
 CLEANUP CLI SAFETY: **PASS** (repository; unit tests).
 LIVE CLEANUP: **NOT AUTHORIZED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C: **NOT COMPLETE**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+DEPLOY: **NOT AUTHORIZED**.
+Phase 10.4C-A4 OA-5: see below.
+
+## Phase 10.4C-A4 — OA-5 standing safety prohibition
+
+Documentation-only. Baseline `origin/main`
+**`e9453bc1436a66459d4ba6eab954ef5c70624392`**. Owner EDY ALAMSAH
+confirmed OA-5 on **13 Nov 2026, 14:16 Asia/Jakarta**. No live
+probe, Shell, SQL, HeadBucket, ListObjects, cleanup, deploy,
+migration, restore/export, or secret disclosure is permitted
+unless a later message names the exact action and scope. Merge,
+CI SUCCESS, documentation, a previous phase approval, and a
+generic “continue” do not authorize those actions. Production
+resources remain untouched. Stage B was **not** started.
+
+PHASE 10.4C-A4 OA-5 RECORD: **COMPLETE – UNMERGED** (this PR).
+PR [#99](https://github.com/mufea/docuflow-ai/pull/99) repository CI:
+**SUCCESS** [43384688433](https://github.com/mufea/docuflow-ai/actions/runs/43384688433)
+(Python `131750284094`, Web `131750284317`; completed
+**13 Nov 2026, 14:19 Asia/Jakarta**). Repository CI is not isolation
+and is not a live authorization.
+OA-5: **PROVIDED** (APPROVE; in force).
+LIVE PROBES / CLEANUP / DEPLOY: **NOT AUTHORIZED**.
 RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
