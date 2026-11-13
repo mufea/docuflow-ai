@@ -3647,14 +3647,20 @@ Corrects stale A12 evidence-ledger **COMPLETE – UNMERGED** after PR
 [#106](https://github.com/mufea/docuflow-ai/pull/106). Owner actions
 remain **OPEN**. Merge-status correction is not evidence closure.
 
-PHASE 10.4C-A13 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A13 DOCUMENTATION: **MERGED** (PR
+[#107](https://github.com/mufea/docuflow-ai/pull/107);
+merge `fbcd8adf8c5d7e6be7589304c1c4a82757f055ec`,
+`2026-11-13T20:10:31+07:00` / **13 Nov 2026, 20:10 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not fill OA-A11-LOGS, approve
+Category A, verify OA-3 execution, or authorize Stage B.
 PR [#107](https://github.com/mufea/docuflow-ai/pull/107) repository CI:
 **SUCCESS** [43415684635](https://github.com/mufea/docuflow-ai/actions/runs/43415684635)
 on `e78d637` (Python `131852859359`, Web `131852858868`; completed
 **13 Nov 2026, 18:17 Asia/Jakarta**). Repository CI is not isolation
 and is not a deploy.
 OA-A11-LOGS: **UNFILLED**.
-CATEGORY A: **NOT APPROVED**.
+CATEGORY A: **NOT APPROVED** (superseded by Phase 10.4C-A14 below).
 OA-3 EXECUTION: **NOT VERIFIED**.
 CONTROL-XWS: **NOT VERIFIED**.
 RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
@@ -3666,3 +3672,46 @@ OA-5: **IN FORCE**.
 DEPLOY: **NOT AUTHORIZED**.
 LIVE CLEANUP: **NOT AUTHORIZED**.
 OWNER ACTIONS: **REQUIRED** / **OPEN**.
+Phase 10.4C-A14: see below.
+
+## Phase 10.4C-A14 — Category A approval and OA-A11-LOGS inspection
+
+Documentation-only plus an authorized Category A access check.
+Baseline `origin/main`
+**`fbcd8adf8c5d7e6be7589304c1c4a82757f055ec`**. Report:
+`docs/reports/PHASE_10_4C_A14_CATEGORY_A_APPROVAL.md`.
+No application, Blueprint, env, database, storage, deploy, cleanup,
+Shell, CONTROL-XWS, OA-3 execution, or Stage B.
+APPLICATION CODE CHANGES: **NONE**.
+
+Records explicit owner APPROVE (EDY ALAMSAH; conversation
+**13 Nov 2026, 20:20 Asia/Jakarta**; re-confirmed **20:30** with
+written date **13 Nov 2026, 20:20**; earlier 2027 write
+**superseded**) for **read-only Render cron log inspection** only.
+Corrects stale A13 **COMPLETE – UNMERGED**. Log artifacts were
+**not** retrieved: `RENDER_API_KEY` **UNSET**, Render CLI absent
+(re-checked **20:30**). OA-A11-LOGS log lines remain **UNFILLED**.
+Category A approval is not OA-3 execution proof.
+
+PHASE 10.4C-A14 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PR [#108](https://github.com/mufea/docuflow-ai/pull/108) repository CI:
+**SUCCESS** [43434467955](https://github.com/mufea/docuflow-ai/actions/runs/43434467955)
+on `8adb824` (Python `131915897233`, Web `131915897899`; completed
+**13 Nov 2026, 20:33 Asia/Jakarta**). Prior head `6ca7892`: **SUCCESS**
+[43433058072](https://github.com/mufea/docuflow-ai/actions/runs/43433058072).
+Repository CI is not isolation and is not a deploy.
+CATEGORY A: **APPROVED** (read-only Render cron logs only).
+OA-A11-LOGS: **UNFILLED** (authorization recorded; log artifacts
+missing).
+OA-3 EXECUTION: **NOT VERIFIED**.
+CONTROL-XWS: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C: **NOT COMPLETE**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+OA-5: **IN FORCE** (named Category A logs exception only).
+DEPLOY: **NOT AUTHORIZED**.
+LIVE CLEANUP: **NOT AUTHORIZED**.
+CATEGORY B: **NOT AUTHORIZED**.
+OWNER ACTIONS: **REQUIRED** / **OPEN** (log artifacts).

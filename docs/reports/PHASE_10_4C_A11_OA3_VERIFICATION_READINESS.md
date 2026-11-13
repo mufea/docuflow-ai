@@ -153,7 +153,10 @@ Weaker supporting evidence (not by itself **EXECUTION VERIFIED**):
 ## 4. Category A — Read-only evidence inspection (future only)
 
 **NOT AUTHORIZED** until the owner fills §7 and names this category
-explicitly.
+explicitly. Later: Category A was **APPROVED** for read-only cron
+logs only — see
+`docs/reports/PHASE_10_4C_A14_CATEGORY_A_APPROVAL.md`. Log
+artifacts remain **UNFILLED**. Category B remains **NOT AUTHORIZED**.
 
 Permitted **after** that APPROVE, and only for the named service and
 window:
@@ -268,6 +271,14 @@ Phase 10.4C-B: NOT IMPLIED
 OA-5: remains IN FORCE except this named Category A window
 ```
 
+Later record (do **not** treat the block above as filled): Category A
+was **APPROVED** by EDY ALAMSAH in a later owner message (conversation
+clock **13 Nov 2026, 20:20 Asia/Jakarta**; re-confirmed **20:30** with
+written date **13 Nov 2026, 20:20**; earlier 2027 write superseded)
+for read-only Render cron log inspection only. See
+`docs/reports/PHASE_10_4C_A14_CATEGORY_A_APPROVAL.md`. Log artifacts
+remain **UNFILLED**. This §7 template is not rewritten.
+
 ## 8. Failure and stop conditions
 
 | Observation | Classification | Action |
@@ -292,7 +303,8 @@ Do not diagnose red Runs as OA-3 fail-fast without the
 4. Cleanup GitHub Deployments: **none**.
 5. Post-#102/#103 cleanup SHA (whether still `381b201`): **NOT VERIFIED**.
 6. CONTROL-XWS: **NOT VERIFIED**.
-7. Category A: **NOT APPROVED**.
+7. Category A: **NOT APPROVED** at A11 time. Later: **APPROVED**
+   (read-only cron logs only) — see A14.
 8. Phase 10.4C-B: **NOT AUTHORIZED**.
 
 ## 10. Safety declaration
