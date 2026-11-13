@@ -289,7 +289,7 @@ DSNs, or unmasked credentials.
 | OA-2 | Authorize or decline a **separate** source PR to default-flag `docuflowai-documents` | RISK-A default helper omitted the live Production bucket name | “APPROVE OA-2” or “DECLINE OA-2” in writing | Live env; no deploy from the code PR until separately approved | **PROVIDED** — APPROVE; see §11 | G3 |
 | OA-3 | Authorize or decline a **separate** source PR for cleanup fail-fast / bucket reject / dry-run | RISK-B remains **FAIL** until source fix | “APPROVE OA-3” or “DECLINE OA-3” | No live cleanup; no Production bucket | **PROVIDED** — APPROVE; see §12 | G4 |
 | OA-4 | Optional: Production dashboard name-only reconfirm of Postgres database **name** and `S3_BUCKET` **name** | Strengthens RISK-C/D name distinctness without connecting | Cropped service Info / env **name** rows; no DSN, no secret | Databases, objects, cleanup | PENDING (optional) | identity only |
-| OA-5 | Standing prohibition: no live probes, Shell, SQL, HeadBucket, cleanup, deploy, or secret paste unless a later message names the exact action and says APPROVE | Prevent implied authorization | Do nothing | All live resources | **PENDING** (in force as prohibition) | all live gates |
+| OA-5 | Standing prohibition: no live probes, Shell, SQL, HeadBucket, cleanup, deploy, or secret paste unless a later message names the exact action and says APPROVE | Prevent implied authorization | Do nothing | All live resources | **PROVIDED** — APPROVE (in force); see §13 | all live gates |
 | OA-6 | Do **not** authorize Phase 10.4C-B until this plan and A3 classifications are accepted | Stage B is functional Staging testing, not isolation closure | Explicit “APPROVE Phase 10.4C-B” naming allowed Staging tests | Production; cleanup; migrations unless named | **PENDING** — currently **NOT AUTHORIZED** | G7 |
 
 ## 8. Phase 10.4C-B authorization prerequisites
@@ -306,7 +306,10 @@ following are true:
    Asia/Jakarta; see §12.** Recording APPROVE is not a live
    cleanup authorization.
 3. Owner sends a separate message that names Phase 10.4C-B and
-   the exact Staging tests permitted.
+   the exact Staging tests permitted. OA-5 **APPROVE** recorded
+   **13 Nov 2026, 14:16 Asia/Jakarta** (see §13) confirms that
+   merge, CI SUCCESS, documentation, a previous phase approval,
+   or a generic “continue” does **not** satisfy this item.
 4. Those tests remain Staging-only: no Production HTTP, Shell,
    SQL, storage, or cleanup unless separately named.
 5. Overall runtime isolation is still labeled **NOT VERIFIED**
@@ -524,6 +527,62 @@ A3 historical RISK-B **FAIL** at SHA `e62962b` / `d61ea1a` is
 preserved. This section records the later source closure.
 
 Safety declaration for OA-3 implementation:
+
+- No Production probes were performed.
+- No Production or Staging Shell commands were executed.
+- No live database connections were made.
+- No cleanup operation was executed.
+- No storage objects were read, written, or deleted.
+- No migrations were executed.
+- No restore or export operations were performed.
+- No credentials or DSNs were exposed.
+- No infrastructure or application configuration was changed.
+- No deployment was performed.
+- Phase 10.4C-B was not authorized or executed.
+
+## 13. OA-5 owner decision — standing prohibition **PROVIDED**
+
+Time: **13 Nov 2026, 14:16 Asia/Jakarta (WIB)**. Documentation
+only. Owner / Approver: EDY ALAMSAH (message recorded in this
+repository). Baseline at recording: `origin/main`
+`e9453bc1436a66459d4ba6eab954ef5c70624392` (Merge PR #98).
+
+This recording does **not** authorize any live action. It
+confirms the standing prohibition already listed in §7. OA-3
+merge `e9453bc` is **MERGED**, not **DEPLOYED**, and does **not**
+authorize live cleanup.
+
+Owner statement (recorded, not paraphrased as a stronger claim):
+
+- OA-5: **APPROVE**.
+- Standing safety prohibition is confirmed.
+- No live Production or Staging probes, Render Shell commands,
+  SQL connections, HeadBucket, ListObjects, cleanup execution,
+  deployment, migrations, restore/export operations, or secret
+  disclosure are permitted unless a separate explicit approval
+  names the exact action and scope.
+- No approval may be inferred from a merged PR, a successful CI
+  run, a documentation update, a previous phase approval, or a
+  generic instruction to continue.
+- Production resources must remain untouched.
+- This prohibition remains in force until explicitly superseded
+  by a new owner authorization.
+
+| Label | Result |
+| --- | --- |
+| OA-5 | **PROVIDED** (APPROVE; in force) |
+| G5 / G6 live tests | **BLOCKED** (unchanged) |
+| Live cleanup | **NOT AUTHORIZED** |
+| Deploy / migrate / restore / export | **NOT AUTHORIZED** |
+| OA-6 / Phase 10.4C-B | **NOT AUTHORIZED** |
+| Overall runtime isolation | **NOT VERIFIED** |
+| Phase 10.4C | **NOT COMPLETE** |
+
+OA-1 Option A, OA-2, and OA-3 remain **PROVIDED**. OA-0 and OA-4
+remain optional **PENDING**. OA-6 remains **PENDING**. This
+confirmation does **not** convert overall isolation to PASS.
+
+Safety declaration for this recording:
 
 - No Production probes were performed.
 - No Production or Staging Shell commands were executed.
