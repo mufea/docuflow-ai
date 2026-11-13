@@ -5,6 +5,7 @@ import threading
 
 from sqlalchemy.orm import Session, sessionmaker
 
+from docuflow.cleanup import validate_cleanup_configuration
 from docuflow.config import Settings
 from docuflow.jobs.retention import run_runtime_cleanup
 from docuflow.storage.base import ObjectStorage
@@ -52,6 +53,12 @@ class CleanupScheduler:
         self._thread = None
 
     def run_once(self) -> None:
+        errors = validate_cleanup_configuration(self.settings)
+        if errors:
+            for item in errors:
+                logger.error("cleanup_config %s", item)
+            logger.error("cleanup_scheduler_refused")
+            return
         session = self.session_factory()
         try:
             run_runtime_cleanup(session, self.storage, self.settings)
