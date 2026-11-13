@@ -78,6 +78,13 @@ not a cleanup deploy):
 - Python `131784512542`, Web `131784512806`
 - Completed **13 Nov 2026, 15:44 Asia/Jakarta**
 
+PR [#103](https://github.com/mufea/docuflow-ai/pull/103) head CI
+(**CI VERIFIED** on `467ae37`; not isolation; not a deploy):
+
+- [43403099428](https://github.com/mufea/docuflow-ai/actions/runs/43403099428) **SUCCESS**
+- Python `131810621108`, Web `131810620550`
+- Completed **13 Nov 2026, 16:40 Asia/Jakarta**
+
 A8R evidence documentation is already on `main` (PR #102). This
 pass does **not** duplicate screenshots. It reconciles git status
 and classification.
@@ -195,6 +202,7 @@ Minimum evidence that would be required later (not collected now):
 | OA-2 / OA-3 source on `origin/main` | **SOURCE VERIFIED** |
 | Targeted cleanup unit tests | **TEST VERIFIED** (20 passed) |
 | `main` CI after #102 | **CI VERIFIED** (not isolation) |
+| PR #103 head CI `467ae37` | **CI VERIFIED** (not isolation) |
 | Staging/Production API/web SHA `4772eb1` | **DEPLOYMENT VERIFIED** (GitHub Render App success `7761006389` / `7761006442` / `7761006496` / `7761006467` at **15:41**; `production_environment: true` is also set on Staging records and is **not** Production proof) |
 | Staging/Production cleanup SHA `381b201` | **DEPLOYMENT EVIDENCE PROVIDED** (OWNER-PROVIDED Deploys 15:32) |
 | Cleanup SHA independently via GitHub Deployments | **NOT VERIFIED** (no cron environments) |
