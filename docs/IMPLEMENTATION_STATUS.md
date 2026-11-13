@@ -3607,7 +3607,13 @@ Corrects stale Phase 10.4C-A12 **COMPLETE – UNMERGED** after PR
 owner action register. Does **not** fill OA-A11-LOGS, approve
 Category A, verify OA-3 execution, or authorize Phase 10.4C-B.
 
-PHASE 10.4C-A12 EVIDENCE LEDGER: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A12 EVIDENCE LEDGER: **MERGED** (PR
+[#106](https://github.com/mufea/docuflow-ai/pull/106);
+merge `4ae6dec312ebb401dde02d6cbca475cc13da19dc`,
+`2026-11-13T18:03:24+07:00` / **13 Nov 2026, 18:03 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not fill OA-A11-LOGS, approve
+Category A, verify OA-3 execution, or authorize Stage B.
 PR [#106](https://github.com/mufea/docuflow-ai/pull/106) repository CI:
 **SUCCESS** [43413392721](https://github.com/mufea/docuflow-ai/actions/runs/43413392721)
 on `1f11f57` (Python `131845203657`, Web `131845203008`; completed
@@ -3626,3 +3632,32 @@ OA-5: **IN FORCE**.
 DEPLOY: **NOT AUTHORIZED**.
 LIVE CLEANUP: **NOT AUTHORIZED**.
 OWNER ACTIONS: **OPEN**.
+Phase 10.4C-A13: see below.
+
+## Phase 10.4C-A13 — Evidence ledger accuracy and owner-action closure
+
+Documentation-only. Baseline `origin/main`
+**`4ae6dec312ebb401dde02d6cbca475cc13da19dc`**. Report:
+`docs/reports/PHASE_10_4C_A13_LEDGER_ACCURACY.md`.
+No application, Blueprint, env, database, storage, deploy, cleanup,
+log, Shell, or live probe. Stage B was **not** started.
+APPLICATION CODE CHANGES: **NONE**.
+
+Corrects stale A12 evidence-ledger **COMPLETE – UNMERGED** after PR
+[#106](https://github.com/mufea/docuflow-ai/pull/106). Owner actions
+remain **OPEN**. Merge-status correction is not evidence closure.
+
+PHASE 10.4C-A13 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+OA-A11-LOGS: **UNFILLED**.
+CATEGORY A: **NOT APPROVED**.
+OA-3 EXECUTION: **NOT VERIFIED**.
+CONTROL-XWS: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C: **NOT COMPLETE**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+OA-5: **IN FORCE**.
+DEPLOY: **NOT AUTHORIZED**.
+LIVE CLEANUP: **NOT AUTHORIZED**.
+OWNER ACTIONS: **REQUIRED** / **OPEN**.
