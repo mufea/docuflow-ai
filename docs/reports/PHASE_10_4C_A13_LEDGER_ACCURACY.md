@@ -49,6 +49,13 @@ ledger section) plus
 `docs/reports/PHASE_10_4C_A12_OWNER_EVIDENCE_LEDGER.md`.
 No later document on `main` already marks the ledger **MERGED**.
 
+PR [#107](https://github.com/mufea/docuflow-ai/pull/107) head CI on
+`e78d637`: **SUCCESS**
+[43415684635](https://github.com/mufea/docuflow-ai/actions/runs/43415684635)
+(Python `131852859359`, Web `131852858868`; completed **13 Nov 2026,
+18:17 Asia/Jakarta**). Repository CI is not isolation and is not a
+deploy.
+
 ## 2. Owner-action necessity
 
 | Requirement | Existing evidence | Owner action | Class | Final status |
