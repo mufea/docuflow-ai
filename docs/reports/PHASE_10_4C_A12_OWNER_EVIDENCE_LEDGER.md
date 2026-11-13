@@ -229,3 +229,17 @@ Owner-provided Production cron line recorded in
 | OA-A12-XWS | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
 | OA-A12-ISO | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
 | OA-6 | **NOT AUTHORIZED** | **NOT AUTHORIZED** | Unchanged |
+
+## 9. Post-attribution amendment (13 Nov 2026, 21:16 Asia/Jakarta)
+
+Owner-provided success tokens recorded in
+`docs/reports/PHASE_10_4C_A15_OA11_LOGS_ATTRIBUTION.md`.
+
+| ID | Prior A15 | After attribution | Note |
+| --- | --- | --- | --- |
+| OA-A12-CAT-A | **APPROVED** | **APPROVED** | Unchanged |
+| OA-A11-LOGS | **PARTIAL** | **PARTIALLY VERIFIED** | Success tokens OWNER-ASSERTED; not closed |
+| OA-A12-OA3 | **NOT VERIFIED** | **NOT VERIFIED** | Missing service / trigger / SHA-on-Run |
+| OA-A12-XWS | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
+| OA-A12-ISO | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
+| OA-6 | **NOT AUTHORIZED** | **NOT AUTHORIZED** | Unchanged |

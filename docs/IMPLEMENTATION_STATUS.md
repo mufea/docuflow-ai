@@ -3739,16 +3739,23 @@ least 32 characters.`). Fail-fast ran; OA-3 success remains
 `DOCUFLOW_SECRET_KEY`. This PR does **not** edit env or relax
 validation.
 
-PHASE 10.4C-A15 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A15 FAIL-FAST DOCUMENTATION: **MERGED** (PR
+[#109](https://github.com/mufea/docuflow-ai/pull/109);
+merge `5ef9ec875287b562d7d46b40577bd3af6754079c`,
+`2026-11-13T13:54:21Z` / **13 Nov 2026, 20:54 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not verify OA-3 execution or
+authorize Stage B.
 PR [#109](https://github.com/mufea/docuflow-ai/pull/109) repository CI:
 **SUCCESS** [43437066684](https://github.com/mufea/docuflow-ai/actions/runs/43437066684)
 on `c2fc8cb` (Python `131924816509`, Web `131924816353`; completed
 **13 Nov 2026, 20:51 Asia/Jakarta**). Repository CI is not isolation
 and is not a deploy.
 CATEGORY A: **APPROVED** (read-only Render cron logs only).
-OA-A11-LOGS: **PARTIAL** (Production fail-fast line recorded;
-`cleanup_cli_ok` / `cleanup_finished aborted=False` **UNFILLED**).
-OA-3 EXECUTION: **NOT VERIFIED** (fail-fast; not success).
+OA-A11-LOGS: **PARTIALLY VERIFIED** after attribution (this
+section’s fail-fast line plus later OWNER-ASSERTED success tokens;
+not closed as VERIFIED).
+OA-3 EXECUTION: **NOT VERIFIED**.
 CONTROL-XWS: **NOT VERIFIED**.
 RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
@@ -3759,5 +3766,40 @@ OA-5: **IN FORCE**.
 DEPLOY: **NOT AUTHORIZED**.
 LIVE CLEANUP: **NOT AUTHORIZED**.
 CATEGORY B: **NOT AUTHORIZED**.
-OWNER ACTIONS: **REQUIRED** / **OPEN** (unique cron secret, then
-success log).
+OWNER ACTIONS: **REQUIRED** / **OPEN**.
+Phase 10.4C-A15 attribution: see below.
+
+## Phase 10.4C-A15 — OA-A11-LOGS evidence attribution
+
+Documentation-only. Baseline `origin/main`
+**`5ef9ec875287b562d7d46b40577bd3af6754079c`** (prompt expected
+`75c789c`; difference is PR #109 **MERGED**). Report:
+`docs/reports/PHASE_10_4C_A15_OA11_LOGS_ATTRIBUTION.md`.
+No application, Blueprint, env, database, storage, deploy, Shell,
+CONTROL-XWS, OA-3 execution, or Stage B.
+APPLICATION CODE CHANGES: **NONE**.
+
+Records owner-provided Production success tokens
+(`cleanup_cli_ok duration_ms=587`; `cleanup_finished` …
+`aborted=False`; clock **2026-11-13 14:02:46.536 UTC**). Tokens are
+SOURCE-CONSISTENT. Service identity, Scheduled trigger, and SHA on
+that Run are **not** independently established. OA-A11-LOGS is
+**not** closed as VERIFIED. OA-3 remains **NOT VERIFIED**.
+
+PHASE 10.4C-A15 ATTRIBUTION DOCUMENTATION: **COMPLETE – UNMERGED**
+(this PR).
+CATEGORY A: **APPROVED** (read-only Render cron logs only).
+OA-A11-LOGS: **PARTIALLY VERIFIED** / **NOT VERIFIED** as closed.
+OA-3 EXECUTION: **NOT VERIFIED**.
+CONTROL-XWS: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C: **NOT COMPLETE**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+OA-5: **IN FORCE**.
+DEPLOY: **NOT AUTHORIZED**.
+LIVE CLEANUP: **NOT AUTHORIZED**.
+CATEGORY B: **NOT AUTHORIZED**.
+OWNER ACTIONS: **REQUIRED** / **OPEN** (Runs row + SHA on the
+14:02 UTC Run; no new execution required).
