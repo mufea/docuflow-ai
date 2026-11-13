@@ -494,6 +494,12 @@ SQLite `DATABASE_URL`; `DOCUFLOW_ENV=test`; no live resources.
 existing). Dry-run test asserts `storage_factory`,
 `engine_factory`, `run_cleanup`, and `storage.delete` are never
 called.
+PR [#98](https://github.com/mufea/docuflow-ai/pull/98) repository CI:
+[43382801577](https://github.com/mufea/docuflow-ai/actions/runs/43382801577)
+**SUCCESS** (Python `131744268966`, Web `131744268833`; completed
+**13 Nov 2026, 14:03 Asia/Jakarta**) — repository CI, **not**
+isolation and **not** a deploy. A merged code PR does **not**
+authorize live cleanup.
 
 ### Residual
 
