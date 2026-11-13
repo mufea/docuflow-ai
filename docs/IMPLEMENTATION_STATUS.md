@@ -3177,7 +3177,13 @@ CONTROL-XWS remains **NOT VERIFIED**. No Production access test,
 Cloudflare token inspection, or live probe was authorized or
 performed. Stage B was **not** started.
 
-PHASE 10.4C-A4 OA-1 RECORD: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A4 OA-1 RECORD: **MERGED** (PR
+[#96](https://github.com/mufea/docuflow-ai/pull/96);
+merge `5c68abf739d002ee4cff9001b10fd8ca76b0e247`,
+`2026-11-13T06:48:17Z` / **13 Nov 2026, 13:48 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not change runtime
+classifications and does **not** authorize Stage B.
 PR [#96](https://github.com/mufea/docuflow-ai/pull/96) repository CI:
 **SUCCESS** [43377234803](https://github.com/mufea/docuflow-ai/actions/runs/43377234803)
 (Python `131726469791`, Web `131726469400`; completed
@@ -3185,9 +3191,36 @@ PR [#96](https://github.com/mufea/docuflow-ai/pull/96) repository CI:
 OA-1: **PROVIDED** (Option A).
 CONTROL-XWS: **NOT VERIFIED** (accepted residual).
 G2 / live probes: **NOT AUTHORIZED**.
-OA-2 / OA-3: **PENDING**.
+OA-2: see below.
+OA-3: **PENDING**.
 RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
 PHASE 10.4C: **NOT COMPLETE**.
 PHASE 10.4C-B: **NOT AUTHORIZED**.
+Phase 10.4C-A4 OA-2: see below.
+
+## Phase 10.4C-A4 — OA-2 Production bucket helper
+
+Source plus unit tests. Baseline `origin/main`
+**`5c68abf739d002ee4cff9001b10fd8ca76b0e247`**. Owner EDY ALAMSAH
+approved OA-2 on **13 Nov 2026, 13:50 Asia/Jakarta**.
+`DEFAULT_PRODUCTION_BUCKETS` now includes `docuflow-documents` and
+`docuflowai-documents`. No live env, Render, deploy, or probe.
+Stage B was **not** started.
+
+PHASE 10.4C-A4 OA-2 IMPLEMENTATION: **COMPLETE – UNMERGED** (this PR).
+PR [#97](https://github.com/mufea/docuflow-ai/pull/97) repository CI:
+**SUCCESS** [43381680153](https://github.com/mufea/docuflow-ai/actions/runs/43381680153)
+(Python `131740643955`, Web `131740643750`; completed
+**13 Nov 2026, 13:54 Asia/Jakarta**). Repository CI is not isolation
+and is not a deploy.
+OA-2: **PROVIDED** (APPROVE).
+PRODUCTION BUCKET HELPER: **PASS** (repository; unit tests).
+RISK-B CLEANUP CLI SAFETY: **FAIL** (unchanged).
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C: **NOT COMPLETE**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+DEPLOY: **NOT AUTHORIZED**.

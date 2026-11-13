@@ -184,10 +184,16 @@ def test_production_resource_reuse_is_detected() -> None:
     assert is_production_database("docuflow-staging-db", "docuflow_staging") is False
     assert is_production_database("db.internal", "app", production_host="db.internal") is True
     assert is_production_bucket("docuflow-documents") is True
+    assert is_production_bucket("docuflowai-documents") is True
+    assert is_production_bucket("DocuFlowAI-Documents") is True
     assert is_production_bucket("docuflow-staging") is False
+    assert is_production_bucket("docuflowai-staging") is False
+    assert is_production_bucket("") is False
     assert is_production_bucket("company", production_bucket="company") is True
     assert is_forbidden_live_test_bucket("docuflow-documents") is True
+    assert is_forbidden_live_test_bucket("docuflowai-documents") is True
     assert is_forbidden_live_test_bucket("docuflow-test") is False
+    assert is_forbidden_live_test_bucket("docuflowai-staging") is False
     assert is_production_public_host("docuflow-api.onrender.com") is True
     assert is_production_public_host("docuflow-staging-api.onrender.com") is False
     assert is_production_public_host("docuflowai.site") is True
@@ -206,6 +212,14 @@ def test_staging_config_rejects_production_reuse_and_rq() -> None:
     assert any("production database" in item for item in reused_db.errors)
     reused_bucket = validate_staging_configuration(_staging_settings(s3_bucket="docuflow-documents"))
     assert any("production bucket" in item for item in reused_bucket.errors)
+    reused_live_bucket = validate_staging_configuration(
+        _staging_settings(s3_bucket="docuflowai-documents")
+    )
+    assert any("production bucket" in item for item in reused_live_bucket.errors)
+    staging_live_name = validate_staging_configuration(
+        _staging_settings(s3_bucket="docuflowai-staging")
+    )
+    assert staging_live_name.errors == []
     rq = validate_staging_configuration(_staging_settings(job_broker="rq", redis_url="redis://127.0.0.1:6379/0"))
     assert any("inline" in item for item in rq.errors)
     sqlite = validate_staging_configuration(_staging_settings(database_url="sqlite+pysqlite:///./data/x.db"))
