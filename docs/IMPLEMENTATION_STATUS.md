@@ -3330,16 +3330,25 @@ OA-1 **ACCEPTED** (CONTROL-XWS **NOT VERIFIED**). OA-2 **COMPLETE**
 **NOT APPROVED**. Staging and Production deployed SHAs for #97/#98:
 **UNAVAILABLE**. MERGED is not DEPLOYED.
 
-PHASE 10.4C-A7 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A7 DOCUMENTATION: **MERGED** (PR
+[#100](https://github.com/mufea/docuflow-ai/pull/100);
+merge `ec3d0795bf24d731559f5baebc97213a42415b88`,
+`2026-11-13T14:58:46+07:00` / **13 Nov 2026, 14:58 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not authorize probes, cleanup,
+or Stage B. A7 SHA **UNAVAILABLE** labels are superseded for
+**current** API GitHub Deployments by Phase 10.4C-A8 below;
+cleanup SHAs remain **NOT VERIFIED**.
 PR [#100](https://github.com/mufea/docuflow-ai/pull/100) repository CI:
 **SUCCESS** [43388760245](https://github.com/mufea/docuflow-ai/actions/runs/43388760245)
 (Python `131763376233`, Web `131763376684`; completed
-**13 Nov 2026, 14:53 Asia/Jakarta**). Repository CI is not isolation
-and is not a deploy.
+**13 Nov 2026, 14:53 Asia/Jakarta**).
+`main` push CI after PR [#100](https://github.com/mufea/docuflow-ai/pull/100):
+**SUCCESS** [43389637969](https://github.com/mufea/docuflow-ai/actions/runs/43389637969)
+(Python `131766211213`, Web `131766210919`; completed
+**13 Nov 2026, 15:00 Asia/Jakarta**). Repository CI is not isolation.
 OA-2 SOURCE: **PASS** (repository).
 OA-3 SOURCE: **PASS** (repository).
-STAGING DEPLOY OF #97/#98: **UNAVAILABLE**.
-PRODUCTION DEPLOY OF #97/#98: **UNAVAILABLE**.
 RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
 CONTROL-XWS: **NOT VERIFIED**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
@@ -3348,3 +3357,41 @@ PHASE 10.4C: **NOT COMPLETE**.
 PHASE 10.4C-B: **NOT AUTHORIZED**.
 OA-5: **IN FORCE**.
 DEPLOY: **NOT AUTHORIZED**.
+Phase 10.4C-A8: see below.
+
+## Phase 10.4C-A8 — Deployment evidence assessment
+
+Documentation-only. Baseline `origin/main`
+**`ec3d0795bf24d731559f5baebc97213a42415b88`** (PR #100 merge;
+exact match). Report:
+`docs/reports/PHASE_10_4C_A8_DEPLOYMENT_EVIDENCE_ASSESSMENT.md`.
+No application, Blueprint, env, database, storage, deploy, cleanup,
+Render dashboard, or live probe. Stage B was **not** started.
+
+GitHub Deployments (Render App) report **success** for SHA
+`ec3d079` on `docuflow-staging-api` (`7760248453`) and
+`docuflow-api` (`7760248463`) at **13 Nov 2026, 15:00 Asia/Jakarta**.
+That SHA includes PR [#97](https://github.com/mufea/docuflow-ai/pull/97)
+and PR [#98](https://github.com/mufea/docuflow-ai/pull/98). No GitHub
+Deployment records exist for `docuflow-staging-cleanup` or
+`docuflow-cleanup`. Commit inclusion is not runtime verification.
+
+PHASE 10.4C-A8 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PR [#101](https://github.com/mufea/docuflow-ai/pull/101) repository CI:
+**SUCCESS** [43391386606](https://github.com/mufea/docuflow-ai/actions/runs/43391386606)
+(Python `131771883059`, Web `131771882603`; completed
+**13 Nov 2026, 15:13 Asia/Jakarta**). Repository CI is not isolation
+and is not a deploy.
+STAGING API DEPLOY SHA: **VERIFIED** (`ec3d079`; includes #97/#98).
+PRODUCTION API DEPLOY SHA: **VERIFIED** (`ec3d079`; includes #97/#98).
+STAGING CLEANUP DEPLOY SHA: **NOT VERIFIED**.
+PRODUCTION CLEANUP DEPLOY SHA: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+CONTROL-XWS: **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C: **NOT COMPLETE**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+OA-5: **IN FORCE**.
+DEPLOY: **NOT AUTHORIZED**.
+LIVE CLEANUP: **NOT AUTHORIZED**.
