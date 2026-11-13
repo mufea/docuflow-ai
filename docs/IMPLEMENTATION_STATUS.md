@@ -3377,6 +3377,11 @@ Deployment records exist for `docuflow-staging-cleanup` or
 `docuflow-cleanup`. Commit inclusion is not runtime verification.
 
 PHASE 10.4C-A8 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PR [#101](https://github.com/mufea/docuflow-ai/pull/101) repository CI:
+**SUCCESS** [43391386606](https://github.com/mufea/docuflow-ai/actions/runs/43391386606)
+(Python `131771883059`, Web `131771882603`; completed
+**13 Nov 2026, 15:13 Asia/Jakarta**). Repository CI is not isolation
+and is not a deploy.
 STAGING API DEPLOY SHA: **VERIFIED** (`ec3d079`; includes #97/#98).
 PRODUCTION API DEPLOY SHA: **VERIFIED** (`ec3d079`; includes #97/#98).
 STAGING CLEANUP DEPLOY SHA: **NOT VERIFIED**.

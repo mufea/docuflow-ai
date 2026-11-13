@@ -87,6 +87,7 @@ templates, not live SHA proof.
 | `main` after #98 | [43383597847](https://github.com/mufea/docuflow-ai/actions/runs/43383597847) | **SUCCESS** | 13 Nov 2026, 14:10 |
 | PR #100 head | [43388760245](https://github.com/mufea/docuflow-ai/actions/runs/43388760245) | **SUCCESS** | 13 Nov 2026, 14:53 |
 | `main` after #100 | [43389637969](https://github.com/mufea/docuflow-ai/actions/runs/43389637969) | **SUCCESS** (Python `131766211213`, Web `131766210919`) | 13 Nov 2026, 15:00 |
+| PR #101 head | [43391386606](https://github.com/mufea/docuflow-ai/actions/runs/43391386606) | **SUCCESS** (Python `131771883059`, Web `131771882603`) on `07a6201` | 13 Nov 2026, 15:13 |
 
 Repository CI is **not** a Render deploy and is **not** isolation.
 
