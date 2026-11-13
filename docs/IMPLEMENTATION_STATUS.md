@@ -3068,7 +3068,16 @@ screenshots **13 Nov 2026, 10:21 Asia/Jakarta** for workspaces
 No application, Blueprint, env, database, or object mutation.
 Stage B was **not** started.
 
-PHASE 10.4C-A2 TEAM-MEMBERS UPDATE: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A2 TEAM-MEMBERS UPDATE: **MERGED** (PR
+[#93](https://github.com/mufea/docuflow-ai/pull/93);
+merge `e62962bd51b7fd7ff8eed089ebd8c2acde84c6e2`,
+`2026-11-13T03:31:10Z` / **13 Nov 2026, 10:31 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not change runtime
+classifications and does **not** authorize Stage B.
+`main` push CI after PR [#93](https://github.com/mufea/docuflow-ai/pull/93):
+**SUCCESS** [43359503777](https://github.com/mufea/docuflow-ai/actions/runs/43359503777).
+Repository CI is not isolation.
 RENDER TEAM MEMBERSHIP: **OWNER-PROVIDED** — one Admin on
 `docuflowai`; one Admin on `docuflowai staging`; no additional
 members shown. Shared solo-owner Admin is expected and is not a
@@ -3077,4 +3086,39 @@ CROSS-WORKSPACE ACCESS ISOLATION: **NOT VERIFIED**.
 RUNTIME ISOLATION VERIFIED: **NO**.
 FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
 PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+Phase 10.4C-A3: see below.
+
+## Phase 10.4C-A3 — Final isolation evidence and source risk assessment
+
+Documentation-only. Baseline `origin/main`
+**`e62962bd51b7fd7ff8eed089ebd8c2acde84c6e2`** (expected SHA;
+exact match). Report:
+`docs/reports/PHASE_10_4C_A3_FINAL_ISOLATION_ASSESSMENT.md`.
+No application, Blueprint, env, database, storage, deploy, or
+cleanup mutation. Stage B was **not** started. Phase 10.4C is
+**not** complete because this assessment exists.
+
+PHASE 10.4C-A3 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PR [#94](https://github.com/mufea/docuflow-ai/pull/94) repository CI:
+**SUCCESS** [43361630872](https://github.com/mufea/docuflow-ai/actions/runs/43361630872)
+(Python `131676255789`, Web `131676255941`; completed
+**13 Nov 2026, 10:52 Asia/Jakarta**). Repository CI is not isolation.
+RENDER WORKSPACE SEPARATION: **PASS** (OWNER-PROVIDED).
+STAGING SERVICE MEMBERSHIP: **PASS** (OWNER-PROVIDED).
+TEAM MEMBERSHIP INVENTORY: **PASS** (OWNER-PROVIDED).
+STAGING R2 CONFIGURATION: **PASS** (OWNER-PROVIDED).
+DATABASE IDENTITY EVIDENCE: **PASS** (OWNER-PROVIDED).
+PRODUCTION BUCKET PROTECTION: **FAIL** (source:
+`is_production_bucket()` does not default-flag
+`docuflowai-documents`).
+CLEANUP CLI SAFETY: **FAIL** (source: no production fail-fast, no
+bucket reject, no dry-run).
+STORAGE BOUNDARY: **PARTIALLY VERIFIED**.
+DATABASE BOUNDARY: **PARTIALLY VERIFIED**.
+CROSS-WORKSPACE ACCESS ISOLATION: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C: **NOT COMPLETE**.
 PHASE 10.4C-B: **NOT AUTHORIZED**.
