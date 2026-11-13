@@ -401,6 +401,11 @@ Local tests (SQLite `DATABASE_URL`; no live resources):
 `test_production_resource_reuse_is_detected`,
 `test_staging_config_rejects_production_reuse_and_rq`, and
 `test_phase910_provisioning.py` — **7 passed**.
+PR [#97](https://github.com/mufea/docuflow-ai/pull/97) repository CI:
+[43381680153](https://github.com/mufea/docuflow-ai/actions/runs/43381680153)
+**SUCCESS** (Python `131740643955`, Web `131740643750`; completed
+**13 Nov 2026, 13:54 Asia/Jakarta**) — repository CI, **not**
+isolation and **not** a deploy.
 
 | Label | Result |
 | --- | --- |
