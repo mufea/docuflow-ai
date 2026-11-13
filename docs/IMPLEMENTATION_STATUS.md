@@ -3338,7 +3338,7 @@ The contemporaneous **COMPLETE – UNMERGED** line is superseded for
 **current** git status. Merge does not authorize probes, cleanup,
 or Stage B. A7 SHA **UNAVAILABLE** labels are superseded for
 **current** API GitHub Deployments by Phase 10.4C-A8 below;
-cleanup SHAs remain **NOT VERIFIED**.
+cleanup deploy SHAs are updated by Phase 10.4C-A8R below.
 PR [#100](https://github.com/mufea/docuflow-ai/pull/100) repository CI:
 **SUCCESS** [43388760245](https://github.com/mufea/docuflow-ai/actions/runs/43388760245)
 (Python `131763376233`, Web `131763376684`; completed
@@ -3382,8 +3382,8 @@ merge `381b20191c0fbab78b39eb309f3e8c37d2ebecf8`,
 `2026-11-13T15:16:19+07:00` / **13 Nov 2026, 15:16 Asia/Jakarta**).
 The contemporaneous **COMPLETE – UNMERGED** line is superseded for
 **current** git status. A8 cleanup SHA **NOT VERIFIED** labels are
-updated for **header SHA only** by Phase 10.4C-A8R below. Successful
-OA-3 cron runs remain **NOT VERIFIED**.
+updated by Phase 10.4C-A8R below (header SHA plus Deploys timestamp).
+Successful OA-3 cron runs remain **NOT VERIFIED**.
 PR [#101](https://github.com/mufea/docuflow-ai/pull/101) repository CI:
 **SUCCESS** [43391386606](https://github.com/mufea/docuflow-ai/actions/runs/43391386606)
 (Python `131771883059`, Web `131771882603`; completed
@@ -3407,18 +3407,23 @@ Phase 10.4C-A8R: see below.
 Documentation-only. Baseline `origin/main`
 **`381b20191c0fbab78b39eb309f3e8c37d2ebecf8`**. Report:
 `docs/reports/PHASE_10_4C_A8R_CLEANUP_OWNER_EVIDENCE.md`.
-Owner supplied **Runs** screenshots (not Deploys) at **15:19** and
-**15:27 Asia/Jakarta**. No Shell, logs, Trigger Run, cleanup
-execution, or live probe by this agent. Stage B was **not** started.
+Owner supplied **Runs** screenshots at **15:19** and **15:27
+Asia/Jakarta**, then **Deploys** tabs at **15:32**. No Shell, logs,
+Trigger Run, cleanup execution, or live probe by this agent. Stage
+B was **not** started.
 
-Both `docuflow-staging-cleanup` and `docuflow-cleanup` headers show
-`381b201` **Latest**, which includes PR
+Both `docuflow-staging-cleanup` and `docuflow-cleanup` currently
+show `381b201` **Latest**, which includes PR
 [#97](https://github.com/mufea/docuflow-ai/pull/97) and PR
-[#98](https://github.com/mufea/docuflow-ai/pull/98). Staging last
-successful run **13 Nov 2026, 14:00 Asia/Jakarta** (before OA-3
-merge 14:08); later scheduled Runs failed. Production last
-successful run **10 Nov 2026, 16:30 Asia/Jakarta**; a Manual run
-~15:26 failed. Failure cause **NOT VERIFIED**.
+[#98](https://github.com/mufea/docuflow-ai/pull/98). Staging
+Auto-Deployed `#97`, `#98`, and `#101` (`381b201` ~**15:17**).
+Production jumped from PR `#44` (`bed6140`) to `#101` with trigger
+**Resumed** (~**15:27**); `#97`/`#98` are included only as
+ancestors of `381b201`. Staging last successful run **13 Nov 2026,
+14:00 Asia/Jakarta** (before OA-3 merge 14:08); later scheduled
+Runs failed. Production last successful run **10 Nov 2026, 16:30
+Asia/Jakarta**; a Manual run ~15:26 failed. Failure cause
+**NOT VERIFIED**.
 
 PHASE 10.4C-A8R DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
 PR [#102](https://github.com/mufea/docuflow-ai/pull/102) repository CI:
@@ -3426,9 +3431,9 @@ PR [#102](https://github.com/mufea/docuflow-ai/pull/102) repository CI:
 (Python `131779188696`, Web `131779188984`; completed
 **13 Nov 2026, 15:31 Asia/Jakarta**). Repository CI is not isolation
 and is not a deploy.
-STAGING CLEANUP HEADER SHA: **VERIFIED** (OWNER-PROVIDED `381b201`).
-PRODUCTION CLEANUP HEADER SHA: **VERIFIED** (OWNER-PROVIDED `381b201`).
-STAGING / PRODUCTION CLEANUP DEPLOY TIMESTAMP: **NOT VERIFIED**.
+STAGING CLEANUP DEPLOY SHA: **VERIFIED** (OWNER-PROVIDED `381b201` Auto-Deploy ~15:17 Asia/Jakarta).
+PRODUCTION CLEANUP DEPLOY SHA: **VERIFIED** (OWNER-PROVIDED `381b201` Resumed ~15:27 Asia/Jakarta).
+OA-A8-S-DEPLOY / OA-A8-P-DEPLOY: **PROVIDED**.
 STAGING / PRODUCTION CLEANUP SUCCESSFUL OA-3 RUN: **NOT VERIFIED**.
 RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
 CONTROL-XWS: **NOT VERIFIED**.
