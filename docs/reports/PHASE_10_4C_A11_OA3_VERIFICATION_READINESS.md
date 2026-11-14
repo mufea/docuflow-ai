@@ -297,11 +297,14 @@ Do not diagnose red Runs as OA-3 fail-fast without the
 
 ## 9. Outstanding evidence gaps
 
-1. OA-3 successful post-change execution: **NOT VERIFIED**.
-   A18: subsequent 14 Nov structured logs and service-level Latest
-   `5ca8867` do **not** bind a SHA to the 13 Nov 21:30 Scheduled
-   Run. See
-   `docs/reports/PHASE_10_4C_A18_OA11_LOGS_FINAL_CLOSURE.md`.
+1. OA-3 successful post-change execution: **NOT VERIFIED** /
+   **BLOCKED — PROVENANCE UNAVAILABLE**. A11 §3 item 2 is unchanged:
+   SHA **on that service for that Run**. Accessible Render **Runs**
+   UI does not expose per-Run SHA (owner confirmation); Deploys show
+   source SHA only at service level. Later 14 Nov SUCCESS Runs and
+   LIVE `01c95bf` do **not** bind a SHA to a named Run. 13 Nov ~21:30
+   logs remain unavailable. See
+   `docs/reports/PHASE_10_4C_OD_10_4C_002_DOCUMENTATION_RECONCILIATION.md`.
 2. Application execution id: **UNAVAILABLE**.
 3. Git SHA inside cleanup logs: **UNAVAILABLE**.
 4. Cleanup GitHub Deployments: **none**.

@@ -254,7 +254,39 @@ PR [#112](https://github.com/mufea/docuflow-ai/pull/112) on
 **14 Nov 2026, 07:50 Asia/Jakarta**). Repository CI is not isolation,
 not a deploy, and not OA-3 verification.
 
-## 13. Safety declaration
+## 13. Post-merge reconciliation (14 Nov 2026, 17:50 Asia/Jakarta)
+
+PR [#112](https://github.com/mufea/docuflow-ai/pull/112) **MERGED**
+`01c95bf054279f937a4dccbe6ef20c2a9652f731`
+(`2026-11-14T00:53:45Z` / **14 Nov 2026, 07:53:45 Asia/Jakarta**).
+Merge-status of this report is **MERGED**. Merge does not close
+OA-A11-LOGS or verify OA-3.
+
+Owner decisions: OD-10.4C-001 HOLD / NO-GO **IN FORCE**;
+OD-10.4C-002 documentation-only reconciliation **APPROVED**. See
+`docs/reports/PHASE_10_4C_OD_10_4C_002_DOCUMENTATION_RECONCILIATION.md`.
+
+Owner-supplied **later** 14 Nov evidence (not independent Render
+API; **not** a rewrite of §§1–12 above):
+
+- Service-level deploy `01c95bf` LIVE **13:57:12 Asia/Jakarta**,
+  Resumed, 41.4 s. **Not** SHA-on-Run.
+- Scheduled SUCCESS 14:00 / 14:15 / 14:30 / 14:45 Asia/Jakarta.
+- Structured `docuflow.cleanup` tokens at 14:00 (`asctime`
+  `2026-11-14 07:01:27 UTC`, `aborted=False`, `duration_ms=656`)
+  and 14:45 (`asctime` `2026-11-14 07:45:33 UTC`, `aborted=False`,
+  `duration_ms=506`).
+- Runs UI does not show per-Run SHA (owner confirmation).
+
+Current execution evidence does **not** replace the missing
+**13 Nov ~21:30 Asia/Jakarta** Run. 21:15 last-success is **not**
+that Run. Duration match is **not** identity. Do **not** infer
+that the 14:45 Run used `01c95bf`.
+
+OA-A11-LOGS remains **PARTIALLY VERIFIED**. OA-3 remains
+**NOT VERIFIED** / **BLOCKED — PROVENANCE UNAVAILABLE**.
+
+## 14. Safety declaration
 
 - No Production HTTP probes were performed by this agent.
 - No Production or Staging Shell commands were executed.

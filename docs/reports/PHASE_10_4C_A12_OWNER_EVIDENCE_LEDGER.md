@@ -272,3 +272,31 @@ Owner A18 screenshots recorded in
 | OA-A12-XWS | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
 | OA-A12-ISO | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
 | OA-6 | **NOT AUTHORIZED** | **NOT AUTHORIZED** | Unchanged |
+
+## 12. Post-OD-10.4C-002 amendment (14 Nov 2026, 17:50 Asia/Jakarta)
+
+Owner decisions and 14 Nov afternoon evidence:
+`docs/reports/PHASE_10_4C_OD_10_4C_002_DOCUMENTATION_RECONCILIATION.md`.
+IDs `EV-OD2-*` do not collide with prior ledger rows.
+
+| ID | Source | Time (Asia/Jakarta unless noted) | Establishes | Does not establish | Classification |
+| --- | --- | --- | --- | --- | --- |
+| EV-OD2-001 | GitHub PR #112 | 07:53:45 | Docs merge `01c95bf` | Production verification | ACCEPTED — GITHUB |
+| EV-OD2-002 | Owner screenshot | 13:57:12 | Service-level LIVE `01c95bf` | SHA-on-Run | ACCEPTED — OWNER-SUPPLIED |
+| EV-OD2-003 | Owner screenshot | 14:00–14:45 | Four Scheduled SUCCESS Runs | Per-Run SHA | ACCEPTED — OWNER-SUPPLIED |
+| EV-OD2-004 | Owner screenshot | 14:00; `asctime` 07:01:27 UTC | Structured cleanup success | 13 Nov 21:30 Run; SHA-on-Run | ACCEPTED — OWNER-SUPPLIED |
+| EV-OD2-005 | Owner screenshot | 14:45; `asctime` 07:45:33 UTC | Structured cleanup success | That Run used `01c95bf` | ACCEPTED — OWNER-SUPPLIED |
+| EV-OD2-006 | Owner confirmation | 14 Nov 2026 | Runs UI has no per-Run SHA | A SHA-on-Run substitute | ACCEPTED — OWNER CONFIRMATION |
+| EV-OD2-007 | Owner | 13 Nov ~21:30 | Dashboard logs unavailable | Failed execution | ACCEPTED AS DOCUMENTED EVIDENCE GAP |
+| EV-OD2-008 | Owner | 13 Nov 21:15 | Last-success UI 53.7 s | Identity with 21:30 | PARTIAL; duration match REJECTED |
+| EV-OD2-009 | Git | n/a | Ancestry of `01c95bf` | Run SHA | REJECTED as Run SHA proof |
+| EV-OD2-010 | Owner Latest | n/a | Service Latest `01c95bf` | Run SHA | REJECTED as Run SHA proof |
+
+| ID | After A18 | After OD-002 | Note |
+| --- | --- | --- | --- |
+| OA-A12-CAT-A | **APPROVED** | **APPROVED** | Unchanged |
+| OA-A11-LOGS | **PARTIALLY VERIFIED** | **PARTIALLY VERIFIED** | 14:00/14:45 logs are current only |
+| OA-A12-OA3 | **NOT VERIFIED** | **NOT VERIFIED** / **BLOCKED — PROVENANCE UNAVAILABLE** | Runs UI has no SHA-on-Run |
+| OA-A12-XWS | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
+| OA-A12-ISO | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
+| OA-6 | **NOT AUTHORIZED** | **NOT AUTHORIZED** | OD-10.4C-001 HOLD / NO-GO |
