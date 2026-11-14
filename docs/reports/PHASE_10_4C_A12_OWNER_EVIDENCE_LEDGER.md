@@ -258,3 +258,17 @@ Owner A17 prompt recorded in
 | OA-A12-XWS | **NOT VERIFIED** | **NOT VERIFIED** | Cron success is not isolation |
 | OA-A12-ISO | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
 | OA-6 | **NOT AUTHORIZED** | **NOT AUTHORIZED** | Unchanged |
+
+## 11. Post-A18 amendment (14 Nov 2026, 07:45 Asia/Jakarta)
+
+Owner A18 screenshots recorded in
+`docs/reports/PHASE_10_4C_A18_OA11_LOGS_FINAL_CLOSURE.md`.
+
+| ID | After A17 | After A18 | Note |
+| --- | --- | --- | --- |
+| OA-A12-CAT-A | **APPROVED** | **APPROVED** | Unchanged |
+| OA-A11-LOGS | **PARTIALLY VERIFIED** | **PARTIALLY VERIFIED** | Subsequent JSON logs are not the 21:30 Run; SHA-on-Run still open |
+| OA-A12-OA3 | **NOT VERIFIED** | **NOT VERIFIED** | Latest `5ca8867` is not SHA-on-Run |
+| OA-A12-XWS | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
+| OA-A12-ISO | **NOT VERIFIED** | **NOT VERIFIED** | Unchanged |
+| OA-6 | **NOT AUTHORIZED** | **NOT AUTHORIZED** | Unchanged |

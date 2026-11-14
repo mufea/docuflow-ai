@@ -298,10 +298,10 @@ Do not diagnose red Runs as OA-3 fail-fast without the
 ## 9. Outstanding evidence gaps
 
 1. OA-3 successful post-change execution: **NOT VERIFIED**.
-   A17: 14:02 UTC is **Manual supporting evidence**. OWNER-CONFIRMED
-   Scheduled Run ~21:30 Asia/Jakarta with success tokens; Run-specific
-   SHA **NOT VERIFIED**. See
-   `docs/reports/PHASE_10_4C_A17_OA11_LOGS_CLOSURE.md`.
+   A18: subsequent 14 Nov structured logs and service-level Latest
+   `5ca8867` do **not** bind a SHA to the 13 Nov 21:30 Scheduled
+   Run. See
+   `docs/reports/PHASE_10_4C_A18_OA11_LOGS_FINAL_CLOSURE.md`.
 2. Application execution id: **UNAVAILABLE**.
 3. Git SHA inside cleanup logs: **UNAVAILABLE**.
 4. Cleanup GitHub Deployments: **none**.
