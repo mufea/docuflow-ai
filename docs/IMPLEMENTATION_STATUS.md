@@ -3826,13 +3826,55 @@ deploy SHA remains **NOT VERIFIED**. OA-A11-LOGS is **not** closed
 as VERIFIED. OA-3 remains **NOT VERIFIED**. Cron SUCCESS is not
 OA-3 completion and is not isolation.
 
-PHASE 10.4C-A17 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
+PHASE 10.4C-A17 DOCUMENTATION: **MERGED** (PR
+[#111](https://github.com/mufea/docuflow-ai/pull/111);
+merge `4b8d26913447d0860dde3f50586b48584ca73d0b`,
+`2026-11-13T23:56:57Z` / **14 Nov 2026, 06:56 Asia/Jakarta**).
+The contemporaneous **COMPLETE – UNMERGED** line is superseded for
+**current** git status. Merge does not close OA-A11-LOGS as
+VERIFIED, verify OA-3 execution, or authorize Stage B.
 PR [#111](https://github.com/mufea/docuflow-ai/pull/111) repository CI:
 **SUCCESS** [43529121145](https://github.com/mufea/docuflow-ai/actions/runs/43529121145)
 on `19ef9f2` (Python `132242129341`, Web `132242129094`; completed
 **14 Nov 2026, 06:44 Asia/Jakarta**). Repository CI is not isolation
 and is not a deploy. CI SUCCESS does not close OA-A11-LOGS as
 VERIFIED and does not verify OA-3.
+CATEGORY A: **APPROVED** (read-only Render cron logs only).
+OA-A11-LOGS: **PARTIALLY VERIFIED**.
+OA-3 EXECUTION: **NOT VERIFIED**.
+CONTROL-XWS: **NOT VERIFIED**.
+RUNTIME ISOLATION VERIFIED: **NO** / overall **NOT VERIFIED**.
+FUNCTIONAL STAGING VERIFIED: **NO** — Stage B **NOT AUTHORIZED**.
+PRODUCTION VERIFIED: **NOT VERIFIED**.
+PHASE 10.4C: **NOT COMPLETE**.
+PHASE 10.4C-B: **NOT AUTHORIZED**.
+OA-5: **IN FORCE**.
+DEPLOY: **NOT AUTHORIZED**.
+LIVE CLEANUP: **NOT AUTHORIZED**.
+CATEGORY B: **NOT AUTHORIZED**.
+OWNER ACTIONS: **REQUIRED** / **OPEN** (Run-specific SHA for the
+21:30 Scheduled Run; no new execution required).
+Phase 10.4C-A18: see below.
+
+## Phase 10.4C-A18 — OA-A11-LOGS final closure and evidence reconciliation
+
+Documentation-only. Baseline `origin/main`
+**`4b8d26913447d0860dde3f50586b48584ca73d0b`** (prompt expected
+`5ca8867`; difference is PR #111 **MERGED**). Report:
+`docs/reports/PHASE_10_4C_A18_OA11_LOGS_FINAL_CLOSURE.md`.
+No application, Blueprint, env, database, storage, deploy, Shell,
+CONTROL-XWS, OA-3 execution, or Stage B.
+APPLICATION CODE CHANGES: **NONE**.
+
+Records owner-provided Render screenshots: Events chronology for
+`5ca8867` live ~21:20 then Scheduled ~21:30; service-level Latest
+`5ca8867` and Resumed `381b201`; four subsequent 14 Nov structured
+logs with `asctime` / `levelname` / `name=docuflow.cleanup` /
+success tokens. Subsequent logs are **not** the 13 Nov 21:30 target
+Run. Run-specific SHA remains **NOT VERIFIED**. OA-A11-LOGS is
+**not** closed as VERIFIED. OA-3 remains **NOT VERIFIED**.
+
+PHASE 10.4C-A18 DOCUMENTATION: **COMPLETE – UNMERGED** (this PR).
 CATEGORY A: **APPROVED** (read-only Render cron logs only).
 OA-A11-LOGS: **PARTIALLY VERIFIED**.
 OA-3 EXECUTION: **NOT VERIFIED**.
