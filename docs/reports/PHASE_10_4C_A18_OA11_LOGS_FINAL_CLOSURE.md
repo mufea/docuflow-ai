@@ -245,7 +245,16 @@ If Render cannot show SHA-on-Run, A1 stays **NOT AVAILABLE**.
 | Phase 10.4C-B | **NOT AUTHORIZED** |
 | Phase 10.4C | **NOT COMPLETE** |
 
-## 12. Safety declaration
+## 12. Repository CI (this PR)
+
+PR [#112](https://github.com/mufea/docuflow-ai/pull/112) on
+`c3b75c7`: **SUCCESS**
+[43536635833](https://github.com/mufea/docuflow-ai/actions/runs/43536635833)
+(Python `132267139143`, Web `132267139235`; completed
+**14 Nov 2026, 07:50 Asia/Jakarta**). Repository CI is not isolation,
+not a deploy, and not OA-3 verification.
+
+## 13. Safety declaration
 
 - No Production HTTP probes were performed by this agent.
 - No Production or Staging Shell commands were executed.
